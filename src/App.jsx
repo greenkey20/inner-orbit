@@ -40,6 +40,7 @@ export default function App() {
     handleSubmit,
     deleteEntry,
     updateEntry,
+    updateEntryAnalysis,
     insertPrompt,
     downloadData,
     handleFileUpload,
@@ -120,6 +121,7 @@ export default function App() {
                 entries={entries}
                 onDeleteEntry={deleteEntry}
                 onUpdateEntry={updateEntry}
+                onUpdateEntryAnalysis={updateEntryAnalysis}
                 onDownloadData={downloadData}
                 onFileUpload={handleFileUpload}
                 fileInputRef={fileInputRef}

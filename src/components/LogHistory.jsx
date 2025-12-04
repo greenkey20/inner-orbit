@@ -36,7 +36,7 @@ const Button = ({ onClick, children, variant = "primary", className = "", ...pro
  * @param {function} onFileUpload - 복원 핸들러
  * @param {React.RefObject} fileInputRef - 파일 입력 ref
  */
-export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onDownloadData, onFileUpload, fileInputRef }) {
+export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUpdateEntryAnalysis, onDownloadData, onFileUpload, fileInputRef }) {
     // 수정 모드 상태 관리
     const [editingId, setEditingId] = useState(null);
     const [editContent, setEditContent] = useState('');
@@ -71,6 +71,17 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onDo
             }
         };
     }, []);
+
+    // 저장된 분석 결과 로드 (localStorage에서)
+    useEffect(() => {
+        const savedResults = {};
+        entries.forEach(entry => {
+            if (entry.analysis) {
+                savedResults[entry.id] = entry.analysis;
+            }
+        });
+        setAnalysisResults(savedResults);
+    }, [entries]);
 
     // 수정 모드 진입
     const startEdit = (entry) => {
@@ -109,6 +120,9 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onDo
             console.log('  - Distortions:', result.distortions);
             console.log('  - Reframed:', result.reframed);
             console.log('  - Alternative:', result.alternative);
+
+            // 분석 결과를 localStorage에 영구 저장
+            onUpdateEntryAnalysis(entry.id, result);
 
             setAnalysisResults(prev => ({
                 ...prev,
@@ -332,13 +346,31 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onDo
                                                 )}
                                             </div>
 
-                                            <button
-                                                onClick={() => setAnalysisResults(prev => { const newResults = { ...prev }; delete newResults[entry.id]; return newResults; })}
-                                                className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
-                                            >
-                                                Close Analysis
-                                            </button>
+                                            {/* Action Buttons */}
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => setAnalysisResults(prev => { const newResults = { ...prev }; delete newResults[entry.id]; return newResults; })}
+                                                    className="flex-1 text-xs text-slate-400 hover:text-slate-600 transition-colors py-2 px-3 rounded bg-slate-50 hover:bg-slate-100"
+                                                >
+                                                    Close Analysis
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDecryptLog(entry)}
+                                                    disabled={analyzingId === entry.id}
+                                                    className="flex-1 text-xs text-emerald-600 hover:text-emerald-700 transition-colors py-2 px-3 rounded bg-emerald-50 hover:bg-emerald-100 disabled:opacity-50"
+                                                >
+                                                    Re-analyze
+                                                </button>
+                                            </div>
                                         </div>
+                                    ) : entry.analysis ? (
+                                        <button
+                                            onClick={() => setAnalysisResults(prev => ({ ...prev, [entry.id]: entry.analysis }))}
+                                            className="w-full px-4 py-2 bg-gradient-to-r from-slate-600 to-emerald-400 text-white rounded-lg hover:from-slate-700 hover:to-emerald-500 transition-all flex items-center justify-center gap-2 text-sm font-medium"
+                                        >
+                                            <Sparkles className="w-4 h-4" />
+                                            View Analysis
+                                        </button>
                                     ) : (
                                         <button
                                             onClick={() => handleDecryptLog(entry)}
