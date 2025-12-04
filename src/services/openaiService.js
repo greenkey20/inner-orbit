@@ -180,7 +180,17 @@ Important:
             response_format: { type: "json_object" }
         });
 
-        const result = JSON.parse(response.choices[0].message.content);
+        console.log('🤖 Raw OpenAI Response:', response.choices[0].message.content); // 디버깅용
+
+        const rawResult = JSON.parse(response.choices[0].message.content);
+
+        // 키 정규화 (대소문자 무관하게 처리)
+        const result = {
+            distortions: rawResult.distortions || rawResult.Distortions || [],
+            reframed: rawResult.reframed || rawResult.Reframed || rawResult.reframed_perspective || "",
+            alternative: rawResult.alternative || rawResult.Alternative || rawResult.alternative_perspective || ""
+        };
+
         return result;
     } catch (error) {
         console.error('OpenAI API Error:', error);
