@@ -148,25 +148,42 @@ User's Current State:
 - Gravity (External Pressure): ${gravity}%
 - Stability (Inner Strength): ${stability}%
 
-Analysis Steps:
-1. Identify specific distortions with exact quotes from the text
-2. Provide compassionate reframing (2-3 sentences)
-3. Suggest one alternative perspective
+CRITICAL: You MUST return a valid JSON object with EXACTLY these three keys: "distortions", "reframed", "alternative"
 
-Output Format (JSON):
+Required JSON Structure:
 {
   "distortions": [
-    { "type": "Mind Reading", "quote": "다들 날 한심하게 생각할 거야" }
+    { "type": "Mind Reading", "quote": "exact quote from text" }
   ],
-  "reframed": "Reframed perspective in Korean",
-  "alternative": "Alternative viewpoint in Korean"
+  "reframed": "Compassionate reframing in Korean (2-3 sentences)",
+  "alternative": "Alternative perspective in Korean (1-2 sentences)"
 }
 
-Important:
+Examples:
+
+Example 1 (distortions found):
+{
+  "distortions": [
+    { "type": "흑백논리", "quote": "완벽하지 않으면 아무 의미가 없어" },
+    { "type": "과잉일반화", "quote": "매번 이렇게 실패해" }
+  ],
+  "reframed": "완벽함보다는 진전에 집중해보세요. 작은 발전도 의미 있는 성장입니다. 과거의 경험이 미래를 결정하지 않습니다.",
+  "alternative": "이번 경험을 통해 무엇을 배울 수 있을까요? 실패가 아닌 학습의 기회로 볼 수 있습니다."
+}
+
+Example 2 (no distortions):
+{
+  "distortions": [],
+  "reframed": "건강한 자기 인식이 잘 드러나는 로그입니다. 현실적이고 균형 잡힌 시각을 유지하고 계십니다.",
+  "alternative": "이런 긍정적인 패턴을 더 자주 의식적으로 활용해보세요."
+}
+
+Important Rules:
+- ALWAYS include all three keys: distortions, reframed, alternative
+- "distortions" must be an array (empty [] if none found)
+- "reframed" and "alternative" must NEVER be empty strings - always provide meaningful content in Korean
 - Be compassionate, not patronizing
-- Use Korean for reframed and alternative
-- If no distortions found, return empty distortions array
-- Keep reframed and alternative concise`;
+- Keep responses concise but meaningful`;
 
     try {
         const response = await openai.chat.completions.create({
@@ -187,8 +204,8 @@ Important:
         // 키 정규화 (대소문자 무관하게 처리)
         const result = {
             distortions: rawResult.distortions || rawResult.Distortions || [],
-            reframed: rawResult.reframed || rawResult.Reframed || rawResult.reframed_perspective || "",
-            alternative: rawResult.alternative || rawResult.Alternative || rawResult.alternative_perspective || ""
+            reframed: rawResult.reframed || rawResult.Reframed || rawResult.reframed_perspective || "로그를 분석했으나 특별한 인지적 왜곡이 발견되지 않았습니다.",
+            alternative: rawResult.alternative || rawResult.Alternative || rawResult.alternative_perspective || "현재의 관점을 유지하면서 긍정적인 측면에도 주목해보세요."
         };
 
         return result;
