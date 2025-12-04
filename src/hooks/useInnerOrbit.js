@@ -74,6 +74,36 @@ export default function useInnerOrbit() {
     };
 
     /**
+     * 로그 엔트리 수정
+     * @param {number} id - 수정할 엔트리의 ID
+     * @param {string} newContent - 새로운 콘텐츠
+     * @param {number} newGravity - 새로운 gravity 값
+     * @param {number} newStability - 새로운 stability 값
+     */
+    const updateEntry = (id, newContent, newGravity, newStability) => {
+        if (!newContent.trim()) {
+            alert('내용을 입력해주세요.');
+            return;
+        }
+
+        setEntries(entries.map(entry => {
+            if (entry.id === id) {
+                return {
+                    ...entry,
+                    content: newContent,
+                    gravity: newGravity,
+                    stability: newStability,
+                    updatedAt: new Date().toLocaleString('ko-KR', {
+                        year: 'numeric', month: 'long', day: 'numeric',
+                        hour: '2-digit', minute: '2-digit', hour12: false
+                    })
+                };
+            }
+            return entry;
+        }));
+    };
+
+    /**
      * 현재 프롬프트를 메시지 영역에 삽입
      */
     const insertPrompt = () => {
@@ -147,6 +177,7 @@ export default function useInnerOrbit() {
         // Actions
         handleSubmit,
         deleteEntry,
+        updateEntry,
         insertPrompt,
         downloadData,
         handleFileUpload,

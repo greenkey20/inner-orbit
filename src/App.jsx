@@ -36,6 +36,7 @@ export default function App() {
     // Actions
     handleSubmit,
     deleteEntry,
+    updateEntry,
     insertPrompt,
     downloadData,
     handleFileUpload,
@@ -60,8 +61,8 @@ export default function App() {
           <button
             onClick={() => setView('write')}
             className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors ${view === 'write'
-                ? 'bg-white shadow-sm text-slate-800 border border-slate-200'
-                : 'text-slate-500 hover:text-slate-700'
+              ? 'bg-white shadow-sm text-slate-800 border border-slate-200'
+              : 'text-slate-500 hover:text-slate-700'
               }`}
           >
             Status & Log
@@ -69,8 +70,8 @@ export default function App() {
           <button
             onClick={() => setView('history')}
             className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors ${view === 'history'
-                ? 'bg-white shadow-sm text-slate-800 border border-slate-200'
-                : 'text-slate-500 hover:text-slate-700'
+              ? 'bg-white shadow-sm text-slate-800 border border-slate-200'
+              : 'text-slate-500 hover:text-slate-700'
               }`}
           >
             Flight History
@@ -108,6 +109,7 @@ export default function App() {
             <LogHistory
               entries={entries}
               onDeleteEntry={deleteEntry}
+              onUpdateEntry={updateEntry}
               onDownloadData={downloadData}
               onFileUpload={handleFileUpload}
               fileInputRef={fileInputRef}
