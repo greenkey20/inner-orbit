@@ -323,6 +323,13 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onDo
                                                         </p>
                                                     </div>
                                                 )}
+
+                                                {/* Fallback for empty result */}
+                                                {(!analysisResults[entry.id].distortions?.length && !analysisResults[entry.id].reframed && !analysisResults[entry.id].alternative) && (
+                                                    <div className="text-xs text-slate-500 italic">
+                                                        특이 사항이 발견되지 않았습니다.
+                                                    </div>
+                                                )}
                                             </div>
 
                                             <button
