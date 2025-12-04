@@ -7,6 +7,7 @@ import LogEditor from './components/LogEditor';
 import LogHistory from './components/LogHistory';
 import TelemetryGuide from './components/TelemetryGuide';
 import FlightTrajectory from './components/FlightTrajectory';
+import ApiKeySettings from './components/ApiKeySettings';
 
 /**
  * App - Inner Orbit 메인 애플리케이션 컴포넌트
@@ -97,6 +98,8 @@ export default function App() {
                 onInsertPrompt={insertPrompt}
                 showPrompt={showPrompt}
                 onTogglePrompt={setShowPrompt}
+                gravity={gravity}
+                stability={stability}
               />
 
               <LogEditor
@@ -125,6 +128,9 @@ export default function App() {
           )}
         </main>
       </div>
+
+      {/* API Key Settings */}
+      <ApiKeySettings />
 
       {/* Global Styles */}
       <style>{`

@@ -9,8 +9,9 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: colors.emerald,    // Stability theme (green)
-        secondary: colors.indigo,   // Gravity theme (navy/indigo)
+        primary: colors.emerald,      // Stability theme (green)
+        secondary: colors.indigo,     // Gravity theme (navy/indigo)
+        'ai-primary': colors.emerald, // AI features (emerald/teal)
       },
     },
   },

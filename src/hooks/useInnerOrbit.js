@@ -104,10 +104,11 @@ export default function useInnerOrbit() {
     };
 
     /**
-     * 현재 프롬프트를 메시지 영역에 삽입
+     * 프롬프트를 메시지 영역에 삽입
+     * @param {string} customPrompt - (선택) 사용자 정의 프롬프트 (AI 생성 질문 등)
      */
-    const insertPrompt = () => {
-        const promptText = PROMPTS[promptIndex];
+    const insertPrompt = (customPrompt) => {
+        const promptText = customPrompt || PROMPTS[promptIndex];
         setMessage((prev) => prev ? `${prev}\n\n[Query]: ${promptText}\n[Log]: ` : `[Query]: ${promptText}\n[Log]: `);
     };
 
