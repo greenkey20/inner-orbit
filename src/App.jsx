@@ -5,6 +5,7 @@ import StatusDashboard from './components/StatusDashboard';
 import PromptAssistant from './components/PromptAssistant';
 import LogEditor from './components/LogEditor';
 import LogHistory from './components/LogHistory';
+import TelemetryGuide from './components/TelemetryGuide';
 
 /**
  * App - Inner Orbit 메인 애플리케이션 컴포넌트
@@ -104,6 +105,8 @@ export default function App() {
                 showPrompt={showPrompt}
                 onShowPrompt={setShowPrompt}
               />
+
+              <TelemetryGuide />
             </div>
           ) : (
             <LogHistory

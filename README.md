@@ -15,10 +15,10 @@
 
 ### 📝 Core Features
 - **Emotion Logging**: Gravity(외부 인력)와 Stability(코어 안정성) 메트릭으로 감정 상태 기록
-- **Log History**: 타임라인 형식의 로그 히스토리 보기
+- **Log History**: 타임라인 형식의 로그 히스토리 (Infinite Scroll 지원)
 - **Log Editing**: 작성된 로그 수정 및 audit trail (수정 일시 추적)
-- **Data Persistence**: localStorage 기반 자동 저장
-- **Backup & Restore**: JSON 파일로 데이터 백업/복원
+- **Data Persistence**: localStorage 기반 자동 저장 (백업/복원 기능 포함)
+- **Telemetry Guide**: Flight Telemetry 개념(Gravity/Stability)에 대한 인앱 가이드 제공
 
 ### 🎨 UI/UX
 - **Custom Theme**: Emerald (Stability) + Indigo (Gravity) 색상 시스템
@@ -209,6 +209,7 @@ export default {
 
 ### Recent Updates
 
+- **v1.4.0** (2024-12-04): UX Improvements (Telemetry Guide, Pagination, Data Persistence relocation)
 - **v1.3.0** (2024-12-04): Custom color theme with Tailwind variables
 - **v1.2.0** (2024-12-04): Log edit feature with audit trail
 - **v1.1.0** (2024-12-03): Modular architecture refactoring
