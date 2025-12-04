@@ -13,7 +13,7 @@ const Button = ({ onClick, children, variant = "primary", className = "", ...pro
     const baseStyle = "px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2";
     const variants = {
         primary: "bg-slate-800 text-white hover:bg-slate-900 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed",
-        secondary: "bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-100",
+        secondary: "bg-primary-50 text-primary-700 hover:bg-primary-100 border border-primary-100",
         outline: "border border-slate-300 text-slate-600 hover:border-slate-400 hover:bg-slate-50",
         ghost: "text-slate-400 hover:text-slate-700 hover:bg-slate-100",
         danger: "bg-rose-50 text-rose-500 hover:bg-rose-100"
@@ -93,8 +93,8 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onDo
                         <Card
                             key={entry.id}
                             className={`p-5 transition-all group ${isEditing
-                                    ? 'ring-2 ring-indigo-500 shadow-lg'
-                                    : 'hover:shadow-md'
+                                ? 'ring-2 ring-primary-500 shadow-lg'
+                                : 'hover:shadow-md'
                                 }`}
                         >
                             {/* Header: Date and Action Buttons */}
@@ -138,7 +138,7 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onDo
                                         <>
                                             <button
                                                 onClick={() => startEdit(entry)}
-                                                className="text-slate-300 hover:text-indigo-500 opacity-0 group-hover:opacity-100 transition-all"
+                                                className="text-slate-300 hover:text-primary-500 opacity-0 group-hover:opacity-100 transition-all"
                                                 title="수정"
                                             >
                                                 <Pencil className="w-3 h-3" />
@@ -161,7 +161,7 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onDo
                                     <textarea
                                         value={editContent}
                                         onChange={(e) => setEditContent(e.target.value)}
-                                        className="w-full min-h-[120px] p-3 bg-slate-50 border border-indigo-200 rounded-lg resize-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 text-sm text-slate-700 leading-relaxed font-sans transition-all"
+                                        className="w-full min-h-[120px] p-3 bg-slate-50 border border-primary-200 rounded-lg resize-none focus:ring-2 focus:ring-primary-300 focus:border-primary-400 text-sm text-slate-700 leading-relaxed font-sans transition-all"
                                         placeholder="로그 내용을 입력하세요..."
                                     />
                                 ) : (
@@ -178,10 +178,10 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onDo
                                     <div className="space-y-1">
                                         <div className="flex justify-between text-xs">
                                             <span className="flex items-center gap-1 text-slate-600 font-medium">
-                                                <Zap className="w-3 h-3 text-amber-500" />
+                                                <Zap className="w-3 h-3 text-secondary-500" />
                                                 Gravity
                                             </span>
-                                            <span className="font-mono font-bold text-amber-600">{editGravity}%</span>
+                                            <span className="font-mono font-bold text-secondary-600">{editGravity}%</span>
                                         </div>
                                         <input
                                             type="range"
@@ -189,7 +189,7 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onDo
                                             max="100"
                                             value={editGravity}
                                             onChange={(e) => setEditGravity(parseInt(e.target.value))}
-                                            className="w-full h-1.5 bg-amber-100 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                                            className="w-full h-1.5 bg-secondary-100 rounded-lg appearance-none cursor-pointer accent-secondary-500"
                                         />
                                     </div>
 
@@ -197,10 +197,10 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onDo
                                     <div className="space-y-1">
                                         <div className="flex justify-between text-xs">
                                             <span className="flex items-center gap-1 text-slate-600 font-medium">
-                                                <Shield className="w-3 h-3 text-indigo-500" />
+                                                <Shield className="w-3 h-3 text-primary-500" />
                                                 Stability
                                             </span>
-                                            <span className="font-mono font-bold text-indigo-600">{editStability}%</span>
+                                            <span className="font-mono font-bold text-primary-600">{editStability}%</span>
                                         </div>
                                         <input
                                             type="range"
@@ -208,19 +208,19 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onDo
                                             max="100"
                                             value={editStability}
                                             onChange={(e) => setEditStability(parseInt(e.target.value))}
-                                            className="w-full h-1.5 bg-indigo-100 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                                            className="w-full h-1.5 bg-primary-100 rounded-lg appearance-none cursor-pointer accent-primary-600"
                                         />
                                     </div>
                                 </div>
                             ) : (
                                 <div className="flex gap-3 pt-1">
-                                    <div className="flex-1 flex items-center justify-between px-3 py-2 bg-amber-50 rounded border border-amber-100" title="외부 인력 (Gravity)">
-                                        <span className="text-[10px] font-bold text-amber-800/60 uppercase">Gravity</span>
-                                        <span className="text-xs font-mono font-bold text-amber-600">{entry.gravity || entry.longing}%</span>
+                                    <div className="flex-1 flex items-center justify-between px-3 py-2 bg-secondary-50 rounded border border-secondary-100" title="외부 인력 (Gravity)">
+                                        <span className="text-[10px] font-bold text-secondary-800/60 uppercase">Gravity</span>
+                                        <span className="text-xs font-mono font-bold text-secondary-600">{entry.gravity || entry.longing}%</span>
                                     </div>
-                                    <div className="flex-1 flex items-center justify-between px-3 py-2 bg-indigo-50 rounded border border-indigo-100" title="코어 안정성 (Stability)">
-                                        <span className="text-[10px] font-bold text-indigo-800/60 uppercase">Stability</span>
-                                        <span className="text-xs font-mono font-bold text-indigo-600">{entry.stability || entry.mood}%</span>
+                                    <div className="flex-1 flex items-center justify-between px-3 py-2 bg-primary-50 rounded border border-primary-100" title="코어 안정성 (Stability)">
+                                        <span className="text-[10px] font-bold text-primary-800/60 uppercase">Stability</span>
+                                        <span className="text-xs font-mono font-bold text-primary-600">{entry.stability || entry.mood}%</span>
                                     </div>
                                 </div>
                             )}

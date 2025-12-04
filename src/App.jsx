@@ -46,7 +46,7 @@ export default function App() {
   } = useInnerOrbit();
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-800 font-sans selection:bg-indigo-100">
+    <div className="min-h-screen bg-slate-100 text-slate-800 font-sans selection:bg-primary-100">
       <div className="max-w-md mx-auto min-h-screen bg-white shadow-2xl overflow-hidden flex flex-col relative border-x border-slate-200">
 
         {/* Header */}

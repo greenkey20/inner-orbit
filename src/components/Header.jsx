@@ -31,11 +31,11 @@ export default function Header({ isExpanded, onToggleExpand, entryCount }) {
                 <div className="flex justify-between items-end mb-1">
                     <div>
                         <div className="flex items-center gap-2 mb-1">
-                            <Hexagon className="w-5 h-5 text-indigo-400 fill-indigo-400/20" />
+                            <Hexagon className="w-5 h-5 text-primary-400 fill-primary-400/20" />
                             <h1 className="text-2xl font-bold tracking-tight text-white shadow-sm">Inner Orbit</h1>
                         </div>
                         <div className="flex items-center gap-2">
-                            <span className="px-2 py-0.5 rounded-full bg-indigo-500/30 border border-indigo-400/30 text-[10px] font-mono text-indigo-200 backdrop-blur-sm">
+                            <span className="px-2 py-0.5 rounded-full bg-primary-500/30 border border-primary-400/30 text-[10px] font-mono text-primary-200 backdrop-blur-sm">
                                 System Active
                             </span>
                             <span className="text-[10px] font-mono text-slate-400">
@@ -55,7 +55,7 @@ export default function Header({ isExpanded, onToggleExpand, entryCount }) {
                 {/* Expanded Description */}
                 <div className={`overflow-hidden transition-all duration-500 ${isExpanded ? 'max-h-20 opacity-100 mt-3' : 'max-h-0 opacity-0 mt-0'}`}>
                     <p className="text-xs text-slate-200 font-light leading-relaxed max-w-[90%] opacity-90">
-                        <span className="font-semibold text-indigo-300">Gravity Assist Protocol:</span><br />
+                        <span className="font-semibold text-primary-300">Gravity Assist Protocol:</span><br />
                         Converting emotional gravity into growth momentum.
                         (감정의 인력을 성장의 동력으로 전환합니다.)
                     </p>
