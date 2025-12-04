@@ -6,6 +6,7 @@ import PromptAssistant from './components/PromptAssistant';
 import LogEditor from './components/LogEditor';
 import LogHistory from './components/LogHistory';
 import TelemetryGuide from './components/TelemetryGuide';
+import FlightTrajectory from './components/FlightTrajectory';
 
 /**
  * App - Inner Orbit 메인 애플리케이션 컴포넌트
@@ -109,14 +110,18 @@ export default function App() {
               <TelemetryGuide />
             </div>
           ) : (
-            <LogHistory
-              entries={entries}
-              onDeleteEntry={deleteEntry}
-              onUpdateEntry={updateEntry}
-              onDownloadData={downloadData}
-              onFileUpload={handleFileUpload}
-              fileInputRef={fileInputRef}
-            />
+            <div className="space-y-6 animate-fade-in">
+              <FlightTrajectory entries={entries} />
+
+              <LogHistory
+                entries={entries}
+                onDeleteEntry={deleteEntry}
+                onUpdateEntry={updateEntry}
+                onDownloadData={downloadData}
+                onFileUpload={handleFileUpload}
+                fileInputRef={fileInputRef}
+              />
+            </div>
           )}
         </main>
       </div>
