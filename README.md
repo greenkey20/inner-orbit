@@ -15,6 +15,7 @@
 
 ### 📝 Core Features
 - **Emotion Logging**: Gravity(외부 인력)와 Stability(코어 안정성) 메트릭으로 감정 상태 기록
+- **Flight Trajectory**: 감정 변화의 흐름을 시각화하는 차트 (Gravity vs Stability)
 - **Log History**: 타임라인 형식의 로그 히스토리 (Infinite Scroll 지원)
 - **Log Editing**: 작성된 로그 수정 및 audit trail (수정 일시 추적)
 - **Data Persistence**: localStorage 기반 자동 저장 (백업/복원 기능 포함)
@@ -26,8 +27,12 @@
 - **PWA Support**: Progressive Web App 지원
 - **Smooth Animations**: Tailwind transitions
 
-### 🤖 AI Features
-- **Prompt Assistant**: 감정 정리를 돕는 AI 쿼리 제안
+### 🤖 AI Features (Powered by OpenAI)
+- **Dynamic Prompting**: 현재 감정 상태(Gravity/Stability)를 분석하여 맞춤형 회고 질문 생성
+- **AI Co-Pilot (Signal Decryption)**:
+  - **Cognitive Distortion Analysis**: 로그에서 인지적 왜곡(흑백논리, 과잉일반화 등) 탐지
+  - **Reframing**: CBT 기반의 객관적이고 긍정적인 재해석 제공
+  - **Persistence**: 분석 결과 영구 저장 및 재조회 기능
 - **Contextual Suggestions**: 상황별 맞춤 질문 제공
 
 ---
@@ -147,6 +152,7 @@ npm run preview
 - **React 18.3** - UI Library
 - **Vite 6.0** - Build Tool & Dev Server
 - **Tailwind CSS 3.4** - Utility-first CSS
+- **OpenAI API** - LLM Integration (GPT-4o-mini)
 
 ### Icons & Assets
 - **Lucide React** - Icon Library
@@ -209,6 +215,8 @@ export default {
 
 ### Recent Updates
 
+- **v1.6.0** (2024-12-04): Flight Trajectory Visualization & Dynamic Prompting
+- **v1.5.0** (2024-12-04): AI Co-Pilot (Signal Decryption) with Persistence
 - **v1.4.0** (2024-12-04): UX Improvements (Telemetry Guide, Pagination, Data Persistence relocation)
 - **v1.3.0** (2024-12-04): Custom color theme with Tailwind variables
 - **v1.2.0** (2024-12-04): Log edit feature with audit trail
