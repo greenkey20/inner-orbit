@@ -20,10 +20,10 @@ export default function StatusDashboard({ gravity, stability, onGravityChange, o
             <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                     <span className="flex items-center gap-2 text-slate-600 font-medium">
-                        <Zap className="w-4 h-4 text-amber-500" />
+                        <Zap className="w-4 h-4 text-secondary-500" />
                         External Gravity (외부 인력)
                     </span>
-                    <span className="font-mono font-bold text-amber-600">{gravity}%</span>
+                    <span className="font-mono font-bold text-secondary-600">{gravity}%</span>
                 </div>
                 <input
                     type="range"
@@ -31,7 +31,7 @@ export default function StatusDashboard({ gravity, stability, onGravityChange, o
                     max="100"
                     value={gravity}
                     onChange={(e) => onGravityChange(parseInt(e.target.value))}
-                    className="w-full h-1.5 bg-amber-100 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                    className="w-full h-1.5 bg-secondary-100 rounded-lg appearance-none cursor-pointer accent-secondary-500"
                 />
             </div>
 
@@ -39,10 +39,10 @@ export default function StatusDashboard({ gravity, stability, onGravityChange, o
             <div className="space-y-2 pt-1">
                 <div className="flex justify-between text-sm">
                     <span className="flex items-center gap-2 text-slate-600 font-medium">
-                        <Shield className="w-4 h-4 text-indigo-500" />
+                        <Shield className="w-4 h-4 text-primary-500" />
                         Core Stability (코어 안정성)
                     </span>
-                    <span className="font-mono font-bold text-indigo-600">{stability}%</span>
+                    <span className="font-mono font-bold text-primary-600">{stability}%</span>
                 </div>
                 <input
                     type="range"
@@ -50,7 +50,7 @@ export default function StatusDashboard({ gravity, stability, onGravityChange, o
                     max="100"
                     value={stability}
                     onChange={(e) => onStabilityChange(parseInt(e.target.value))}
-                    className="w-full h-1.5 bg-indigo-100 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                    className="w-full h-1.5 bg-primary-100 rounded-lg appearance-none cursor-pointer accent-primary-600"
                 />
             </div>
         </section>
