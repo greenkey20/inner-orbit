@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Calendar, Trash2, Download, Upload, AlertCircle, Hexagon, Pencil, Check, X, Zap, Shield } from 'lucide-react';
 
 // UI 컴포넌트: 카드
@@ -42,6 +42,30 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onDo
     const [editGravity, setEditGravity] = useState(50);
     const [editStability, setEditStability] = useState(50);
 
+    // 페이지네이션 상태
+    const [visibleCount, setVisibleCount] = useState(10);
+    const observerRef = useRef(null);
+    const sentinelRef = useRef(null);
+
+    // 무한 스크롤 Observer 설정
+    useEffect(() => {
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) {
+                setVisibleCount((prev) => prev + 10);
+            }
+        }, { threshold: 1.0 });
+
+        if (sentinelRef.current) {
+            observer.observe(sentinelRef.current);
+        }
+
+        return () => {
+            if (sentinelRef.current) {
+                observer.unobserve(sentinelRef.current);
+            }
+        };
+    }, []);
+
     // 수정 모드 진입
     const startEdit = (entry) => {
         setEditingId(entry.id);
@@ -64,29 +88,13 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onDo
 
     return (
         <div className="space-y-6 animate-fade-in">
-            {/* Backup Section */}
-            <div className="bg-white p-4 rounded-xl border border-slate-200 flex flex-col gap-3 shadow-sm">
-                <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                    <AlertCircle className="w-3 h-3" /> Data Persistence
-                </div>
-                <div className="flex gap-2">
-                    <Button onClick={onDownloadData} variant="outline" className="flex-1 text-xs bg-slate-50">
-                        <Download className="w-3 h-3" /> Backup (JSON)
-                    </Button>
-                    <Button onClick={() => fileInputRef.current?.click()} variant="outline" className="flex-1 text-xs bg-slate-50">
-                        <Upload className="w-3 h-3" /> Restore
-                    </Button>
-                    <input type="file" ref={fileInputRef} onChange={onFileUpload} accept="application/json" className="hidden" />
-                </div>
-            </div>
-
             {entries.length === 0 ? (
                 <div className="text-center py-16 opacity-60">
                     <Hexagon className="w-10 h-10 mx-auto mb-4 text-slate-300" />
                     <p className="text-sm text-slate-500">No logs found.<br />Initialize your first entry.</p>
                 </div>
             ) : (
-                entries.map((entry) => {
+                entries.slice(0, visibleCount).map((entry) => {
                     const isEditing = editingId === entry.id;
 
                     return (
@@ -216,11 +224,11 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onDo
                                 <div className="flex gap-3 pt-1">
                                     <div className="flex-1 flex items-center justify-between px-3 py-2 bg-secondary-50 rounded border border-secondary-100" title="외부 인력 (Gravity)">
                                         <span className="text-[10px] font-bold text-secondary-800/60 uppercase">Gravity</span>
-                                        <span className="text-xs font-mono font-bold text-secondary-600">{entry.gravity || entry.longing}%</span>
+                                        <span className="text-xs font-mono font-bold text-secondary-600">{entry.gravity ?? entry.longing ?? 0}%</span>
                                     </div>
                                     <div className="flex-1 flex items-center justify-between px-3 py-2 bg-primary-50 rounded border border-primary-100" title="코어 안정성 (Stability)">
                                         <span className="text-[10px] font-bold text-primary-800/60 uppercase">Stability</span>
-                                        <span className="text-xs font-mono font-bold text-primary-600">{entry.stability || entry.mood}%</span>
+                                        <span className="text-xs font-mono font-bold text-primary-600">{entry.stability ?? entry.mood ?? 0}%</span>
                                     </div>
                                 </div>
                             )}
@@ -228,6 +236,29 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onDo
                     );
                 })
             )}
+
+            {/* Infinite Scroll Sentinel */}
+            {entries.length > visibleCount && (
+                <div ref={sentinelRef} className="h-10 flex justify-center items-center">
+                    <div className="w-5 h-5 border-2 border-slate-200 border-t-slate-400 rounded-full animate-spin"></div>
+                </div>
+            )}
+
+            {/* Data Persistence Section - Moved to Bottom */}
+            <div className="bg-white p-4 rounded-xl border border-slate-200 flex flex-col gap-3 shadow-sm">
+                <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    <AlertCircle className="w-3 h-3" /> Data Persistence
+                </div>
+                <div className="flex gap-2">
+                    <Button onClick={onDownloadData} variant="outline" className="flex-1 text-xs bg-slate-50">
+                        <Download className="w-3 h-3" /> Backup (JSON)
+                    </Button>
+                    <Button onClick={() => fileInputRef.current?.click()} variant="outline" className="flex-1 text-xs bg-slate-50">
+                        <Upload className="w-3 h-3" /> Restore
+                    </Button>
+                    <input type="file" ref={fileInputRef} onChange={onFileUpload} accept="application/json" className="hidden" />
+                </div>
+            </div>
         </div>
     );
 }
