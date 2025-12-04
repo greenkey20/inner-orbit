@@ -104,6 +104,26 @@ export default function useInnerOrbit() {
     };
 
     /**
+     * 로그 엔트리의 AI 분석 결과 저장
+     * @param {number} id - 엔트리 ID
+     * @param {Object} analysis - 분석 결과 객체
+     */
+    const updateEntryAnalysis = (id, analysis) => {
+        setEntries(entries.map(entry => {
+            if (entry.id === id) {
+                return {
+                    ...entry,
+                    analysis: {
+                        ...analysis,
+                        analyzedAt: new Date().toISOString()
+                    }
+                };
+            }
+            return entry;
+        }));
+    };
+
+    /**
      * 프롬프트를 메시지 영역에 삽입
      * @param {string} customPrompt - (선택) 사용자 정의 프롬프트 (AI 생성 질문 등)
      */
@@ -179,6 +199,7 @@ export default function useInnerOrbit() {
         handleSubmit,
         deleteEntry,
         updateEntry,
+        updateEntryAnalysis,
         insertPrompt,
         downloadData,
         handleFileUpload,

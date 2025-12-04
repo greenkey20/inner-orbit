@@ -36,7 +36,7 @@ const Button = ({ onClick, children, variant = "primary", className = "", ...pro
  * @param {function} onFileUpload - 복원 핸들러
  * @param {React.RefObject} fileInputRef - 파일 입력 ref
  */
-export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onDownloadData, onFileUpload, fileInputRef }) {
+export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUpdateEntryAnalysis, onDownloadData, onFileUpload, fileInputRef }) {
     // 수정 모드 상태 관리
     const [editingId, setEditingId] = useState(null);
     const [editContent, setEditContent] = useState('');
@@ -71,6 +71,17 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onDo
             }
         };
     }, []);
+
+    // 저장된 분석 결과 로드 (localStorage에서)
+    useEffect(() => {
+        const savedResults = {};
+        entries.forEach(entry => {
+            if (entry.analysis) {
+                savedResults[entry.id] = entry.analysis;
+            }
+        });
+        setAnalysisResults(savedResults);
+    }, [entries]);
 
     // 수정 모드 진입
     const startEdit = (entry) => {
@@ -109,6 +120,9 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onDo
             console.log('  - Distortions:', result.distortions);
             console.log('  - Reframed:', result.reframed);
             console.log('  - Alternative:', result.alternative);
+
+            // 분석 결과를 localStorage에 영구 저장
+            onUpdateEntryAnalysis(entry.id, result);
 
             setAnalysisResults(prev => ({
                 ...prev,
