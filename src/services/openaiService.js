@@ -112,3 +112,86 @@ function analyzeState(gravity, stability) {
 
     return { gravityLevel, stabilityLevel, condition };
 }
+
+/**
+ * 인지적 왜곡 분석 (Cognitive Distortion Analysis)
+ * @param {string} logContent - 사용자가 작성한 로그 내용
+ * @param {number} gravity - 외부 인력 (0-100)
+ * @param {number} stability - 코어 안정성 (0-100)
+ * @returns {Promise<Object>} - 분석 결과 { distortions: [], reframed: string, alternative: string }
+ */
+export async function analyzeCognitiveDistortions(logContent, gravity, stability) {
+    const apiKey = getApiKey();
+
+    if (!apiKey) {
+        throw new Error('API Key가 설정되지 않았습니다. Settings에서 API Key를 입력해주세요.');
+    }
+
+    const openai = new OpenAI({
+        apiKey: apiKey,
+        dangerouslyAllowBrowser: true
+    });
+
+    // System Prompt - CBT 치료사 역할
+    const systemPrompt = `You are an empathetic CBT (Cognitive Behavioral Therapy) therapist for "Inner Orbit" - a journaling app for emotional navigation.
+
+Your role is to analyze the user's journal entry for cognitive distortions and provide gentle reframing.
+
+Common Cognitive Distortions to detect:
+1. All-or-Nothing Thinking (흑백논리): "always", "never", "perfectly", "completely"
+2. Mind Reading (독심술 오류): "they think I'm...", "everyone will think..."
+3. Overgeneralization (과잉일반화): "again", "always happens", "every time"
+4. Catastrophizing (파국화): "it's over", "ruined", "disaster"
+5. Self-Blame (자기 비하): "I'm worthless", "I can't", "I'm incompetent"
+
+User's Current State:
+- Gravity (External Pressure): ${gravity}%
+- Stability (Inner Strength): ${stability}%
+
+Analysis Steps:
+1. Identify specific distortions with exact quotes from the text
+2. Provide compassionate reframing (2-3 sentences)
+3. Suggest one alternative perspective
+
+Output Format (JSON):
+{
+  "distortions": [
+    { "type": "Mind Reading", "quote": "다들 날 한심하게 생각할 거야" }
+  ],
+  "reframed": "Reframed perspective in Korean",
+  "alternative": "Alternative viewpoint in Korean"
+}
+
+Important:
+- Be compassionate, not patronizing
+- Use Korean for reframed and alternative
+- If no distortions found, return empty distortions array
+- Keep reframed and alternative concise`;
+
+    try {
+        const response = await openai.chat.completions.create({
+            model: 'gpt-4o-mini',
+            messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: logContent }
+            ],
+            temperature: 0.7,
+            max_tokens: 500,
+            response_format: { type: "json_object" }
+        });
+
+        const result = JSON.parse(response.choices[0].message.content);
+        return result;
+    } catch (error) {
+        console.error('OpenAI API Error:', error);
+
+        if (error.status === 401) {
+            throw new Error('API Key가 유효하지 않습니다. Settings에서 확인해주세요.');
+        } else if (error.status === 429) {
+            throw new Error('API 요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요.');
+        } else {
+            throw new Error(`신호 분석 실패: ${error.message}`);
+        }
+    }
+}
+

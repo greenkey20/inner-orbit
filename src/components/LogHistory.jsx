@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Calendar, Trash2, Download, Upload, AlertCircle, Hexagon, Pencil, Check, X, Zap, Shield } from 'lucide-react';
+import { Calendar, Trash2, Download, Upload, AlertCircle, Hexagon, Pencil, Check, X, Zap, Shield, Sparkles } from 'lucide-react';
+import { analyzeCognitiveDistortions } from '../services/openaiService';
 
 // UI 컴포넌트: 카드
 const Card = ({ children, className = "" }) => (
@@ -47,6 +48,11 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onDo
     const observerRef = useRef(null);
     const sentinelRef = useRef(null);
 
+    // AI Co-Pilot 상태
+    const [analyzingId, setAnalyzingId] = useState(null);
+    const [analysisResults, setAnalysisResults] = useState({});
+    const [analysisError, setAnalysisError] = useState(null);
+
     // 무한 스크롤 Observer 설정
     useEffect(() => {
         const observer = new IntersectionObserver((entries) => {
@@ -86,6 +92,36 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onDo
         setEditContent('');
     };
 
+    // AI 분석 실행
+    const handleDecryptLog = async (entry) => {
+        console.log('🔵 Decrypt Log button clicked! Entry ID:', entry.id);
+        console.log('Entry content:', entry.content);
+        setAnalyzingId(entry.id);
+        setAnalysisError(null);
+
+        try {
+            const result = await analyzeCognitiveDistortions(
+                entry.content,
+                entry.gravity ?? 50,
+                entry.stability ?? 50
+            );
+            console.log('✅ AI Analysis Result:', result); // 디버깅용
+            console.log('  - Distortions:', result.distortions);
+            console.log('  - Reframed:', result.reframed);
+            console.log('  - Alternative:', result.alternative);
+
+            setAnalysisResults(prev => ({
+                ...prev,
+                [entry.id]: result
+            }));
+        } catch (error) {
+            console.error('❌ Analysis Error:', error); // 디버깅용
+            setAnalysisError(error.message);
+        } finally {
+            setAnalyzingId(null);
+        }
+    };
+
     return (
         <div className="space-y-6 animate-fade-in">
             {entries.length === 0 ? (
@@ -94,8 +130,11 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onDo
                     <p className="text-sm text-slate-500">No logs found.<br />Initialize your first entry.</p>
                 </div>
             ) : (
-                entries.slice(0, visibleCount).map((entry) => {
+                entries.slice(0, visibleCount).map((entry, index) => {
                     const isEditing = editingId === entry.id;
+                    // Calculate log sequence number (oldest = #1)
+                    const sortedEntries = [...entries].sort((a, b) => a.id - b.id);
+                    const logNumber = sortedEntries.findIndex(e => e.id === entry.id) + 1;
 
                     return (
                         <Card
@@ -122,6 +161,12 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onDo
                                             </span>
                                         </div>
                                     )}
+                                    {/* Log Sequence Number */}
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[10px] font-mono text-slate-400">
+                                            Log Sequence #{logNumber}
+                                        </span>
+                                    </div>
                                 </div>
 
                                 <div className="flex gap-2">
@@ -232,17 +277,103 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onDo
                                     </div>
                                 </div>
                             )}
+
+                            {/* AI Co-Pilot: Decrypt Log Button */}
+                            {!isEditing && (
+                                <div className="mt-4 pt-4 border-t border-slate-100">
+                                    {analysisResults[entry.id] ? (
+                                        <div className="space-y-3">
+                                            {/* Analysis Results */}
+                                            <div className="p-4 bg-gradient-to-br from-slate-50 to-emerald-50 rounded-lg border border-emerald-200">
+                                                <div className="flex items-center gap-2 mb-3">
+                                                    <Sparkles className="w-4 h-4 text-emerald-600" />
+                                                    <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">로그 해독 리포트</span>
+                                                </div>
+
+                                                {/* Distortions */}
+                                                {analysisResults[entry.id].distortions && analysisResults[entry.id].distortions.length > 0 && (
+                                                    <div className="mb-3">
+                                                        <span className="text-xs font-bold text-slate-700">🔍 발견된 왜곡:</span>
+                                                        <ul className="mt-2 space-y-1">
+                                                            {analysisResults[entry.id].distortions.map((d, idx) => (
+                                                                <li key={idx} className="text-xs text-slate-600 ml-2">
+                                                                    <span className="font-semibold text-rose-600">{d.type}</span>: "{d.quote}"
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+
+                                                {/* Reframed Perspective */}
+                                                {analysisResults[entry.id].reframed && (
+                                                    <div className="mb-3">
+                                                        <span className="text-xs font-bold text-slate-700">💡 재해석:</span>
+                                                        <p className="text-sm text-slate-700 leading-relaxed mt-1">
+                                                            {analysisResults[entry.id].reframed}
+                                                        </p>
+                                                    </div>
+                                                )}
+
+                                                {/* Alternative Perspective */}
+                                                {analysisResults[entry.id].alternative && (
+                                                    <div>
+                                                        <span className="text-xs font-bold text-slate-700">✨ 대안적 관점:</span>
+                                                        <p className="text-sm text-emerald-700 leading-relaxed mt-1">
+                                                            {analysisResults[entry.id].alternative}
+                                                        </p>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <button
+                                                onClick={() => setAnalysisResults(prev => { const newResults = { ...prev }; delete newResults[entry.id]; return newResults; })}
+                                                className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
+                                            >
+                                                Close Analysis
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            onClick={() => handleDecryptLog(entry)}
+                                            disabled={analyzingId === entry.id}
+                                            className="w-full px-4 py-2 bg-gradient-to-r from-slate-700 to-emerald-500 text-white rounded-lg hover:from-slate-800 hover:to-emerald-600 transition-all flex items-center justify-center gap-2 text-sm font-medium disabled:opacity-50"
+                                        >
+                                            {analyzingId === entry.id ? (
+                                                <>
+                                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                                    Decrypting Log...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Sparkles className="w-4 h-4" />
+                                                    Decrypt Log
+                                                </>
+                                            )}
+                                        </button>
+                                    )}
+
+                                    {/* Error Message */}
+                                    {analysisError && analyzingId === entry.id && (
+                                        <div className="mt-2 p-2 bg-rose-50 border border-rose-200 rounded text-xs text-rose-600">
+                                            {analysisError}
+                                        </div>
+                                    )}
+                                </div>
+                            )
+                            }
                         </Card>
                     );
                 })
             )}
 
             {/* Infinite Scroll Sentinel */}
-            {entries.length > visibleCount && (
-                <div ref={sentinelRef} className="h-10 flex justify-center items-center">
-                    <div className="w-5 h-5 border-2 border-slate-200 border-t-slate-400 rounded-full animate-spin"></div>
-                </div>
-            )}
+            {
+                entries.length > visibleCount && (
+                    <div ref={sentinelRef} className="h-10 flex justify-center items-center">
+                        <div className="w-5 h-5 border-2 border-slate-200 border-t-slate-400 rounded-full animate-spin"></div>
+                    </div>
+                )
+            }
 
             {/* Data Persistence Section - Moved to Bottom */}
             <div className="bg-white p-4 rounded-xl border border-slate-200 flex flex-col gap-3 shadow-sm">
@@ -259,6 +390,6 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onDo
                     <input type="file" ref={fileInputRef} onChange={onFileUpload} accept="application/json" className="hidden" />
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
