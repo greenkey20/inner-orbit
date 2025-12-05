@@ -114,6 +114,7 @@ export function analyzeTemporalPatterns(entries) {
 /**
  * 3. Keyword Extraction (키워드 추출)
  * 고위험 상태(High Gravity)일 때 사용된 단어 추출 및 빈도 계산
+ * [Query]: 부분(프로그램 제공 질문)은 제외하고, [Log]: 부분(사용자 답변)만 분석
  * 
  * @param {Array} entries - 로그 엔트리 배열
  * @param {number} gravityThreshold - Gravity 임계값 (기본: 70)
@@ -130,8 +131,57 @@ export function extractKeywords(entries, gravityThreshold = 70) {
         return [];
     }
 
-    // 모든 텍스트 통합
-    const allText = highGravityEntries.map(e => e.content).join(' ');
+    /**
+     * [Query]: 부분을 제거하고 [Log]: 부분만 추출하는 헬퍼 함수
+     * 예시:
+     * "[Query]: 질문내용\n[Log]: 답변내용\n[Query]: 질문2\n[Log]: 답변2"
+     * -> "답변내용 답변2"
+     */
+    function extractUserContent(text) {
+        // [Log]: 로 시작하는 모든 섹션을 추출
+        const logSections = [];
+        const lines = text.split('\n');
+        let isInLogSection = false;
+        let currentLogContent = [];
+
+        for (const line of lines) {
+            if (line.trim().startsWith('[Query]:')) {
+                // [Query]: 섹션 시작 - 이전 [Log] 섹션이 있으면 저장
+                if (isInLogSection && currentLogContent.length > 0) {
+                    logSections.push(currentLogContent.join(' '));
+                    currentLogContent = [];
+                }
+                isInLogSection = false;
+            } else if (line.trim().startsWith('[Log]:')) {
+                // [Log]: 섹션 시작
+                isInLogSection = true;
+                // [Log]: 라벨 뒤의 내용도 포함
+                const content = line.replace(/^\[Log\]:\s*/, '').trim();
+                if (content) {
+                    currentLogContent.push(content);
+                }
+            } else if (isInLogSection) {
+                // [Log] 섹션 내용 계속
+                const trimmed = line.trim();
+                if (trimmed) {
+                    currentLogContent.push(trimmed);
+                }
+            }
+        }
+
+        // 마지막 [Log] 섹션 저장
+        if (isInLogSection && currentLogContent.length > 0) {
+            logSections.push(currentLogContent.join(' '));
+        }
+
+        // [Log] 섹션이 없는 경우, 전체 텍스트를 사용 (기존 로그와의 호환성)
+        return logSections.length > 0 ? logSections.join(' ') : text;
+    }
+
+    // 모든 텍스트 통합 (사용자 작성 부분만)
+    const allText = highGravityEntries
+        .map(e => extractUserContent(e.content))
+        .join(' ');
 
     // 한글, 영문 단어 추출 (2글자 이상)
     const koreanWords = allText.match(/[가-힣]{2,}/g) || [];
