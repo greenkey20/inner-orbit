@@ -8,6 +8,7 @@ import LogHistory from './components/LogHistory';
 import TelemetryGuide from './components/TelemetryGuide';
 import FlightTrajectory from './components/FlightTrajectory';
 import ApiKeySettings from './components/ApiKeySettings';
+import Analytics from './components/Analytics';
 
 /**
  * App - Inner Orbit 메인 애플리케이션 컴포넌트
@@ -80,6 +81,15 @@ export default function App() {
           >
             Flight History
           </button>
+          <button
+            onClick={() => setView('analytics')}
+            className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors ${view === 'analytics'
+              ? 'bg-white shadow-sm text-slate-800 border border-slate-200'
+              : 'text-slate-500 hover:text-slate-700'
+              }`}
+          >
+            Analytics
+          </button>
         </div>
 
         {/* Main Content */}
@@ -113,7 +123,7 @@ export default function App() {
 
               <TelemetryGuide />
             </div>
-          ) : (
+          ) : view === 'history' ? (
             <div className="space-y-6 animate-fade-in">
               <FlightTrajectory entries={entries} />
 
@@ -126,6 +136,10 @@ export default function App() {
                 onFileUpload={handleFileUpload}
                 fileInputRef={fileInputRef}
               />
+            </div>
+          ) : (
+            <div className="animate-fade-in">
+              <Analytics entries={entries} />
             </div>
           )}
         </main>
