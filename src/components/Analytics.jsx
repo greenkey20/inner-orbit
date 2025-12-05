@@ -61,7 +61,7 @@ export default function Analytics({ entries }) {
     return (
         <div className="space-y-6 animate-fade-in">
             {/* 헤더 */}
-            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 rounded-xl shadow-lg">
+            <div className="bg-gradient-to-r from-slate-600 to-slate-700 text-white p-6 rounded-xl shadow-lg">
                 <h2 className="text-2xl font-bold mb-2">📊 Mission Control Report</h2>
                 <p className="text-sm opacity-90">심층 분석 대시보드 - 당신의 감정 패턴을 수치화합니다</p>
             </div>
@@ -69,7 +69,7 @@ export default function Analytics({ entries }) {
             {/* 1. Correlation Analysis */}
             <section className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                 <div className="flex items-center gap-2 mb-4">
-                    <TrendingUp className="w-5 h-5 text-indigo-600" />
+                    <TrendingUp className="w-5 h-5 text-slate-600" />
                     <h3 className="text-lg font-bold text-slate-800">상관관계 분석</h3>
                 </div>
 
@@ -102,12 +102,12 @@ export default function Analytics({ entries }) {
                                 return null;
                             }}
                         />
-                        <Scatter data={scatterData} fill="#6366f1" />
+                        <Scatter data={scatterData} fill="#64748b" />
                     </ScatterChart>
                 </ResponsiveContainer>
 
                 {/* Insights */}
-                <div className="mt-4 p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+                <div className="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
                     {correlationData.insights.length > 0 ? (
                         <ul className="space-y-1 text-sm text-slate-700">
                             {correlationData.insights.map((insight, idx) => (
@@ -123,7 +123,7 @@ export default function Analytics({ entries }) {
             {/* 2. Temporal Patterns */}
             <section className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                 <div className="flex items-center gap-2 mb-4">
-                    <Clock className="w-5 h-5 text-purple-600" />
+                    <Clock className="w-5 h-5 text-slate-600" />
                     <h3 className="text-lg font-bold text-slate-800">시간대 분석</h3>
                 </div>
 
@@ -148,7 +148,7 @@ export default function Analytics({ entries }) {
                             {temporalChartData.map((entry, index) => (
                                 <Cell
                                     key={`cell-${index}`}
-                                    fill={entry.key === temporalData.maxPeriod ? '#9333ea' : '#c4b5fd'}
+                                    fill={entry.key === temporalData.maxPeriod ? '#475569' : '#cbd5e1'}
                                 />
                             ))}
                         </Bar>
@@ -157,7 +157,7 @@ export default function Analytics({ entries }) {
 
                 {/* Insights */}
                 {temporalData.maxPeriod && temporalData.maxCount > 0 && (
-                    <div className="mt-4 p-3 bg-purple-50 rounded-lg border border-purple-100">
+                    <div className="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
                         <p className="text-sm text-slate-700">
                             🌙 {
                                 temporalData.maxPeriod === 'dawn' ? '새벽 (0-6시)' :
