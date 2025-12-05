@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- 아이콘 경로 (public 폴더 기준) -->
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="apple-touch-icon" href="/icon-192.png">
+    
+    <!-- 뷰포트 설정: 확대 방지 및 노치 디자인 대응 (viewport-fit=cover) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    
+    <!-- iOS 상태바 스타일: 블랙 (투명한 느낌을 주려면 black-translucent) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Inner Orbit">
+    
+    <!-- 테마 컬러 -->
+    <meta name="theme-color" content="#0f172a">
+
+    <title>Inner Orbit</title>
+    
+    <!-- PWA Manifest 연결 -->
+    <link rel="manifest" href="/manifest.json">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

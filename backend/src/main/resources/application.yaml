@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: inner-orbit
+
+  # PostgreSQL 데이터베이스 설정
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/innerorbit}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+
+  # JPA 설정
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        default_batch_fetch_size: 100
+        jdbc:
+          time_zone: Asia/Seoul
+
+
+  # [NEW] Spring AI 설정 (들여쓰기 중요!)
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: gpt-4o-mini
+          temperature: 0.7
+
+  # 로깅 설정
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    com.greenkey20.innerorbit: DEBUG

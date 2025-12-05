@@ -1,0 +1,19 @@
+/** @type {import('tailwindcss').Config} */
+import colors from 'tailwindcss/colors';
+
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        primary: colors.emerald,      // Stability theme (green)
+        secondary: colors.indigo,     // Gravity theme (navy/indigo)
+        'ai-primary': colors.emerald, // AI features (emerald/teal)
+      },
+    },
+  },
+  plugins: [],
+}
