@@ -4,9 +4,9 @@ spring:
 
   # PostgreSQL 데이터베이스 설정
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/innerorbit}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:postgres}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/innerorbit_db}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10
