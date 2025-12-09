@@ -1,6 +1,129 @@
+#==========================================
+#1. Security & Credentials (보안 및 자격증명)
+#[중요] 절대 Git에 올라가면 안 되는 파일들
+#==========================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.key
+*.pem
+*.p12
+*.jks
+secret.yml
+application-secret.yaml
+
+#==========================================
+#2. Operating System Files (운영체제 생성 파일)
+#개발 환경마다 다른 OS 파일들이 섞이는 것을 방지
+#==========================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+#==========================================
+#3. Editor & IDE (에디터 및 IDE 설정)
+#개인별 설정 파일이 프로젝트 설정을 덮어쓰지 않도록 제외
+#==========================================
+#IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+#Visual Studio Code
+.vscode/
+*.code-workspace
+
+#Eclipse
+.classpath
+.project
+.settings/
+.factorypath
+
+#NetBeans
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+#==========================================
+#4. Backend (Java & Spring Boot & Gradle)
+#빌드 결과물이나 로컬 캐시 등은 제외
+#==========================================
+#Gradle Build Artifacts
 backend/build/
 backend/.gradle/
+build/
+.gradle/
+
+#Log Files
+*.log
+logs/
+
+#Package Files (실행 가능한 JAR 파일은 제외하되, wrapper는 포함해야 함)
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+#[예외] Gradle Wrapper는 포함해야 함 (협업 시 빌드 도구 버전 통일)
+!gradle-wrapper.jar
+!backend/gradle/wrapper/gradle-wrapper.jar
+
+#==========================================
+#5. Frontend (Node.js & React)
+#의존성 모듈과 빌드 결과물 제외
+#==========================================
+#Dependencies
 frontend/node_modules/
+node_modules/
+
+#Production Build
 frontend/dist/
-.idea/
-.vscode/
+dist/
+frontend/build/
+
+#Testing Coverage
+frontend/coverage/
+coverage/
+
+#Debug Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+#Local Env Files (Frontend)
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+#==========================================
+#6. Docker & Infrastructure (선택 사항)
+#로컬 테스트용 Docker 설정이나 볼륨 데이터 제외
+#==========================================
+docker-compose.override.yml
+.docker/
+
+#==========================================
+#7. Database (Local DB Data)
+#로컬 DB 파일이나 덤프 파일 제외
+#==========================================
+*.sql
+*.sqlite
+postgres_data/
+mysql_data/

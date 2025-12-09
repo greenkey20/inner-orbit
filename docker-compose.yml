@@ -1,0 +1,48 @@
+services:
+  # 1. Database Service
+  db:
+    image: postgres:16-alpine
+    container_name: inner-orbit-db
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - inner-orbit-net
+    restart: always
+
+  # 2. Backend Service (Spring Boot)
+  backend:
+    build: ./backend
+    container_name: inner-orbit-backend
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_AI_OPENAI_API_KEY: ${OPENAI_API_KEY}
+    networks:
+      - inner-orbit-net
+    restart: always
+
+  # 3. Frontend Service (Nginx + React)
+  frontend:
+    build: ./frontend
+    container_name: inner-orbit-frontend
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    networks:
+      - inner-orbit-net
+    restart: always
+
+volumes:
+  postgres_data:
+
+networks:
+  inner-orbit-net:
+    driver: bridge

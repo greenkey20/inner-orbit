@@ -36,8 +36,11 @@ spring:
         options:
           model: gpt-4o-mini
           temperature: 0.7
+      client:
+        connect-timeout: 10s
+        read-timeout: 60s
 
-  # 로깅 설정
+# 로깅 설정
 logging:
   level:
     org.hibernate.SQL: DEBUG
