@@ -221,17 +221,25 @@ npm run dev
 
 ## API 엔드포인트
 
-### Log Entries
+### Log Management
+
+로그 엔트리의 CRUD(생성, 조회, 수정, 삭제) 기능을 제공합니다.
 
 - `GET /api/logs` - 모든 로그 엔트리 조회
 - `POST /api/logs` - 새 로그 엔트리 생성
 - `PUT /api/logs/{id}` - 로그 엔트리 수정
 - `DELETE /api/logs/{id}` - 로그 엔트리 삭제
-- `POST /api/logs/{id}/analyze` - AI 기반 인지 왜곡 분석
 
 ### AI Services
 
-- `GET /api/ai/prompt?gravity={0-100}&stability={0-100}` - 동적 프롬프트 생성
+OpenAI API를 활용한 AI 기반 분석 및 프롬프트 생성 기능을 제공합니다.
+
+- `POST /api/logs/{id}/analyze` - **인지 왜곡 분석**
+  - **설명**: 로그 내용을 분석하여 인지 왜곡(Cognitive Distortions) 감지 및 재구성 제안
+  - **파라미터**: 로그 ID
+  - **응답**: `{"distortions": [...], "reframed": "...", "alternative": "..."}`
+
+- `GET /api/ai/prompt?gravity={0-100}&stability={0-100}` - **동적 프롬프트 생성**
   - **설명**: 사용자의 현재 Gravity/Stability 상태에 맞는 맞춤형 질문 생성
   - **파라미터**:
     - `gravity`: 외부 인력 (0-100, 기본값: 50)
