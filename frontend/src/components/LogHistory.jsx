@@ -110,8 +110,8 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
         setAnalysisError(null);
 
         try {
-            // 백엔드 AI API 호출
-            const response = await fetch(`/api/ai/analyze/${entry.id}`, {
+            // 백엔드 API 호출
+            const response = await fetch(`/api/logs/${entry.id}/analyze`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

@@ -1,5 +1,6 @@
 package com.greenkey20.innerorbit.controller;
 
+import com.greenkey20.innerorbit.domain.dto.request.AnalysisUpdateRequest;
 import com.greenkey20.innerorbit.domain.dto.request.LogEntryCreateRequest;
 import com.greenkey20.innerorbit.domain.dto.request.LogEntryUpdateRequest;
 import com.greenkey20.innerorbit.domain.dto.response.LogEntryResponse;
@@ -17,8 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * LogController - 로그 엔트리 CRUD 관련 REST API 컨트롤러
- * AI 관련 기능은 AiController에서 처리합니다.
+ * LogController - 로그 엔트리 관련 REST API 컨트롤러
  */
 @RestController
 @RequestMapping("/api/logs")
@@ -128,6 +128,32 @@ public class LogController {
             @Valid @RequestBody LogEntryUpdateRequest request) {
         log.info("Updating log entry with id: {}", id);
         LogEntryResponse response = logService.updateLogEntry(id, request);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 로그 엔트리에 AI 분석 결과 추가/업데이트
+     *
+     * PATCH /api/logs/{id}/analysis
+     */
+    @PatchMapping("/{id}/analysis")
+    public ResponseEntity<LogEntryResponse> updateAnalysis(
+            @PathVariable Long id,
+            @Valid @RequestBody AnalysisUpdateRequest request) {
+        log.info("Updating analysis for log entry with id: {}", id);
+        LogEntryResponse response = logService.updateAnalysis(id, request);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * AI를 사용하여 로그 엔트리 분석 실행
+     *
+     * POST /api/logs/{id}/analyze
+     */
+    @PostMapping("/{id}/analyze")
+    public ResponseEntity<LogEntryResponse> analyzeLogEntry(@PathVariable Long id) {
+        log.info("Triggering AI analysis for log entry with id: {}", id);
+        LogEntryResponse response = logService.updateLogAnalysis(id);
         return ResponseEntity.ok(response);
     }
 
