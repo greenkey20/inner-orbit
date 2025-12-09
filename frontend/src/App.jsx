@@ -7,7 +7,6 @@ import LogEditor from './components/LogEditor';
 import LogHistory from './components/LogHistory';
 import TelemetryGuide from './components/TelemetryGuide';
 import FlightTrajectory from './components/FlightTrajectory';
-import ApiKeySettings from './components/ApiKeySettings';
 import Analytics from './components/Analytics';
 
 /**
@@ -144,9 +143,6 @@ export default function App() {
           )}
         </main>
       </div>
-
-      {/* API Key Settings */}
-      <ApiKeySettings />
 
       {/* Global Styles */}
       <style>{`

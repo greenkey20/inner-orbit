@@ -99,4 +99,49 @@ public class AiServiceImpl implements AiService {
             throw new RuntimeException("AI 분석 중 오류가 발생했습니다: " + e.getMessage(), e);
         }
     }
+
+    @Override
+    public String generateDynamicPrompt(Integer gravity, Integer stability) {
+        log.info("Generating dynamic prompt - Gravity: {}, Stability: {}", gravity, stability);
+
+        // System Prompt - Inner Orbit Mission Control 역할
+        String systemPrompt = """
+                You are 'Inner Orbit Mission Control'. Ask ONE powerful, thought-provoking question (max 2 sentences) based on the user's Gravity/Stability state.
+
+                User's Current State:
+                - Gravity (External Pressure): %d%%
+                - Stability (Inner Strength): %d%%
+
+                Guidelines:
+                - If Gravity is high (>70): Ask about external pressures and coping mechanisms
+                - If Stability is low (<30): Ask about self-care and grounding
+                - If both are balanced (40-60 range): Ask about growth or reflection
+                - Use compassionate, direct language
+                - Keep it concise (max 2 sentences)
+                - Write in Korean
+                - Focus on empowerment, not judgment
+
+                Return ONLY the question, without any prefix or explanation.
+                """.formatted(gravity, stability);
+
+        try {
+            // ChatClient를 사용하여 OpenAI API 호출
+            ChatClient chatClient = chatClientBuilder.build();
+
+            // 프롬프트 실행 및 문자열 결과 반환
+            String prompt = chatClient.prompt()
+                    .system(systemPrompt)
+                    .user("Generate a thoughtful question for this user's current state.")
+                    .call()
+                    .content();
+
+            log.info("Dynamic prompt generated successfully: {}", prompt);
+
+            return prompt;
+
+        } catch (Exception e) {
+            log.error("Failed to generate dynamic prompt: {}", e.getMessage(), e);
+            throw new RuntimeException("동적 프롬프트 생성 중 오류가 발생했습니다: " + e.getMessage(), e);
+        }
+    }
 }

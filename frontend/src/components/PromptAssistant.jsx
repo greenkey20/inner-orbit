@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BookOpen, RefreshCw, Trash2, Sparkles } from 'lucide-react';
-import { generateDynamicPrompt, getApiKey } from '../services/openaiService';
+import { generateDynamicPrompt } from '../services/openaiService';
 
 // UI 컴포넌트: 버튼
 const Button = ({ onClick, children, variant = "primary", className = "", ...props }) => {
@@ -46,13 +46,6 @@ export default function PromptAssistant({
     const [error, setError] = useState('');
 
     const handleGenerateAiPrompt = async () => {
-        const hasApiKey = Boolean(getApiKey());
-
-        if (!hasApiKey) {
-            setError('API Key가 필요합니다. Settings에서 OpenAI API Key를 입력해주세요.');
-            return;
-        }
-
         setIsGenerating(true);
         setError('');
 

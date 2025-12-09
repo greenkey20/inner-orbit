@@ -18,4 +18,14 @@ public interface AiService {
      * @return 분석 결과 (인지적 왜곡 목록, 재구성된 관점, 대안적 관점)
      */
     AnalysisResult analyzeCognitiveDistortions(String logContent, Integer gravity, Integer stability);
+
+    /**
+     * 동적 프롬프트 생성
+     * 사용자의 Gravity/Stability 상태를 기반으로 생각을 유도하는 질문을 생성
+     *
+     * @param gravity 외부 인력 (0-100)
+     * @param stability 코어 안정성 (0-100)
+     * @return 생성된 질문 (한국어)
+     */
+    String generateDynamicPrompt(Integer gravity, Integer stability);
 }
