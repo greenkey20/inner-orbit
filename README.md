@@ -234,10 +234,16 @@ npm run dev
 
 OpenAI API를 활용한 AI 기반 분석 및 프롬프트 생성 기능을 제공합니다.
 
-- `POST /api/logs/{id}/analyze` - **인지 왜곡 분석**
-  - **설명**: 로그 내용을 분석하여 인지 왜곡(Cognitive Distortions) 감지 및 재구성 제안
-  - **파라미터**: 로그 ID
+- `POST /api/ai/analyze/{logId}` - **AI 인지 왜곡 분석 실행**
+  - **설명**: 로그 내용을 AI로 분석하여 인지 왜곡(Cognitive Distortions) 감지 및 재구성 제안
+  - **파라미터**: `logId` - 분석할 로그 엔트리 ID
   - **응답**: `{"distortions": [...], "reframed": "...", "alternative": "..."}`
+
+- `PATCH /api/ai/analysis/{logId}` - **분석 결과 수동 업데이트**
+  - **설명**: 로그 엔트리의 AI 분석 결과를 수동으로 추가/수정
+  - **파라미터**: `logId` - 로그 엔트리 ID
+  - **요청 본문**: `{"distortions": [...], "reframed": "...", "alternative": "..."}`
+  - **응답**: 업데이트된 로그 엔트리 전체 정보
 
 - `GET /api/ai/prompt?gravity={0-100}&stability={0-100}` - **동적 프롬프트 생성**
   - **설명**: 사용자의 현재 Gravity/Stability 상태에 맞는 맞춤형 질문 생성

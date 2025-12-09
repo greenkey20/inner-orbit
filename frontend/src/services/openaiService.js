@@ -3,7 +3,7 @@
  * 사용자의 Gravity/Stability 상태에 맞는 맞춤형 질문을 백엔드에서 생성합니다.
  *
  * ⚠️ 참고:
- * - 인지적 왜곡 분석: POST /api/logs/{id}/analyze
+ * - 인지적 왜곡 분석: POST /api/ai/analyze/{logId}
  * - 동적 프롬프트 생성: GET /api/ai/prompt
  * - OpenAI API Key는 백엔드에서 안전하게 관리됩니다.
  */
