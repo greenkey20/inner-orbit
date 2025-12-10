@@ -4,10 +4,39 @@
  */
 
 /**
+ * [HELPER] 한글 날짜 문자열("2025년 12월 9일 21:30")을 표준 Date 객체로 변환
+ * Safari/iOS 호환성을 위해 필수
+ */
+function parseKoreanDate(dateStr) {
+    if (!dateStr) return new Date(); // 방어 코드
+    
+    // 1. 이미 ISO 형식이면 바로 변환
+    if (dateStr.includes('T') || dateStr.includes('-')) {
+        return new Date(dateStr);
+    }
+
+    // 2. 한글 포맷 파싱 ("2025년 12월 9일 21:30")
+    // 정규식으로 숫자만 추출: [2025, 12, 9, 21, 30]
+    const parts = dateStr.match(/\d+/g);
+    
+    if (parts && parts.length >= 5) {
+        // 월은 0부터 시작하므로 -1 해줘야 함
+        return new Date(
+            parts[0],     // Year
+            parts[1] - 1, // Month (0-11)
+            parts[2],     // Day
+            parts[3],     // Hour
+            parts[4]      // Minute
+        );
+    }
+    
+    return new Date(); // 파싱 실패 시 현재 시간
+}
+
+/**
  * 1. Correlation Analysis (상관관계 분석)
  * Gravity와 Stability 간의 피어슨 상관계수 계산 및 구간별 통계
- * 
- * @param {Array} entries - 로그 엔트리 배열 [{id, gravity, stability, ...}]
+ * * @param {Array} entries - 로그 엔트리 배열 [{id, gravity, stability, ...}]
  * @returns {Object} { correlation, highGravityAvgStability, veryHighGravityAvgStability }
  */
 export function calculateCorrelation(entries) {
@@ -25,8 +54,10 @@ export function calculateCorrelation(entries) {
     const sumG2 = gravityValues.reduce((sum, g) => sum + g * g, 0);
     const sumS2 = stabilityValues.reduce((sum, s) => sum + s * s, 0);
 
-    const correlation = (n * sumGS - sumG * sumS) /
-        Math.sqrt((n * sumG2 - sumG * sumG) * (n * sumS2 - sumS * sumS));
+    const numerator = (n * sumGS - sumG * sumS);
+    const denominator = Math.sqrt((n * sumG2 - sumG * sumG) * (n * sumS2 - sumS * sumS));
+    
+    const correlation = denominator === 0 ? 0 : numerator / denominator;
 
     // 구간별 평균 계산
     const highGravity = entries.filter(e => e.gravity >= 60);
@@ -69,8 +100,7 @@ export function calculateCorrelation(entries) {
 /**
  * 2. Temporal Pattern Analysis (시간대 분석)
  * 시간대별 Gravity 경보 빈도 분석
- * 
- * @param {Array} entries - 로그 엔트리 배열
+ * * @param {Array} entries - 로그 엔트리 배열
  * @returns {Object} { dawn, morning, afternoon, night, maxPeriod }
  */
 export function analyzeTemporalPatterns(entries) {
@@ -81,22 +111,18 @@ export function analyzeTemporalPatterns(entries) {
     const patterns = { dawn: 0, morning: 0, afternoon: 0, night: 0 };
 
     entries.forEach(entry => {
-        // date 형식: "2024년 12월 5일 09:18" 등
-        const dateStr = entry.date;
-        const hourMatch = dateStr.match(/(\d{1,2}):(\d{2})/);
+        // parseKoreanDate 헬퍼 함수를 사용하여 안전하게 시간 추출
+        const dateObj = parseKoreanDate(entry.date);
+        const hour = dateObj.getHours();
 
-        if (hourMatch) {
-            const hour = parseInt(hourMatch[1], 10);
-
-            if (hour >= 0 && hour < 6) {
-                patterns.dawn++;
-            } else if (hour >= 6 && hour < 12) {
-                patterns.morning++;
-            } else if (hour >= 12 && hour < 18) {
-                patterns.afternoon++;
-            } else {
-                patterns.night++;
-            }
+        if (hour >= 0 && hour < 6) {
+            patterns.dawn++;
+        } else if (hour >= 6 && hour < 12) {
+            patterns.morning++;
+        } else if (hour >= 12 && hour < 18) {
+            patterns.afternoon++;
+        } else {
+            patterns.night++;
         }
     });
 
@@ -114,9 +140,7 @@ export function analyzeTemporalPatterns(entries) {
 /**
  * 3. Keyword Extraction (키워드 추출)
  * 고위험 상태(High Gravity)일 때 사용된 단어 추출 및 빈도 계산
- * [Query]: 부분(프로그램 제공 질문)은 제외하고, [Log]: 부분(사용자 답변)만 분석
- * 
- * @param {Array} entries - 로그 엔트리 배열
+ * * @param {Array} entries - 로그 엔트리 배열
  * @param {number} gravityThreshold - Gravity 임계값 (기본: 70)
  * @returns {Array} [{ word, count }] 빈도순 정렬
  */
@@ -131,14 +155,7 @@ export function extractKeywords(entries, gravityThreshold = 70) {
         return [];
     }
 
-    /**
-     * [Query]: 부분을 제거하고 [Log]: 부분만 추출하는 헬퍼 함수
-     * 예시:
-     * "[Query]: 질문내용\n[Log]: 답변내용\n[Query]: 질문2\n[Log]: 답변2"
-     * -> "답변내용 답변2"
-     */
     function extractUserContent(text) {
-        // [Log]: 로 시작하는 모든 섹션을 추출
         const logSections = [];
         const lines = text.split('\n');
         let isInLogSection = false;
@@ -146,22 +163,18 @@ export function extractKeywords(entries, gravityThreshold = 70) {
 
         for (const line of lines) {
             if (line.trim().startsWith('[Query]:')) {
-                // [Query]: 섹션 시작 - 이전 [Log] 섹션이 있으면 저장
                 if (isInLogSection && currentLogContent.length > 0) {
                     logSections.push(currentLogContent.join(' '));
                     currentLogContent = [];
                 }
                 isInLogSection = false;
             } else if (line.trim().startsWith('[Log]:')) {
-                // [Log]: 섹션 시작
                 isInLogSection = true;
-                // [Log]: 라벨 뒤의 내용도 포함
                 const content = line.replace(/^\[Log\]:\s*/, '').trim();
                 if (content) {
                     currentLogContent.push(content);
                 }
             } else if (isInLogSection) {
-                // [Log] 섹션 내용 계속
                 const trimmed = line.trim();
                 if (trimmed) {
                     currentLogContent.push(trimmed);
@@ -169,31 +182,25 @@ export function extractKeywords(entries, gravityThreshold = 70) {
             }
         }
 
-        // 마지막 [Log] 섹션 저장
         if (isInLogSection && currentLogContent.length > 0) {
             logSections.push(currentLogContent.join(' '));
         }
 
-        // [Log] 섹션이 없는 경우, 전체 텍스트를 사용 (기존 로그와의 호환성)
         return logSections.length > 0 ? logSections.join(' ') : text;
     }
 
-    // 모든 텍스트 통합 (사용자 작성 부분만)
     const allText = highGravityEntries
         .map(e => extractUserContent(e.content))
         .join(' ');
 
-    // 한글, 영문 단어 추출 (2글자 이상)
     const koreanWords = allText.match(/[가-힣]{2,}/g) || [];
     const englishWords = allText.match(/[a-zA-Z]{2,}/g) || [];
     const words = [...koreanWords, ...englishWords];
 
-    // 불용어 제거
     const stopWords = new Set(['이것', '그것', '저것', '있다', '없다', '하다', '되다', '않다',
         '것이', '나는', '내가', '우리', '그리고', '하지만', '그런데',
         'the', 'is', 'am', 'are', 'and', 'or', 'but', 'in', 'on', 'at']);
 
-    // 빈도 계산
     const frequency = {};
     words.forEach(word => {
         const normalized = word.toLowerCase();
@@ -202,7 +209,6 @@ export function extractKeywords(entries, gravityThreshold = 70) {
         }
     });
 
-    // 빈도순 정렬 (상위 20개)
     return Object.entries(frequency)
         .map(([word, count]) => ({ word, count }))
         .sort((a, b) => b.count - a.count)
@@ -212,8 +218,7 @@ export function extractKeywords(entries, gravityThreshold = 70) {
 /**
  * 4. Resilience Index (회복 탄력성 지수)
  * Stability가 저점에서 회복(50% 이상)까지 걸리는 평균 시간 계산
- * 
- * @param {Array} entries - 로그 엔트리 배열 (시간순 정렬 필요)
+ * * @param {Array} entries - 로그 엔트리 배열 (시간순 정렬 필요)
  * @returns {Object} { avgRecoveryDays, recoveryCount, trend }
  */
 export function calculateResilienceIndex(entries) {
@@ -221,11 +226,11 @@ export function calculateResilienceIndex(entries) {
         return { avgRecoveryDays: null, recoveryCount: 0, trend: null };
     }
 
-   // [FIX 1] 정렬 기준 변경: 헬퍼 함수(한글 날짜 포맷을 브라우저가 이해할 수 있는 표준 포맷(YYYY-MM-DDTHH:mm:ss)으로 변환해주는 유틸리티 함수) 사용
+    // [FIX 1] 정렬 기준 변경: 헬퍼 함수 사용
     const sorted = [...entries].sort((a, b) => parseKoreanDate(a.date) - parseKoreanDate(b.date));
 
     const recoveryPeriods = [];
-    let lowPointTime = null; // ID 대신 시간을 저장
+    let lowPointTime = null;
 
     for (let i = 0; i < sorted.length; i++) {
         const entry = sorted[i];
@@ -239,14 +244,14 @@ export function calculateResilienceIndex(entries) {
 
         // 회복 감지 (Stability >= 50)
         if (lowPointTime !== null && entry.stability >= 50) {
-            // [FIX 2] 계산 로직 변경: 시간 차이 계산
-            const recoveryDays = (entryTime - lowPointTime) / (1000 * 60 * 60 * 24); // ms to days
-
-            // [안전장치] 혹시라도 음수나 말도 안 되는 값이 나오면 무시 (0.001일 이상만 인정)
+            // [FIX 3] 계산 로직 변경: 시간 차이 계산
+            const recoveryDays = (entryTime - lowPointTime) / (1000 * 60 * 60 * 24);
+            
+            // [안전장치] 유효한 값만 포함 (0.001일 이상)
             if (recoveryDays > 0.0001) {
                 recoveryPeriods.push(recoveryDays);
             }
-
+            
             lowPointTime = null;
         }
     }
