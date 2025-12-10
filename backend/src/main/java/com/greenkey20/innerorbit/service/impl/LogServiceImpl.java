@@ -102,7 +102,8 @@ public class LogServiceImpl implements LogService {
     public List<LogEntryResponse> getAllLogEntries() {
         log.info("Fetching all log entries");
 
-        List<LogEntry> entries = logRepository.findAll();
+        // [FIX] findAll() -> findAllByOrderByCreatedAtDesc()로 변경하여 최신순 정렬 보장
+        List<LogEntry> entries = logRepository.findAllByOrderByCreatedAtDesc();
 
         return entries.stream()
                 .map(LogEntryResponse::from)
