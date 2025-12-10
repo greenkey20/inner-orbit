@@ -221,25 +221,27 @@ export function calculateResilienceIndex(entries) {
         return { avgRecoveryDays: null, recoveryCount: 0, trend: null };
     }
 
-    // 날짜순으로 정렬 (id가 timestamp이므로 id순 정렬)
-    const sorted = [...entries].sort((a, b) => a.id - b.id);
+    // [FIX 1] 정렬 기준 변경: id가 아닌 실제 날짜 객체로 정렬
+    const sorted = [...entries].sort((a, b) => new Date(a.date) - new Date(b.date));
 
     const recoveryPeriods = [];
-    let lowPointId = null;
+    let lowPointTime = null; // ID 대신 시간을 저장
 
     for (let i = 0; i < sorted.length; i++) {
         const entry = sorted[i];
+        const entryTime = new Date(entry.date).getTime(); // 밀리초 변환
 
         // 저점 감지 (Stability <= 30)
-        if (entry.stability <= 30 && lowPointId === null) {
-            lowPointId = entry.id;
+        if (entry.stability <= 30 && lowPointTime === null) {
+            lowPointTime = entryTime;
         }
 
         // 회복 감지 (Stability >= 50)
-        if (lowPointId !== null && entry.stability >= 50) {
-            const recoveryDays = (entry.id - lowPointId) / (1000 * 60 * 60 * 24); // ms to days
+        if (lowPointTime !== null && entry.stability >= 50) {
+            // [FIX 2] 계산 로직 변경: 시간 차이 계산
+            const recoveryDays = (entryTime - lowPointTime) / (1000 * 60 * 60 * 24); // ms to days
             recoveryPeriods.push(recoveryDays);
-            lowPointId = null;
+            lowPointTime = null;
         }
     }
 
