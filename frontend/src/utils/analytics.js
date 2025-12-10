@@ -221,15 +221,16 @@ export function calculateResilienceIndex(entries) {
         return { avgRecoveryDays: null, recoveryCount: 0, trend: null };
     }
 
-    // [FIX 1] 정렬 기준 변경: id가 아닌 실제 날짜 객체로 정렬
-    const sorted = [...entries].sort((a, b) => new Date(a.date) - new Date(b.date));
+   // [FIX 1] 정렬 기준 변경: 헬퍼 함수(한글 날짜 포맷을 브라우저가 이해할 수 있는 표준 포맷(YYYY-MM-DDTHH:mm:ss)으로 변환해주는 유틸리티 함수) 사용
+    const sorted = [...entries].sort((a, b) => parseKoreanDate(a.date) - parseKoreanDate(b.date));
 
     const recoveryPeriods = [];
     let lowPointTime = null; // ID 대신 시간을 저장
 
     for (let i = 0; i < sorted.length; i++) {
         const entry = sorted[i];
-        const entryTime = new Date(entry.date).getTime(); // 밀리초 변환
+        // [FIX 2] 시간 변환: 헬퍼 함수 사용
+        const entryTime = parseKoreanDate(entry.date).getTime();
 
         // 저점 감지 (Stability <= 30)
         if (entry.stability <= 30 && lowPointTime === null) {
@@ -240,7 +241,12 @@ export function calculateResilienceIndex(entries) {
         if (lowPointTime !== null && entry.stability >= 50) {
             // [FIX 2] 계산 로직 변경: 시간 차이 계산
             const recoveryDays = (entryTime - lowPointTime) / (1000 * 60 * 60 * 24); // ms to days
-            recoveryPeriods.push(recoveryDays);
+
+            // [안전장치] 혹시라도 음수나 말도 안 되는 값이 나오면 무시 (0.001일 이상만 인정)
+            if (recoveryDays > 0.0001) {
+                recoveryPeriods.push(recoveryDays);
+            }
+
             lowPointTime = null;
         }
     }
