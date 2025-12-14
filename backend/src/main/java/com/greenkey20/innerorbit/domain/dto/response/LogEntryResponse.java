@@ -30,6 +30,11 @@ public class LogEntryResponse {
     private LocalDateTime updatedAt;
 
     private Map<String, Object> analysisResult;
+    private String location;
+    private String sensoryVisual;
+    private String sensoryAuditory;
+    private String sensoryTactile;
+    private Boolean isDeepLog;
 
     /**
      * Entity -> DTO 변환 메서드
@@ -43,6 +48,11 @@ public class LogEntryResponse {
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .analysisResult(entity.getAnalysisResult())
+                .location(entity.getLocation())
+                .sensoryVisual(entity.getSensoryVisual())
+                .sensoryAuditory(entity.getSensoryAuditory())
+                .sensoryTactile(entity.getSensoryTactile())
+                .isDeepLog(entity.getIsDeepLog())
                 .build();
     }
 }
