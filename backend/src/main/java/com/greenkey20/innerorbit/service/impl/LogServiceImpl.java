@@ -51,6 +51,11 @@ public class LogServiceImpl implements LogService {
                 .content(request.getContent())
                 .stability(request.getStability())
                 .gravity(request.getGravity())
+                .location(request.getLocation())
+                .sensoryVisual(request.getSensoryVisual())
+                .sensoryAuditory(request.getSensoryAuditory())
+                .sensoryTactile(request.getSensoryTactile())
+                .isDeepLog(request.getIsDeepLog() != null ? request.getIsDeepLog() : false)
                 .build();
 
         // 4. 엔티티 저장 (createdAt은 @PrePersist에서 자동 설정)
