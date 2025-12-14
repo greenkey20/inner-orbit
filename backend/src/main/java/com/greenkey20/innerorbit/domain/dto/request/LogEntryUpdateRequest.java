@@ -26,4 +26,18 @@ public class LogEntryUpdateRequest {
     @Min(value = 0, message = "그리움 강도는 0 이상이어야 합니다")
     @Max(value = 100, message = "그리움 강도는 100 이하여야 합니다")
     private Integer gravity;
+
+    @Size(max = 500, message = "위치는 500자를 초과할 수 없습니다")
+    private String location;
+
+    @Size(max = 10000, message = "시각 정보는 10000자를 초과할 수 없습니다")
+    private String sensoryVisual;
+
+    @Size(max = 10000, message = "청각 정보는 10000자를 초과할 수 없습니다")
+    private String sensoryAuditory;
+
+    @Size(max = 10000, message = "촉각 정보는 10000자를 초과할 수 없습니다")
+    private String sensoryTactile;
+
+    private Boolean isDeepLog;
 }
