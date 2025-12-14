@@ -44,7 +44,7 @@ public class LogEntry {
     private LocalDateTime updatedAt;
 
     @Type(JsonBinaryType.class)
-    @Column(name = "analysis_result", columnDefinition = "jsonb")
+    @Column(name = "analysis_result", columnDefinition = "TEXT")
     private Map<String, Object> analysisResult;
 
     @Column(name = "user_id")
