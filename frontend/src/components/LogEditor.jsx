@@ -34,7 +34,9 @@ const ToggleSwitch = ({ enabled, onToggle, label, className = "" }) => {
                     }`}
                 />
             </button>
-            <span className="text-sm font-medium text-slate-700">{label}</span>
+            <span className={`text-sm font-medium transition-colors duration-200 ${
+                enabled ? 'text-lime-600' : 'text-slate-700'
+            }`}>{label}</span>
         </div>
     );
 };
@@ -81,26 +83,11 @@ export default function LogEditor({
         }
     };
 
-    const isSubmitDisabled = isTravelMode 
+    const isSubmitDisabled = isTravelMode
         ? !message.trim() && !deepLogData.location && !deepLogData.sensoryVisual && !deepLogData.sensoryAuditory && !deepLogData.sensoryTactile
         : !message.trim();
     return (
         <>
-            {/* Travel Mode Toggle */}
-            <section className="mb-6">
-                <div className="bg-gradient-to-r from-lime-50 to-emerald-50 rounded-xl p-4 border border-lime-200">
-                    <ToggleSwitch
-                        enabled={isTravelMode}
-                        onToggle={() => setIsTravelMode(!isTravelMode)}
-                        label="Travel Mode (Deep Log)"
-                        className="justify-center"
-                    />
-                    <p className="text-xs text-slate-500 text-center mt-2">
-                        {isTravelMode ? '여행 중 감각적 경험을 상세히 기록합니다' : '일상적인 감정 로그를 작성합니다'}
-                    </p>
-                </div>
-            </section>
-
             <section className="space-y-4">
                 <div className="flex justify-between items-end px-1">
                     <label className="text-xs font-bold text-slate-500 uppercase flex items-center gap-2 tracking-wider">
@@ -198,6 +185,20 @@ export default function LogEditor({
                     </div>
                 )}
             </section>
+
+            {/* Travel Mode Toggle */}
+            <div className="flex flex-col items-center justify-center my-6">
+                <ToggleSwitch
+                    enabled={isTravelMode}
+                    onToggle={() => setIsTravelMode(!isTravelMode)}
+                    label="Travel Mode (Deep Log)"
+                />
+                <p className={`text-xs text-center mt-2 transition-colors duration-200 ${
+                    isTravelMode ? 'text-lime-600 font-medium' : 'text-slate-500'
+                }`}>
+                    {isTravelMode ? '여행 중 감각적 경험을 상세히 기록합니다' : '일상적인 감정 로그를 작성합니다'}
+                </p>
+            </div>
 
             <Button
                 onClick={handleSubmitWithDeepLog}
