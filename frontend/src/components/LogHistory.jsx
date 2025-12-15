@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Calendar, Trash2, Download, Upload, AlertCircle, Hexagon, Pencil, Check, X, Zap, Shield, Sparkles } from 'lucide-react';
+import { Calendar, Trash2, Download, Upload, AlertCircle, Hexagon, Pencil, Check, X, Zap, Shield, Sparkles, MapPin, Eye, Ear, Hand } from 'lucide-react';
 
 // UI 컴포넌트: 카드
 const Card = ({ children, className = "" }) => (
@@ -248,6 +248,62 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                     </div>
                                 )}
                             </div>
+
+                            {/* Deep Log Data - 감각 정보 표시 */}
+                            {!isEditing && entry.isDeepLog && (entry.location || entry.sensoryVisual || entry.sensoryAuditory || entry.sensoryTactile) && (
+                                <div className="mb-5 p-4 bg-gradient-to-r from-lime-50 to-emerald-50 rounded-xl border border-lime-200">
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <span className="text-xs font-bold text-lime-800 uppercase tracking-wider">✈️ Deep Travel Log</span>
+                                    </div>
+
+                                    {/* Location */}
+                                    {entry.location && (
+                                        <div className="mb-3 flex items-start gap-2">
+                                            <MapPin className="w-4 h-4 text-lime-600 mt-0.5 flex-shrink-0" />
+                                            <div>
+                                                <span className="text-xs font-bold text-slate-700 block mb-1">Location</span>
+                                                <span className="text-sm text-slate-600">{entry.location}</span>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Sensory Grid */}
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                        {/* Visual */}
+                                        {entry.sensoryVisual && (
+                                            <div className="flex items-start gap-2">
+                                                <Eye className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+                                                <div>
+                                                    <span className="text-xs font-bold text-slate-700 block mb-1">보이는 것</span>
+                                                    <span className="text-sm text-slate-600">{entry.sensoryVisual}</span>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Auditory */}
+                                        {entry.sensoryAuditory && (
+                                            <div className="flex items-start gap-2">
+                                                <Ear className="w-4 h-4 text-lime-600 mt-0.5 flex-shrink-0" />
+                                                <div>
+                                                    <span className="text-xs font-bold text-slate-700 block mb-1">들리는 것</span>
+                                                    <span className="text-sm text-slate-600">{entry.sensoryAuditory}</span>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Tactile */}
+                                        {entry.sensoryTactile && (
+                                            <div className="flex items-start gap-2">
+                                                <Hand className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                                                <div>
+                                                    <span className="text-xs font-bold text-slate-700 block mb-1">느껴지는 것</span>
+                                                    <span className="text-sm text-slate-600">{entry.sensoryTactile}</span>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Metrics: Gravity and Stability */}
                             {isEditing ? (

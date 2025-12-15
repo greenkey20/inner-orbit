@@ -25,6 +25,13 @@ export default function useInnerOrbit() {
     const [promptIndex, setPromptIndex] = useState(0);
     const [showPrompt, setShowPrompt] = useState(true);
     const [isHeaderExpanded, setIsHeaderExpanded] = useState(true);
+    const [deepLogData, setDeepLogData] = useState({
+        location: '',
+        sensoryVisual: '',
+        sensoryAuditory: '',
+        sensoryTactile: '',
+        isDeepLog: false
+    });
     const fileInputRef = useRef(null);
 
     // ===== 백엔드에서 로그 불러오기 =====
@@ -42,7 +49,13 @@ export default function useInnerOrbit() {
                         stability: log.stability,
                         gravity: log.gravity,
                         updatedAt: log.updatedAt,
-                        analysis: log.analysisResult
+                        analysis: log.analysisResult,
+                        // Deep Log 필드 추가
+                        location: log.location,
+                        sensoryVisual: log.sensoryVisual,
+                        sensoryAuditory: log.sensoryAuditory,
+                        sensoryTactile: log.sensoryTactile,
+                        isDeepLog: log.isDeepLog || false
                     }));
                     setEntries(formattedEntries);
                 }
@@ -58,21 +71,49 @@ export default function useInnerOrbit() {
 
     /**
      * 새 로그 엔트리를 생성하고 백엔드에 저장
+     * @param {Object} customLogData - (선택) Deep Log 데이터가 포함된 커스텀 로그 데이터
      */
-    const handleSubmit = async () => {
-        if (!message.trim()) return;
+    const handleSubmit = async (customLogData = null) => {
+        // Deep Log 모드인 경우 customLogData 사용, 아니면 기본 message 체크
+        const isDeepLogSubmission = customLogData && customLogData.isDeepLog;
+        const hasContent = isDeepLogSubmission 
+            ? (customLogData.content?.trim() || customLogData.location?.trim() || 
+               customLogData.sensoryVisual?.trim() || customLogData.sensoryAuditory?.trim() || 
+               customLogData.sensoryTactile?.trim())
+            : message.trim();
+
+        if (!hasContent) return;
 
         try {
+            // 요청 데이터 구성
+            const requestData = isDeepLogSubmission 
+                ? {
+                    content: customLogData.content || '',
+                    stability: stability,
+                    gravity: gravity,
+                    location: customLogData.location || null,
+                    sensoryVisual: customLogData.sensoryVisual || null,
+                    sensoryAuditory: customLogData.sensoryAuditory || null,
+                    sensoryTactile: customLogData.sensoryTactile || null,
+                    isDeepLog: true
+                }
+                : {
+                    content: message,
+                    stability: stability,
+                    gravity: gravity,
+                    location: null,
+                    sensoryVisual: null,
+                    sensoryAuditory: null,
+                    sensoryTactile: null,
+                    isDeepLog: false
+                };
+
             const response = await fetch('/api/logs', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    content: message,
-                    stability: stability,
-                    gravity: gravity
-                })
+                body: JSON.stringify(requestData)
             });
 
             if (response.ok) {
@@ -84,11 +125,27 @@ export default function useInnerOrbit() {
                     content: newLog.content,
                     stability: newLog.stability,
                     gravity: newLog.gravity,
-                    analysis: newLog.analysisResult
+                    analysis: newLog.analysisResult,
+                    // Deep Log 필드 추가
+                    location: newLog.location,
+                    sensoryVisual: newLog.sensoryVisual,
+                    sensoryAuditory: newLog.sensoryAuditory,
+                    sensoryTactile: newLog.sensoryTactile,
+                    isDeepLog: newLog.isDeepLog || false
                 };
 
                 setEntries([newEntry, ...entries]);
                 setMessage("");
+                // Deep Log 데이터 초기화
+                if (isDeepLogSubmission) {
+                    setDeepLogData({
+                        location: '',
+                        sensoryVisual: '',
+                        sensoryAuditory: '',
+                        sensoryTactile: '',
+                        isDeepLog: false
+                    });
+                }
                 setView('history');
             } else {
                 console.error('Failed to save log');
@@ -222,6 +279,7 @@ export default function useInnerOrbit() {
         showPrompt,
         isHeaderExpanded,
         prompts: PROMPTS,
+        deepLogData,
 
         // Setters
         setMessage,
@@ -231,6 +289,7 @@ export default function useInnerOrbit() {
         setPromptIndex,
         setShowPrompt,
         setIsHeaderExpanded,
+        setDeepLogData,
 
         // Actions
         handleSubmit,
