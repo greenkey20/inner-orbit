@@ -124,14 +124,32 @@ public class AiServiceImpl implements AiService {
                 Return ONLY the question, without any prefix or explanation.
                 """.formatted(gravity, stability);
 
+        // User message variations (#32 - 다양성 증가)
+        String[] userMessageVariations = {
+                "Generate a thoughtful question for this user's current state.",
+                "Create an insightful journaling prompt based on their emotional metrics.",
+                "Craft a reflective question that helps them explore their current feelings.",
+                "Ask a question that encourages self-awareness and emotional processing.",
+                "Formulate a question that invites deeper introspection about their state."
+        };
+
+        // 랜덤하게 user message 선택
+        String userMessage = userMessageVariations[(int) (Math.random() * userMessageVariations.length)];
+        log.debug("Selected user message variation: {}", userMessage);
+
         try {
             // ChatClient를 사용하여 OpenAI API 호출
-            ChatClient chatClient = chatClientBuilder.build();
+            // Temperature 0.9로 설정하여 더 창의적이고 다양한 질문 생성 (#33)
+            ChatClient chatClient = chatClientBuilder
+                    .defaultOptions(OpenAiChatOptions.builder()
+                            .withTemperature(0.9)
+                            .build())
+                    .build();
 
             // 프롬프트 실행 및 문자열 결과 반환
             String prompt = chatClient.prompt()
                     .system(systemPrompt)
-                    .user("Generate a thoughtful question for this user's current state.")
+                    .user(userMessage)
                     .call()
                     .content();
 
