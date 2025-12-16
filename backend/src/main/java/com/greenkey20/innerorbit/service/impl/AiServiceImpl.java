@@ -155,7 +155,48 @@ public class AiServiceImpl implements AiService {
                 - Keep it concise (max 2 sentences)
                 - Write in Korean
                 - Focus on empowerment, not judgment
-                - Vary your question style (open-ended, specific, metaphorical, action-oriented)
+
+                Question Style Variations (#31 - Expanded categories):
+
+                A. TIME PERSPECTIVE:
+                   - Past-reflective: "지난 일주일 동안 어떤 순간이 가장 의미 있었나요?"
+                   - Present-focused: "지금 이 순간, 당신의 몸은 무엇을 말하고 있나요?"
+                   - Future-oriented: "내일의 당신에게 어떤 선물을 주고 싶나요?"
+
+                B. QUESTION LENGTH & TONE:
+                   - Short & punchy: "지금 필요한 건 뭐예요?"
+                   - Deep & contemplative: "당신의 내면에서 가장 조용한 목소리는 무엇을 속삭이나요?"
+
+                C. ENGAGEMENT TYPE:
+                   - Open-ended exploration: "이 감정이 당신에게 전하려는 메시지는 무엇일까요?"
+                   - Specific action: "오늘 자신에게 줄 수 있는 작은 친절은 무엇인가요?"
+                   - Binary choice: "지금 더 필요한 건 쉼인가요, 아니면 움직임인가요?"
+                   - Metaphorical: "만약 지금 감정이 날씨라면, 어떤 하늘인가요?"
+                   - Somatic/embodied: "긴장이 몸 어디에 머물러 있나요?"
+
+                D. COGNITIVE LEVEL:
+                   - Feeling-based: "지금 가슴속 가장 큰 감정은 무엇인가요?"
+                   - Thought-based: "이 상황에 대한 당신의 해석은 도움이 되고 있나요?"
+                   - Value-based: "지금 이 선택이 당신의 어떤 가치와 연결되어 있나요?"
+                   - Pattern-recognition: "이런 느낌, 전에도 경험한 적 있나요?"
+
+                E. RELATIONAL PERSPECTIVE:
+                   - Self-to-self: "지금 당신의 어떤 부분이 위로가 필요한가요?"
+                   - Self-to-others: "누구에게 이 이야기를 나누고 싶나요?"
+                   - Self-to-world: "이 경험이 세상을 보는 당신의 시각을 어떻게 바꾸고 있나요?"
+
+                F. RESPONSE FORMAT:
+                   - Narrative invitation: "이 순간을 한 문장으로 표현한다면?"
+                   - Sensation focus: "지금 느껴지는 감각을 세 단어로 말한다면?"
+                   - Gratitude angle: "어려움 속에서도 감사할 수 있는 건 무엇인가요?"
+                   - Strength mining: "이 상황을 견디게 하는 당신의 힘은 어디서 오나요?"
+
+                IMPORTANT:
+                - Randomly vary your style across these categories
+                - Mix different approaches (e.g., future-oriented + metaphorical)
+                - Avoid repetitive sentence patterns
+                - Sometimes be poetic, sometimes be direct
+                - Match the emotional intensity to their state
 
                 Return ONLY the question, without any prefix or explanation.
                 """.formatted(gravity, stability);
