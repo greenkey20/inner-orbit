@@ -158,45 +158,65 @@ public class AiServiceImpl implements AiService {
 
                 Question Style Variations (#31 - Expanded categories):
 
-                A. TIME PERSPECTIVE:
-                   - Past-reflective: "지난 일주일 동안 어떤 순간이 가장 의미 있었나요?"
-                   - Present-focused: "지금 이 순간, 당신의 몸은 무엇을 말하고 있나요?"
-                   - Future-oriented: "내일의 당신에게 어떤 선물을 주고 싶나요?"
+                A. TIME PERSPECTIVE (MUST vary - do NOT always use present tense):
+                   - Past-reflective: "어제의 당신은 무엇을 배웠나요?", "최근 당신을 웃게 만든 순간은?"
+                   - Present-focused: "이 순간 몸이 말하는 건?", "지금 당신 안에 있는 건 뭐예요?"
+                   - Future-oriented: "내일 아침, 어떤 기분으로 눈뜨고 싶어요?", "한 달 후 당신은 무엇을 후회하지 않을까요?"
 
-                B. QUESTION LENGTH & TONE:
-                   - Short & punchy: "지금 필요한 건 뭐예요?"
-                   - Deep & contemplative: "당신의 내면에서 가장 조용한 목소리는 무엇을 속삭이나요?"
+                B. QUESTION LENGTH & TONE (Alternate between styles):
+                   - Short & punchy: "필요한 건?", "버틸 수 있어요?", "뭐가 두려워요?"
+                   - Deep & contemplative: "내면의 목소리가 속삭이는 말은 무엇인가요?", "당신의 마음이 진정으로 원하는 것은 무엇일까요?"
 
-                C. ENGAGEMENT TYPE:
-                   - Open-ended exploration: "이 감정이 당신에게 전하려는 메시지는 무엇일까요?"
-                   - Specific action: "오늘 자신에게 줄 수 있는 작은 친절은 무엇인가요?"
-                   - Binary choice: "지금 더 필요한 건 쉼인가요, 아니면 움직임인가요?"
-                   - Metaphorical: "만약 지금 감정이 날씨라면, 어떤 하늘인가요?"
-                   - Somatic/embodied: "긴장이 몸 어디에 머물러 있나요?"
+                C. ENGAGEMENT TYPE (Rotate through different types):
+                   - Open-ended: "이 감정이 전하는 메시지는?", "무엇이 당신을 이렇게 만들었나요?"
+                   - Specific action: "내일 아침 첫 번째로 할 행동은?", "오늘 자신에게 줄 선물은?"
+                   - Binary choice: "쉼 vs 움직임, 무엇이 필요해요?", "혼자 vs 함께, 어느 쪽인가요?"
+                   - Metaphorical: "당신의 감정을 색깔로 표현한다면?", "마음이 어떤 계절인가요?"
+                   - Somatic: "몸 어디가 말하고 있나요?", "숨은 어떻게 흐르나요?"
 
-                D. COGNITIVE LEVEL:
-                   - Feeling-based: "지금 가슴속 가장 큰 감정은 무엇인가요?"
-                   - Thought-based: "이 상황에 대한 당신의 해석은 도움이 되고 있나요?"
-                   - Value-based: "지금 이 선택이 당신의 어떤 가치와 연결되어 있나요?"
-                   - Pattern-recognition: "이런 느낌, 전에도 경험한 적 있나요?"
+                D. COGNITIVE LEVEL (Balance different levels):
+                   - Feeling-based: "가슴이 말하는 건?", "어떤 감정이 가장 크게 느껴져요?"
+                   - Thought-based: "이 생각이 도움이 되나요?", "당신의 해석은 진실에 가까울까요?"
+                   - Value-based: "무엇이 정말 중요한가요?", "이 선택이 당신다운 건가요?"
+                   - Pattern-recognition: "익숙한 패턴이 보이나요?", "과거에도 이랬나요?"
 
-                E. RELATIONAL PERSPECTIVE:
-                   - Self-to-self: "지금 당신의 어떤 부분이 위로가 필요한가요?"
-                   - Self-to-others: "누구에게 이 이야기를 나누고 싶나요?"
-                   - Self-to-world: "이 경험이 세상을 보는 당신의 시각을 어떻게 바꾸고 있나요?"
+                E. RELATIONAL PERSPECTIVE (Vary the perspective):
+                   - Self-to-self: "내면의 어느 부분이 위로를 원하나요?", "자신에게 해주고 싶은 말은?"
+                   - Self-to-others: "누구의 목소리가 듣고 싶나요?", "나눔이 필요한 순간인가요?"
+                   - Self-to-world: "세상이 다르게 보이나요?", "이 경험이 당신을 어떻게 바꾸나요?"
 
-                F. RESPONSE FORMAT:
-                   - Narrative invitation: "이 순간을 한 문장으로 표현한다면?"
-                   - Sensation focus: "지금 느껴지는 감각을 세 단어로 말한다면?"
-                   - Gratitude angle: "어려움 속에서도 감사할 수 있는 건 무엇인가요?"
-                   - Strength mining: "이 상황을 견디게 하는 당신의 힘은 어디서 오나요?"
+                F. RESPONSE FORMAT (Mix formats freely):
+                   - Narrative: "한 문장으로 표현한다면?", "제목을 붙인다면?"
+                   - Sensation: "세 단어로 말한다면?", "몸의 언어는?"
+                   - Gratitude: "감사할 지점은?", "빛나는 순간이 있었나요?"
+                   - Strength: "당신을 버티게 하는 건?", "어디서 힘이 나오나요?"
 
-                IMPORTANT:
-                - Randomly vary your style across these categories
-                - Mix different approaches (e.g., future-oriented + metaphorical)
-                - Avoid repetitive sentence patterns
-                - Sometimes be poetic, sometimes be direct
-                - Match the emotional intensity to their state
+                CRITICAL INSTRUCTIONS - READ CAREFULLY:
+
+                1. DO NOT START EVERY QUESTION WITH "지금 이 순간"
+                2. DO NOT REPEAT THE SAME SENTENCE STRUCTURE (like "~나요?" pattern)
+                3. RANDOMLY PICK from different TIME PERSPECTIVES (past/present/future)
+                4. RANDOMLY PICK from different QUESTION LENGTHS (short punchy vs deep)
+                5. RANDOMLY PICK from different ENGAGEMENT TYPES
+                6. MIX AND MATCH categories (e.g., "past + metaphorical", "future + binary choice")
+                7. VARY the question ending patterns:
+                   - Use "~요?", "~까요?", "~나요?", "~어요?", "~인가요?" interchangeably
+                   - Sometimes end without question mark (invitation style)
+                   - Use imperative mood occasionally: "말해보세요", "떠올려보세요"
+                8. ALTERNATE between formal/informal tone
+                9. Some questions should be ONE word: "필요한 건?", "두려운 건?"
+                10. Some questions should be poetic and metaphorical
+                11. NEVER generate similar questions twice in a row
+                12. Match emotional intensity to the user's specific situation (from 9 categories above)
+
+                EXAMPLES OF DIVERSE QUESTIONS:
+                - "버틸 수 있어요?" (short, direct, present)
+                - "내일 아침, 무엇이 달라져 있을까요?" (future-oriented)
+                - "어제의 당신에게 편지를 쓴다면?" (past-reflective, metaphorical)
+                - "감정을 색으로 표현한다면?" (metaphorical, short)
+                - "쉼 vs 움직임?" (binary, ultra-short)
+                - "최근 웃었던 순간이 떠오르나요?" (past, gentle)
+                - "당신다운 선택은 뭐예요?" (value-based, direct)
 
                 Return ONLY the question, without any prefix or explanation.
                 """.formatted(gravity, stability);
