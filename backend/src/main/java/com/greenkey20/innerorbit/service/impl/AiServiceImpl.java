@@ -142,7 +142,7 @@ public class AiServiceImpl implements AiService {
             // Temperature 0.9로 설정하여 더 창의적이고 다양한 질문 생성 (#33)
             ChatClient chatClient = chatClientBuilder
                     .defaultOptions(OpenAiChatOptions.builder()
-                            .withTemperature(0.9)
+                            .temperature(0.9)
                             .build())
                     .build();
 
