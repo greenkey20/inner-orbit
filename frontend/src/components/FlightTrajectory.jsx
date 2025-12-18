@@ -10,7 +10,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 export default function FlightTrajectory({ entries }) {
     // 데이터 변환: entries를 recharts 형식으로 변환
     const chartData = entries.map(entry => ({
-        timestamp: entry.id, // Unix timestamp (밀리초)
+        timestamp: new Date(entry.date).getTime(), // 실제 날짜를 밀리초 타임스탬프로 변환
         gravity: entry.gravity ?? 0,
         stability: entry.stability ?? 0,
         date: entry.date, // 툴팁용
@@ -42,6 +42,16 @@ export default function FlightTrajectory({ entries }) {
     // X축 포맷터 (타임스탬프 -> 날짜)
     const formatXAxis = (timestamp) => {
         const date = new Date(timestamp);
+        const now = new Date();
+
+        // 데이터의 연도 범위 확인
+        const dataYears = [...new Set(chartData.map(d => new Date(d.timestamp).getFullYear()))];
+
+        // 데이터가 여러 해에 걸쳐 있거나 현재 연도가 아니면 연도 포함
+        if (dataYears.length > 1 || !dataYears.includes(now.getFullYear())) {
+            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        }
+        // 같은 연도면 월/일만 표시
         return `${date.getMonth() + 1}/${date.getDate()}`;
     };
 
@@ -79,11 +89,13 @@ export default function FlightTrajectory({ entries }) {
                         tickFormatter={formatXAxis}
                         stroke="#94a3b8"
                         style={{ fontSize: '11px' }}
+                        tickCount={Math.min(chartData.length, 8)}
                     />
                     <YAxis
                         domain={[0, 100]}
                         stroke="#94a3b8"
                         style={{ fontSize: '11px' }}
+                        tickFormatter={(value) => `${value}%`}
                     />
                     <Tooltip content={<CustomTooltip />} />
                     <Legend
