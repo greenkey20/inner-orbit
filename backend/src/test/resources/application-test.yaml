@@ -1,0 +1,29 @@
+# Test environment configuration
+# Overrides main application.yaml for integration tests
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop  # H2 tests use auto-schema generation
+    show-sql: true
+
+  flyway:
+    enabled: false  # Disable Flyway for H2 tests
+
+  ai:
+    openai:
+      api-key: test-key
+      chat:
+        options:
+          model: gpt-4o-mini
+
+logging:
+  level:
+    com.greenkey20.innerorbit: DEBUG

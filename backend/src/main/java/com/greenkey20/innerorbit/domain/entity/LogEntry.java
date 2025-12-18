@@ -44,11 +44,27 @@ public class LogEntry {
     private LocalDateTime updatedAt;
 
     @Type(JsonBinaryType.class)
-    @Column(name = "analysis_result", columnDefinition = "jsonb")
+    @Column(name = "analysis_result", columnDefinition = "TEXT")
     private Map<String, Object> analysisResult;
 
     @Column(name = "user_id")
     private Long userId;
+
+    @Column(length = 500)
+    private String location;
+
+    @Column(name = "sensory_visual", columnDefinition = "TEXT")
+    private String sensoryVisual;
+
+    @Column(name = "sensory_auditory", columnDefinition = "TEXT")
+    private String sensoryAuditory;
+
+    @Column(name = "sensory_tactile", columnDefinition = "TEXT")
+    private String sensoryTactile;
+
+    @Column(name = "is_deep_log", nullable = false)
+    @Builder.Default
+    private Boolean isDeepLog = false;
 
     @PrePersist
     protected void onCreate() {

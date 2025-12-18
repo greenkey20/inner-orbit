@@ -26,6 +26,7 @@ export default function App() {
     showPrompt,
     isHeaderExpanded,
     prompts,
+    deepLogData,
 
     // Setters
     setMessage,
@@ -35,6 +36,7 @@ export default function App() {
     setPromptIndex,
     setShowPrompt,
     setIsHeaderExpanded,
+    setDeepLogData,
 
     // Actions
     handleSubmit,
@@ -118,6 +120,8 @@ export default function App() {
                 onSubmit={handleSubmit}
                 showPrompt={showPrompt}
                 onShowPrompt={setShowPrompt}
+                deepLogData={deepLogData}
+                onDeepLogChange={setDeepLogData}
               />
 
               <TelemetryGuide />

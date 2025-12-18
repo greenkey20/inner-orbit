@@ -127,3 +127,6 @@ docker-compose.override.yml
 *.sqlite
 postgres_data/
 mysql_data/
+
+#[예외] Flyway 마이그레이션 파일은 포함해야 함 (버전 관리 필요)
+!backend/src/main/resources/db/migration/*.sql

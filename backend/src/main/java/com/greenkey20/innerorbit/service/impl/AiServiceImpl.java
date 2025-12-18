@@ -100,38 +100,300 @@ public class AiServiceImpl implements AiService {
         }
     }
 
+    /**
+     * Gravity/Stability 값으로 사용자의 현재 상황을 9개 카테고리 중 하나로 판단
+     */
+    private String determineSituation(Integer gravity, Integer stability) {
+        if (gravity > 67 && stability < 34) return "CRISIS";
+        if (gravity > 67 && stability >= 34 && stability <= 66) return "OVERWHELMED";
+        if (gravity > 67 && stability > 66) return "RESILIENT_UNDER_PRESSURE";
+        if (gravity >= 34 && gravity <= 66 && stability < 34) return "UNSTABLE";
+        if (gravity >= 34 && gravity <= 66 && stability >= 34 && stability <= 66) return "BALANCED";
+        if (gravity >= 34 && gravity <= 66 && stability > 66) return "GROWING";
+        if (gravity < 34 && stability < 34) return "SELF_DOUBT";
+        if (gravity < 34 && stability >= 34 && stability <= 66) return "REFLECTIVE";
+        if (gravity < 34 && stability > 66) return "THRIVING";
+        return "BALANCED"; // fallback
+    }
+
+    /**
+     * 상황별 맞춤 시스템 프롬프트 생성 (옵션 A: 구조화된 접근)
+     */
+    private String buildPromptForSituation(String situation, Integer gravity, Integer stability) {
+        return switch(situation) {
+            case "CRISIS" -> """
+                    You are 'Inner Orbit Mission Control'.
+
+                    User State: Gravity %d%%, Stability %d%% (HIGH PRESSURE + LOW STABILITY = CRISIS)
+
+                    Focus: Immediate coping strategies and finding small moments of relief or support.
+
+                    Example question styles (generate similar but DIFFERENT questions):
+                    - "버틸 수 있어요?" (ultra-short)
+                    - "도움 필요해?" (ultra-short, informal)
+                    - "숨 쉴 공간은?" (ultra-short, metaphorical)
+                    - "누가 도와줄 수 있어요?" (relational, direct)
+                    - "안전한 곳은 어디예요?" (somatic, place)
+                    - "5분만 쉴 수 있나요?" (time-specific, near-future)
+                    - "방금 전엔 괜찮았어요?" (past, checking)
+                    - "쉼 vs 도움?" (binary, ultra-short)
+
+                    CRITICAL:
+                    - NO "지금", "현재", "이 순간" - keep it ultra-short
+                    - URGENT tone, not reflective
+                    - Most questions should be 2-5 words
+                    - Vary: ultra-short / informal / binary / time-specific
+                    - Write in Korean
+                    - Return ONLY the question
+                    """.formatted(gravity, stability);
+
+            case "OVERWHELMED" -> """
+                    You are 'Inner Orbit Mission Control'.
+
+                    User State: Gravity %d%%, Stability %d%% (HIGH PRESSURE + MEDIUM STABILITY = OVERWHELMED)
+
+                    Focus: Boundary-setting, pressure management, and what's helping them maintain resilience.
+
+                    Example question styles (generate similar but DIFFERENT questions):
+                    - "아니오라고 할 수 있는 건?" (boundary, direct)
+                    - "내려놓을 수 있는 건?" (action, short)
+                    - "압박 vs 휴식?" (binary, ultra-short)
+                    - "어떤 경계가 필요해요?" (boundary, direct)
+                    - "오늘 무엇을 거절할 수 있어요?" (future, action)
+                    - "당신을 버티게 하는 건?" (strength, short)
+                    - "이번 주, 무엇을 줄일까요?" (near-future, specific)
+                    - "스스로를 지키려면?" (self-protection, action)
+
+                    CRITICAL:
+                    - AVOID "지금", "현재" - use "오늘", "이번 주" instead
+                    - Focus on ACTION and CONTROL
+                    - Keep questions SHORT (3-7 words)
+                    - Mix binary / action / boundary setting
+                    - Write in Korean
+                    - Return ONLY the question
+                    """.formatted(gravity, stability);
+
+            case "RESILIENT_UNDER_PRESSURE" -> """
+                    You are 'Inner Orbit Mission Control'.
+
+                    User State: Gravity %d%%, Stability %d%% (HIGH PRESSURE + HIGH STABILITY = RESILIENT)
+
+                    Focus: Strength sources, how they maintain balance, and successful coping patterns.
+
+                    Example question styles (generate similar but DIFFERENT questions):
+                    - "힘의 원천은?" (ultra-short, strength)
+                    - "어떻게 버텨왔어요?" (past, coping)
+                    - "균형의 비결은?" (short, pattern)
+                    - "내일도 버틸 수 있으려면?" (future, sustaining)
+                    - "이 강인함, 어디서 배웠어요?" (past, growth)
+                    - "나누고 싶은 지혜는?" (relational, short)
+                    - "중심을 잡게 하는 건?" (strength, direct)
+                    - "압박 속 평온, 비결은?" (paradox, short)
+
+                    CRITICAL:
+                    - CELEBRATE strength while acknowledging pressure
+                    - AVOID "지금" - use past ("어떻게~왔어요") or future ("~려면")
+                    - Mix SHORT questions and slightly longer reflective ones
+                    - Write in Korean
+                    - Return ONLY the question
+                    """.formatted(gravity, stability);
+
+            case "UNSTABLE" -> """
+                    You are 'Inner Orbit Mission Control'.
+
+                    User State: Gravity %d%%, Stability %d%% (MEDIUM PRESSURE + LOW STABILITY = UNSTABLE)
+
+                    Focus: Grounding techniques, emotional regulation, building inner security and self-compassion.
+
+                    Example question styles (generate similar but DIFFERENT questions):
+                    - "발바닥 느껴져요?" (somatic, ultra-short)
+                    - "숨은 어떻게 흐르나요?" (somatic, breathing)
+                    - "몸 어디가 편안해요?" (somatic, safe spot)
+                    - "안전했던 순간은?" (past, safe memory)
+                    - "자신에게 해줄 말은?" (self-compassion, short)
+                    - "감정의 파도, 어디쯤 왔어요?" (metaphorical, present)
+                    - "땅에 닿는 느낌은?" (grounding, somatic)
+                    - "안정 vs 흔들림?" (binary, sensation)
+
+                    CRITICAL:
+                    - AVOID "지금" - use somatic present ("느껴져요?", "흐르나요?")
+                    - Focus on BODY sensations, not "감정은 무엇"
+                    - Keep it GENTLE and SHORT
+                    - Mix somatic / past-safe / metaphorical
+                    - Write in Korean
+                    - Return ONLY the question
+                    """.formatted(gravity, stability);
+
+            case "BALANCED" -> """
+                    You are 'Inner Orbit Mission Control'.
+
+                    User State: Gravity %d%%, Stability %d%% (MEDIUM PRESSURE + MEDIUM STABILITY = BALANCED)
+
+                    Focus: Growth opportunities, meaningful reflection, values, goals, and personal development.
+
+                    Example question styles (generate similar but DIFFERENT questions):
+                    - "다음 도전은?" (ultra-short, future)
+                    - "무엇이 의미 있어요?" (value, short)
+                    - "성장하고 싶은 부분은?" (growth, future)
+                    - "당신다운 삶이란?" (identity, deep)
+                    - "최근 배운 건?" (past, wisdom, short)
+                    - "균형 속 발견은?" (present, reflective, short)
+                    - "어떤 가치가 빛나요?" (value, metaphorical)
+                    - "내일의 나는?" (future, identity, short)
+
+                    CRITICAL:
+                    - AVOID "지금" - use past/future balance
+                    - Mix GROWTH (future) and WISDOM (past)
+                    - Vary length: ultra-short to philosophical
+                    - Focus on VALUES and MEANING
+                    - Write in Korean
+                    - Return ONLY the question
+                    """.formatted(gravity, stability);
+
+            case "GROWING" -> """
+                    You are 'Inner Orbit Mission Control'.
+
+                    User State: Gravity %d%%, Stability %d%% (MEDIUM PRESSURE + HIGH STABILITY = GROWING)
+
+                    Focus: Leveraging stability for new challenges, exploring potential and aspirations.
+
+                    Example question styles (generate similar but DIFFERENT questions):
+                    - "다음 모험은?" (ultra-short, future)
+                    - "어떤 가능성이 보여요?" (potential, open)
+                    - "도전하고 싶은 건?" (action, future, short)
+                    - "안정감을 어디에 쓸까요?" (resource, future)
+                    - "잠재력의 방향은?" (potential, short)
+                    - "성장의 다음 단계는?" (future, development)
+                    - "뭘 시작해볼까요?" (action, ultra-short, future)
+                    - "꿈꾸던 도전은?" (past-desire, future-action)
+
+                    CRITICAL:
+                    - ENERGETIC and FORWARD-LOOKING
+                    - ALL questions should be FUTURE-oriented
+                    - Keep it SHORT and EXCITING
+                    - Focus on ACTION and POSSIBILITY
+                    - Write in Korean
+                    - Return ONLY the question
+                    """.formatted(gravity, stability);
+
+            case "SELF_DOUBT" -> """
+                    You are 'Inner Orbit Mission Control'.
+
+                    User State: Gravity %d%%, Stability %d%% (LOW PRESSURE + LOW STABILITY = SELF-DOUBT)
+
+                    Focus: Self-worth, internal narratives, reconnecting with strengths.
+
+                    Example question styles (generate similar but DIFFERENT questions):
+                    - "당신의 가치는?" (ultra-short, worth)
+                    - "강점을 기억하나요?" (strength, past, gentle)
+                    - "스스로에게 하는 말, 진실인가요?" (narrative, challenge)
+                    - "믿을 수 있었던 순간은?" (past, strength, memory)
+                    - "자신에 대해 다시 쓴다면?" (narrative, metaphorical)
+                    - "내면의 비판, 누구 목소리예요?" (relational, pattern)
+                    - "당신이 빛났던 때는?" (past, strength, metaphorical)
+                    - "자신을 어떻게 보고 싶어요?" (future, re-framing)
+
+                    CRITICAL:
+                    - GENTLE and COMPASSIONATE
+                    - Focus on PAST STRENGTHS and RE-FRAMING
+                    - AVOID "지금" - use past ("~했던", "~기억하나요")
+                    - Keep it SHORT and WARM
+                    - Write in Korean
+                    - Return ONLY the question
+                    """.formatted(gravity, stability);
+
+            case "REFLECTIVE" -> """
+                    You are 'Inner Orbit Mission Control'.
+
+                    User State: Gravity %d%%, Stability %d%% (LOW PRESSURE + MEDIUM STABILITY = REFLECTIVE)
+
+                    Focus: Life lessons, meaningful experiences, deep introspection, wisdom-gathering.
+
+                    Example question styles (generate similar but DIFFERENT questions):
+                    - "삶이 가르쳐준 건?" (past, wisdom, short)
+                    - "변화시킨 순간은?" (past, transformation)
+                    - "최근 발견한 의미는?" (past-present, meaning)
+                    - "여정에서 얻은 지혜는?" (past, metaphorical)
+                    - "과거의 나에게 전할 말은?" (past-reflective, compassion)
+                    - "어떤 진실이 보이나요?" (present, insight)
+                    - "깨달은 건?" (ultra-short, wisdom)
+                    - "경험이 남긴 건?" (past, legacy)
+
+                    CRITICAL:
+                    - CONTEMPLATIVE and DEEP
+                    - Focus on PAST lessons and PRESENT insights
+                    - AVOID "지금" - use "최근", "여정", past tense
+                    - Can be SHORT or POETIC
+                    - Write in Korean
+                    - Return ONLY the question
+                    """.formatted(gravity, stability);
+
+            case "THRIVING" -> """
+                    You are 'Inner Orbit Mission Control'.
+
+                    User State: Gravity %d%%, Stability %d%% (LOW PRESSURE + HIGH STABILITY = THRIVING)
+
+                    Focus: Joy, gratitude, life appreciation, sustaining and sharing this positive state.
+
+                    Example question styles (generate similar but DIFFERENT questions):
+                    - "빛나게 하는 건?" (ultra-short, joy)
+                    - "감사한 순간은?" (past, gratitude, short)
+                    - "기쁨을 나눌 사람은?" (relational, sharing)
+                    - "축복은?" (ultra-short, gratitude)
+                    - "내일도 웃으려면?" (future, sustaining)
+                    - "풍요로움은 어디서?" (appreciation, source)
+                    - "삶의 선물은?" (gratitude, metaphorical, short)
+                    - "이 기쁨, 어떻게 지킬까요?" (future, sustaining)
+
+                    CRITICAL:
+                    - WARM and CELEBRATORY
+                    - Focus on JOY and GRATITUDE
+                    - AVOID "지금 느끼는" - use "빛나게 하는", "감사한", "축복"
+                    - Keep it SHORT and WARM
+                    - Mix present celebration and future sustaining
+                    - Write in Korean
+                    - Return ONLY the question
+                    """.formatted(gravity, stability);
+
+            default -> """
+                    You are 'Inner Orbit Mission Control'.
+
+                    User State: Gravity %d%%, Stability %d%%
+
+                    Generate a thoughtful, diverse question in Korean that helps the user explore their current emotional state.
+                    Vary your style: use different time perspectives (past/present/future), lengths (short/long), and types (open/action/metaphorical).
+
+                    Return ONLY the question.
+                    """.formatted(gravity, stability);
+        };
+    }
+
     @Override
     public String generateDynamicPrompt(Integer gravity, Integer stability) {
-        log.info("Generating dynamic prompt - Gravity: {}, Stability: {}", gravity, stability);
+        // 1단계: 상황 판단
+        String situation = determineSituation(gravity, stability);
+        log.info("Generating dynamic prompt - Gravity: {}, Stability: {} -> Situation: {}",
+                gravity, stability, situation);
 
-        // System Prompt - Inner Orbit Mission Control 역할
-        String systemPrompt = """
-                You are 'Inner Orbit Mission Control'. Ask ONE powerful, thought-provoking question (max 2 sentences) based on the user's Gravity/Stability state.
+        // 2단계: 상황별 맞춤 시스템 프롬프트 생성
+        String systemPrompt = buildPromptForSituation(situation, gravity, stability);
 
-                User's Current State:
-                - Gravity (External Pressure): %d%%
-                - Stability (Inner Strength): %d%%
-
-                Guidelines:
-                - If Gravity is high (>70): Ask about external pressures and coping mechanisms
-                - If Stability is low (<30): Ask about self-care and grounding
-                - If both are balanced (40-60 range): Ask about growth or reflection
-                - Use compassionate, direct language
-                - Keep it concise (max 2 sentences)
-                - Write in Korean
-                - Focus on empowerment, not judgment
-
-                Return ONLY the question, without any prefix or explanation.
-                """.formatted(gravity, stability);
+        // User message 단순화 (옵션 1) - 상황별 프롬프트가 이미 충분히 구체적이므로 단순하게
+        String userMessage = "Generate one question.";
 
         try {
             // ChatClient를 사용하여 OpenAI API 호출
-            ChatClient chatClient = chatClientBuilder.build();
+            // Temperature 0.9로 설정하여 더 창의적이고 다양한 질문 생성 (#33)
+            ChatClient chatClient = chatClientBuilder
+                    .defaultOptions(OpenAiChatOptions.builder()
+                            .temperature(0.9)
+                            .build())
+                    .build();
 
             // 프롬프트 실행 및 문자열 결과 반환
             String prompt = chatClient.prompt()
                     .system(systemPrompt)
-                    .user("Generate a thoughtful question for this user's current state.")
+                    .user(userMessage)
                     .call()
                     .content();
 
