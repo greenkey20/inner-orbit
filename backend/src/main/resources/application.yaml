@@ -17,7 +17,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate  # Flyway가 스키마 관리하므로 validate로 변경
     show-sql: true
     properties:
       hibernate:
@@ -26,6 +26,15 @@ spring:
         default_batch_fetch_size: 100
         jdbc:
           time_zone: Asia/Seoul
+
+  # Flyway 설정
+  flyway:
+    enabled: true
+    # 핵심: 기존 데이터가 있는 DB라면 마이그레이션을 수행하지 않고
+    # 현재 상태를 기준점(Baseline)으로 잡겠다는 설정입니다.
+    baseline-on-migrate: true
+    # 현재 V1 스크립트가 이미 적용된 상태라고 가정합니다.
+    baseline-version: 1
 
 
   # [NEW] Spring AI 설정 (들여쓰기 중요!)
