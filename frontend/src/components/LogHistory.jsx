@@ -42,6 +42,12 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
     const [editGravity, setEditGravity] = useState(50);
     const [editStability, setEditStability] = useState(50);
 
+    // Deep Log 필드 상태
+    const [editLocation, setEditLocation] = useState('');
+    const [editSensoryVisual, setEditSensoryVisual] = useState('');
+    const [editSensoryAuditory, setEditSensoryAuditory] = useState('');
+    const [editSensoryTactile, setEditSensoryTactile] = useState('');
+
     // 페이지네이션 상태
     const [visibleCount, setVisibleCount] = useState(10);
     const observerRef = useRef(null);
@@ -88,11 +94,31 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
         setEditContent(entry.content);
         setEditGravity(entry.gravity || 50);
         setEditStability(entry.stability || 50);
+
+        // Deep Log 필드 로드
+        if (entry.isDeepLog) {
+            setEditLocation(entry.location || '');
+            setEditSensoryVisual(entry.sensoryVisual || '');
+            setEditSensoryAuditory(entry.sensoryAuditory || '');
+            setEditSensoryTactile(entry.sensoryTactile || '');
+        }
     };
 
     // 수정 저장
     const saveEdit = () => {
-        onUpdateEntry(editingId, editContent, editGravity, editStability);
+        // Deep Log 엔트리인 경우 감각 필드도 함께 전달
+        const entry = entries.find(e => e.id === editingId);
+        if (entry && entry.isDeepLog) {
+            const deepLogFields = {
+                location: editLocation,
+                sensoryVisual: editSensoryVisual,
+                sensoryAuditory: editSensoryAuditory,
+                sensoryTactile: editSensoryTactile
+            };
+            onUpdateEntry(editingId, editContent, editGravity, editStability, deepLogFields);
+        } else {
+            onUpdateEntry(editingId, editContent, editGravity, editStability);
+        }
         setEditingId(null);
     };
 
@@ -100,6 +126,12 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
     const cancelEdit = () => {
         setEditingId(null);
         setEditContent('');
+
+        // Deep Log state 초기화
+        setEditLocation('');
+        setEditSensoryVisual('');
+        setEditSensoryAuditory('');
+        setEditSensoryTactile('');
     };
 
     // AI 분석 실행 - 백엔드 API 호출
@@ -233,6 +265,7 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                 </div>
                             </div>
 
+
                             {/* Content: Text or Textarea */}
                             <div className="mb-5">
                                 {isEditing ? (
@@ -249,59 +282,137 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                 )}
                             </div>
 
-                            {/* Deep Log Data - 감각 정보 표시 */}
-                            {!isEditing && entry.isDeepLog && (entry.location || entry.sensoryVisual || entry.sensoryAuditory || entry.sensoryTactile) && (
+                            {/* Deep Log Data - 감각 정보 표시/수정 */}
+                            {entry.isDeepLog && (
                                 <div className="mb-5 p-4 bg-gradient-to-r from-lime-50 to-emerald-50 rounded-xl border border-lime-200">
                                     <div className="flex items-center gap-2 mb-3">
                                         <span className="text-xs font-bold text-lime-800 uppercase tracking-wider">✈️ Deep Travel Log</span>
                                     </div>
 
-                                    {/* Location */}
-                                    {entry.location && (
-                                        <div className="mb-3 flex items-start gap-2">
-                                            <MapPin className="w-4 h-4 text-lime-600 mt-0.5 flex-shrink-0" />
-                                            <div>
-                                                <span className="text-xs font-bold text-slate-700 block mb-1">Location</span>
-                                                <span className="text-sm text-slate-600">{entry.location}</span>
-                                            </div>
+                                    {/* Warning for Deep Log Editing */}
+                                    {isEditing && (
+                                        <div className="mb-3 p-2.5 bg-amber-50 border border-amber-200 rounded-lg">
+                                            <p className="text-xs text-gray-600 flex items-center gap-1.5">
+                                                <span>⚠️</span>
+                                                <span>주의: Deep Log는 순간의 감각을 기록합니다. 수정 시 원본 경험이 변경될 수 있습니다.</span>
+                                            </p>
                                         </div>
                                     )}
 
-                                    {/* Sensory Grid */}
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                        {/* Visual */}
-                                        {entry.sensoryVisual && (
-                                            <div className="flex items-start gap-2">
-                                                <Eye className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
-                                                <div>
-                                                    <span className="text-xs font-bold text-slate-700 block mb-1">보이는 것</span>
-                                                    <span className="text-sm text-slate-600">{entry.sensoryVisual}</span>
-                                                </div>
+                                    {isEditing ? (
+                                        /* Edit Mode - Input Fields */
+                                        <>
+                                            {/* Location Input */}
+                                            <div className="mb-3">
+                                                <label className="flex items-center gap-2 text-xs font-bold text-slate-700 mb-2">
+                                                    <MapPin className="w-4 h-4 text-lime-600" />
+                                                    Location
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={editLocation}
+                                                    onChange={(e) => setEditLocation(e.target.value)}
+                                                    placeholder="Where are you now?"
+                                                    className="w-full px-3 py-2 bg-white border border-lime-300 rounded-lg focus:ring-2 focus:ring-lime-400 focus:border-lime-400 text-sm text-slate-700 placeholder:text-lime-400"
+                                                />
                                             </div>
-                                        )}
 
-                                        {/* Auditory */}
-                                        {entry.sensoryAuditory && (
-                                            <div className="flex items-start gap-2">
-                                                <Ear className="w-4 h-4 text-lime-600 mt-0.5 flex-shrink-0" />
+                                            {/* Sensory Inputs Grid */}
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                                {/* Visual */}
                                                 <div>
-                                                    <span className="text-xs font-bold text-slate-700 block mb-1">들리는 것</span>
-                                                    <span className="text-sm text-slate-600">{entry.sensoryAuditory}</span>
+                                                    <label className="flex items-center gap-2 text-xs font-bold text-slate-700 mb-2">
+                                                        <Eye className="w-4 h-4 text-emerald-600" />
+                                                        보이는 것
+                                                    </label>
+                                                    <textarea
+                                                        value={editSensoryVisual}
+                                                        onChange={(e) => setEditSensoryVisual(e.target.value)}
+                                                        placeholder="무엇이 보이나요?"
+                                                        className="w-full h-20 px-3 py-2 bg-white border border-emerald-300 rounded-lg resize-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 text-sm text-slate-700 placeholder:text-emerald-400"
+                                                    />
                                                 </div>
-                                            </div>
-                                        )}
 
-                                        {/* Tactile */}
-                                        {entry.sensoryTactile && (
-                                            <div className="flex items-start gap-2">
-                                                <Hand className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                                                {/* Auditory */}
                                                 <div>
-                                                    <span className="text-xs font-bold text-slate-700 block mb-1">느껴지는 것</span>
-                                                    <span className="text-sm text-slate-600">{entry.sensoryTactile}</span>
+                                                    <label className="flex items-center gap-2 text-xs font-bold text-slate-700 mb-2">
+                                                        <Ear className="w-4 h-4 text-lime-600" />
+                                                        들리는 것
+                                                    </label>
+                                                    <textarea
+                                                        value={editSensoryAuditory}
+                                                        onChange={(e) => setEditSensoryAuditory(e.target.value)}
+                                                        placeholder="무엇이 들리나요?"
+                                                        className="w-full h-20 px-3 py-2 bg-white border border-lime-300 rounded-lg resize-none focus:ring-2 focus:ring-lime-400 focus:border-lime-400 text-sm text-slate-700 placeholder:text-lime-400"
+                                                    />
+                                                </div>
+
+                                                {/* Tactile */}
+                                                <div>
+                                                    <label className="flex items-center gap-2 text-xs font-bold text-slate-700 mb-2">
+                                                        <Hand className="w-4 h-4 text-green-600" />
+                                                        느껴지는 것
+                                                    </label>
+                                                    <textarea
+                                                        value={editSensoryTactile}
+                                                        onChange={(e) => setEditSensoryTactile(e.target.value)}
+                                                        placeholder="무엇이 느껴지나요?"
+                                                        className="w-full h-20 px-3 py-2 bg-white border border-green-300 rounded-lg resize-none focus:ring-2 focus:ring-green-400 focus:border-green-400 text-sm text-slate-700 placeholder:text-green-400"
+                                                    />
                                                 </div>
                                             </div>
-                                        )}
-                                    </div>
+                                        </>
+                                    ) : (
+                                        /* View Mode - Display Data */
+                                        <>
+                                            {/* Location */}
+                                            {entry.location && (
+                                                <div className="mb-3 flex items-start gap-2">
+                                                    <MapPin className="w-4 h-4 text-lime-600 mt-0.5 flex-shrink-0" />
+                                                    <div>
+                                                        <span className="text-xs font-bold text-slate-700 block mb-1">Location</span>
+                                                        <span className="text-sm text-slate-600">{entry.location}</span>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Sensory Grid */}
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                                {/* Visual */}
+                                                {entry.sensoryVisual && (
+                                                    <div className="flex items-start gap-2">
+                                                        <Eye className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+                                                        <div>
+                                                            <span className="text-xs font-bold text-slate-700 block mb-1">보이는 것</span>
+                                                            <span className="text-sm text-slate-600">{entry.sensoryVisual}</span>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Auditory */}
+                                                {entry.sensoryAuditory && (
+                                                    <div className="flex items-start gap-2">
+                                                        <Ear className="w-4 h-4 text-lime-600 mt-0.5 flex-shrink-0" />
+                                                        <div>
+                                                            <span className="text-xs font-bold text-slate-700 block mb-1">들리는 것</span>
+                                                            <span className="text-sm text-slate-600">{entry.sensoryAuditory}</span>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Tactile */}
+                                                {entry.sensoryTactile && (
+                                                    <div className="flex items-start gap-2">
+                                                        <Hand className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                                                        <div>
+                                                            <span className="text-xs font-bold text-slate-700 block mb-1">느껴지는 것</span>
+                                                            <span className="text-sm text-slate-600">{entry.sensoryTactile}</span>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             )}
 

@@ -142,8 +142,32 @@ public class LogServiceImpl implements LogService {
     @Override
     @Transactional
     public LogEntryResponse updateLogEntry(Long id, LogEntryUpdateRequest request) {
-        // TODO: 비즈니스 로직 구현
-        throw new UnsupportedOperationException("Not implemented yet");
+        log.info("Updating log entry id={} with request: {}", id, request);
+
+        // 1. 기존 엔트리 조회
+        LogEntry logEntry = logRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("로그를 찾을 수 없습니다. id: " + id));
+
+        // 2. 필드 업데이트
+        logEntry.setContent(request.getContent());
+        logEntry.setStability(request.getStability());
+        logEntry.setGravity(request.getGravity());
+
+        // Deep Log 필드 업데이트 (null 허용)
+        logEntry.setLocation(request.getLocation());
+        logEntry.setSensoryVisual(request.getSensoryVisual());
+        logEntry.setSensoryAuditory(request.getSensoryAuditory());
+        logEntry.setSensoryTactile(request.getSensoryTactile());
+
+        if (request.getIsDeepLog() != null) {
+            logEntry.setIsDeepLog(request.getIsDeepLog());
+        }
+
+        // 3. 저장 (updatedAt은 @PreUpdate로 자동 설정됨)
+        LogEntry updated = logRepository.save(logEntry);
+
+        // 4. DTO로 변환하여 반환
+        return LogEntryResponse.from(updated);
     }
 
     @Override

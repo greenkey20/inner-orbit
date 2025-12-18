@@ -173,28 +173,65 @@ export default function useInnerOrbit() {
      * @param {string} newContent - 새로운 콘텐츠
      * @param {number} newGravity - 새로운 gravity 값
      * @param {number} newStability - 새로운 stability 값
+     * @param {Object} deepLogFields - (선택) Deep Log 필드들 {location, sensoryVisual, sensoryAuditory, sensoryTactile}
      */
-    const updateEntry = (id, newContent, newGravity, newStability) => {
+    const updateEntry = async (id, newContent, newGravity, newStability, deepLogFields = null) => {
         if (!newContent.trim()) {
             alert('내용을 입력해주세요.');
             return;
         }
 
-        setEntries(entries.map(entry => {
-            if (entry.id === id) {
-                return {
-                    ...entry,
-                    content: newContent,
-                    gravity: newGravity,
-                    stability: newStability,
-                    updatedAt: new Date().toLocaleString('ko-KR', {
-                        year: 'numeric', month: 'long', day: 'numeric',
-                        hour: '2-digit', minute: '2-digit', hour12: false
-                    })
-                };
+        try {
+            // 요청 데이터 구성
+            const requestData = {
+                content: newContent,
+                stability: newStability,
+                gravity: newGravity,
+                ...(deepLogFields && {
+                    location: deepLogFields.location || null,
+                    sensoryVisual: deepLogFields.sensoryVisual || null,
+                    sensoryAuditory: deepLogFields.sensoryAuditory || null,
+                    sensoryTactile: deepLogFields.sensoryTactile || null
+                })
+            };
+
+            // 백엔드에 PUT 요청
+            const response = await fetch(`/api/logs/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            });
+
+            if (response.ok) {
+                const updatedLog = await response.json();
+                // 백엔드 응답으로 state 업데이트
+                setEntries(entries.map(entry => {
+                    if (entry.id === id) {
+                        return {
+                            ...entry,
+                            content: updatedLog.content,
+                            gravity: updatedLog.gravity,
+                            stability: updatedLog.stability,
+                            updatedAt: updatedLog.updatedAt,
+                            // Deep Log 필드 업데이트
+                            location: updatedLog.location,
+                            sensoryVisual: updatedLog.sensoryVisual,
+                            sensoryAuditory: updatedLog.sensoryAuditory,
+                            sensoryTactile: updatedLog.sensoryTactile
+                        };
+                    }
+                    return entry;
+                }));
+            } else {
+                console.error('Failed to update log');
+                alert('로그 수정에 실패했습니다.');
             }
-            return entry;
-        }));
+        } catch (error) {
+            console.error('Error updating log:', error);
+            alert('로그 수정 중 오류가 발생했습니다.');
+        }
     };
 
     /**
