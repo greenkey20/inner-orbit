@@ -62,10 +62,6 @@ public class LogEntry {
     @Column(name = "sensory_tactile", columnDefinition = "TEXT")
     private String sensoryTactile;
 
-    @Column(name = "is_deep_log", nullable = false)
-    @Builder.Default
-    private Boolean isDeepLog = false;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "log_type", nullable = false, length = 20)
     @Builder.Default

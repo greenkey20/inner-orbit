@@ -55,7 +55,6 @@ public class LogServiceImpl implements LogService {
                 .sensoryVisual(request.getSensoryVisual())
                 .sensoryAuditory(request.getSensoryAuditory())
                 .sensoryTactile(request.getSensoryTactile())
-                .isDeepLog(request.getIsDeepLog() != null ? request.getIsDeepLog() : false)
                 .logType(request.getLogType() != null ? request.getLogType() : com.greenkey20.innerorbit.domain.entity.LogType.DAILY)
                 .insightTrigger(request.getInsightTrigger())
                 .insightAbstraction(request.getInsightAbstraction())
@@ -158,20 +157,18 @@ public class LogServiceImpl implements LogService {
         logEntry.setStability(request.getStability());
         logEntry.setGravity(request.getGravity());
 
-        // Deep Log 필드 업데이트 (null 허용)
+        // Log Type 업데이트
+        if (request.getLogType() != null) {
+            logEntry.setLogType(request.getLogType());
+        }
+
+        // Sensory 필드 업데이트 (null 허용)
         logEntry.setLocation(request.getLocation());
         logEntry.setSensoryVisual(request.getSensoryVisual());
         logEntry.setSensoryAuditory(request.getSensoryAuditory());
         logEntry.setSensoryTactile(request.getSensoryTactile());
 
-        if (request.getIsDeepLog() != null) {
-            logEntry.setIsDeepLog(request.getIsDeepLog());
-        }
-
         // Insight Log 필드 업데이트 (null 허용)
-        if (request.getLogType() != null) {
-            logEntry.setLogType(request.getLogType());
-        }
         logEntry.setInsightTrigger(request.getInsightTrigger());
         logEntry.setInsightAbstraction(request.getInsightAbstraction());
         logEntry.setInsightApplication(request.getInsightApplication());

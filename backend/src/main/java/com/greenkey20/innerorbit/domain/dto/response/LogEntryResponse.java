@@ -35,12 +35,20 @@ public class LogEntryResponse {
     private String sensoryVisual;
     private String sensoryAuditory;
     private String sensoryTactile;
-    private Boolean isDeepLog;
     private LogType logType;
     private String insightTrigger;
     private String insightAbstraction;
     private String insightApplication;
     private String aiFeedback;
+
+    /**
+     * Backward compatibility: computed from logType
+     * @deprecated Use {@link #logType} instead
+     */
+    @Deprecated
+    public Boolean getIsDeepLog() {
+        return logType == LogType.SENSORY;
+    }
 
     /**
      * Entity -> DTO 변환 메서드
@@ -58,7 +66,6 @@ public class LogEntryResponse {
                 .sensoryVisual(entity.getSensoryVisual())
                 .sensoryAuditory(entity.getSensoryAuditory())
                 .sensoryTactile(entity.getSensoryTactile())
-                .isDeepLog(entity.getIsDeepLog())
                 .logType(entity.getLogType())
                 .insightTrigger(entity.getInsightTrigger())
                 .insightAbstraction(entity.getInsightAbstraction())

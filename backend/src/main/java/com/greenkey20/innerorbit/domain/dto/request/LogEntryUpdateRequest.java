@@ -40,9 +40,27 @@ public class LogEntryUpdateRequest {
     @Size(max = 10000, message = "촉각 정보는 10000자를 초과할 수 없습니다")
     private String sensoryTactile;
 
-    private Boolean isDeepLog;
-
     private LogType logType;
+
+    /**
+     * Backward compatibility: isDeepLog is deprecated, use logType instead
+     * @deprecated Use {@link #logType} with value {@link LogType#SENSORY}
+     */
+    @Deprecated
+    public void setIsDeepLog(Boolean isDeepLog) {
+        if (isDeepLog != null && isDeepLog) {
+            this.logType = LogType.SENSORY;
+        }
+    }
+
+    /**
+     * Backward compatibility: computed from logType
+     * @deprecated Use {@link #logType}
+     */
+    @Deprecated
+    public Boolean getIsDeepLog() {
+        return logType != null && logType == LogType.SENSORY;
+    }
 
     @Size(max = 10000, message = "통찰 트리거는 10000자를 초과할 수 없습니다")
     private String insightTrigger;
