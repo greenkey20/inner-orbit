@@ -66,6 +66,23 @@ public class LogEntry {
     @Builder.Default
     private Boolean isDeepLog = false;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "log_type", nullable = false, length = 20)
+    @Builder.Default
+    private LogType logType = LogType.DAILY;
+
+    @Column(name = "insight_trigger", columnDefinition = "TEXT")
+    private String insightTrigger;
+
+    @Column(name = "insight_abstraction", columnDefinition = "TEXT")
+    private String insightAbstraction;
+
+    @Column(name = "insight_application", columnDefinition = "TEXT")
+    private String insightApplication;
+
+    @Column(name = "ai_feedback", columnDefinition = "TEXT")
+    private String aiFeedback;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

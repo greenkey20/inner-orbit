@@ -160,7 +160,14 @@ class DeepLogIntegrationTest {
                 "Each grain feels warm and soft beneath my feet, shifting and flowing like liquid silk. The texture changes " +
                 "subtly as I walk from the fine, almost powder-like sand near the dunes to the slightly coarser grains " +
                 "where the wind has carved deeper channels. The warmth penetrates through my skin, creating a soothing " +
-                "sensation that connects me deeply to this moment in time.";
+                "sensation that connects me deeply to this moment in time. " +
+                "As the day progresses, the temperature shifts dramatically, and I can feel the transition from cool morning " +
+                "sand to the intense heat of midday. The breeze picks up, carrying with it the salt-tinged scent of the nearby " +
+                "ocean, mixing with the earthy smell of the desert landscape. Each step I take leaves a temporary imprint that " +
+                "the wind begins to erase almost immediately, as if the landscape is constantly renewing itself. " +
+                "The sensory experience is overwhelming yet calming, grounding me in the present moment while connecting me " +
+                "to the timeless nature of this environment. The interplay of heat, texture, movement, and sound creates " +
+                "a symphony of sensations that words can barely capture.";
 
         LogEntryCreateRequest longSensoryRequest = LogEntryCreateRequest.builder()
                 .content("상세한 감각 기록")

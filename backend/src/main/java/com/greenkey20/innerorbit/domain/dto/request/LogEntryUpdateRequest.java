@@ -1,5 +1,6 @@
 package com.greenkey20.innerorbit.domain.dto.request;
 
+import com.greenkey20.innerorbit.domain.entity.LogType;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -40,4 +41,18 @@ public class LogEntryUpdateRequest {
     private String sensoryTactile;
 
     private Boolean isDeepLog;
+
+    private LogType logType;
+
+    @Size(max = 10000, message = "통찰 트리거는 10000자를 초과할 수 없습니다")
+    private String insightTrigger;
+
+    @Size(max = 10000, message = "통찰 추상화는 10000자를 초과할 수 없습니다")
+    private String insightAbstraction;
+
+    @Size(max = 10000, message = "통찰 적용은 10000자를 초과할 수 없습니다")
+    private String insightApplication;
+
+    @Size(max = 10000, message = "AI 피드백은 10000자를 초과할 수 없습니다")
+    private String aiFeedback;
 }

@@ -56,6 +56,11 @@ public class LogServiceImpl implements LogService {
                 .sensoryAuditory(request.getSensoryAuditory())
                 .sensoryTactile(request.getSensoryTactile())
                 .isDeepLog(request.getIsDeepLog() != null ? request.getIsDeepLog() : false)
+                .logType(request.getLogType() != null ? request.getLogType() : com.greenkey20.innerorbit.domain.entity.LogType.DAILY)
+                .insightTrigger(request.getInsightTrigger())
+                .insightAbstraction(request.getInsightAbstraction())
+                .insightApplication(request.getInsightApplication())
+                .aiFeedback(request.getAiFeedback())
                 .build();
 
         // 4. 엔티티 저장 (createdAt은 @PrePersist에서 자동 설정)
@@ -162,6 +167,15 @@ public class LogServiceImpl implements LogService {
         if (request.getIsDeepLog() != null) {
             logEntry.setIsDeepLog(request.getIsDeepLog());
         }
+
+        // Insight Log 필드 업데이트 (null 허용)
+        if (request.getLogType() != null) {
+            logEntry.setLogType(request.getLogType());
+        }
+        logEntry.setInsightTrigger(request.getInsightTrigger());
+        logEntry.setInsightAbstraction(request.getInsightAbstraction());
+        logEntry.setInsightApplication(request.getInsightApplication());
+        logEntry.setAiFeedback(request.getAiFeedback());
 
         // 3. 저장 (updatedAt은 @PreUpdate로 자동 설정됨)
         LogEntry updated = logRepository.save(logEntry);
