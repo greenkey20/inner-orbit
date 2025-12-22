@@ -26,11 +26,17 @@ export default function useInnerOrbit() {
     const [showPrompt, setShowPrompt] = useState(true);
     const [isHeaderExpanded, setIsHeaderExpanded] = useState(true);
     const [deepLogData, setDeepLogData] = useState({
+        // Sensory fields
         location: '',
         sensoryVisual: '',
         sensoryAuditory: '',
         sensoryTactile: '',
-        isDeepLog: false
+        // Insight fields
+        insightTrigger: '',
+        insightAbstraction: '',
+        insightApplication: '',
+        // Log type
+        logType: 'DAILY'
     });
     const fileInputRef = useRef(null);
 
@@ -50,11 +56,19 @@ export default function useInnerOrbit() {
                         gravity: log.gravity,
                         updatedAt: log.updatedAt,
                         analysis: log.analysisResult,
-                        // Deep Log 필드 추가
+                        // Sensory fields
                         location: log.location,
                         sensoryVisual: log.sensoryVisual,
                         sensoryAuditory: log.sensoryAuditory,
                         sensoryTactile: log.sensoryTactile,
+                        // Insight fields
+                        insightTrigger: log.insightTrigger,
+                        insightAbstraction: log.insightAbstraction,
+                        insightApplication: log.insightApplication,
+                        aiFeedback: log.aiFeedback,
+                        // Log type
+                        logType: log.logType || 'DAILY',
+                        // Backward compatibility
                         isDeepLog: log.isDeepLog || false
                     }));
                     setEntries(formattedEntries);
@@ -71,42 +85,53 @@ export default function useInnerOrbit() {
 
     /**
      * 새 로그 엔트리를 생성하고 백엔드에 저장
-     * @param {Object} customLogData - (선택) Deep Log 데이터가 포함된 커스텀 로그 데이터
+     * @param {Object} customLogData - (선택) Log 데이터 (logType에 따라 다른 필드 포함)
      */
     const handleSubmit = async (customLogData = null) => {
-        // Deep Log 모드인 경우 customLogData 사용, 아니면 기본 message 체크
-        const isDeepLogSubmission = customLogData && customLogData.isDeepLog;
-        const hasContent = isDeepLogSubmission 
-            ? (customLogData.content?.trim() || customLogData.location?.trim() || 
-               customLogData.sensoryVisual?.trim() || customLogData.sensoryAuditory?.trim() || 
-               customLogData.sensoryTactile?.trim())
-            : message.trim();
+        const logType = customLogData?.logType || 'DAILY';
+
+        // 각 모드별 유효성 검증
+        let hasContent = false;
+        if (logType === 'SENSORY') {
+            hasContent = customLogData.content?.trim() || customLogData.location?.trim() ||
+                        customLogData.sensoryVisual?.trim() || customLogData.sensoryAuditory?.trim() ||
+                        customLogData.sensoryTactile?.trim();
+        } else if (logType === 'INSIGHT') {
+            hasContent = customLogData.insightTrigger?.trim() &&
+                        customLogData.insightAbstraction?.trim() &&
+                        customLogData.insightApplication?.trim();
+        } else {
+            hasContent = message.trim();
+        }
 
         if (!hasContent) return;
 
         try {
             // 요청 데이터 구성
-            const requestData = isDeepLogSubmission 
-                ? {
-                    content: customLogData.content || '',
-                    stability: stability,
-                    gravity: gravity,
+            let requestData = {
+                content: customLogData?.content || message,
+                stability: stability,
+                gravity: gravity,
+                logType: logType
+            };
+
+            // logType에 따라 추가 필드 포함
+            if (logType === 'SENSORY') {
+                requestData = {
+                    ...requestData,
                     location: customLogData.location || null,
                     sensoryVisual: customLogData.sensoryVisual || null,
                     sensoryAuditory: customLogData.sensoryAuditory || null,
-                    sensoryTactile: customLogData.sensoryTactile || null,
-                    isDeepLog: true
-                }
-                : {
-                    content: message,
-                    stability: stability,
-                    gravity: gravity,
-                    location: null,
-                    sensoryVisual: null,
-                    sensoryAuditory: null,
-                    sensoryTactile: null,
-                    isDeepLog: false
+                    sensoryTactile: customLogData.sensoryTactile || null
                 };
+            } else if (logType === 'INSIGHT') {
+                requestData = {
+                    ...requestData,
+                    insightTrigger: customLogData.insightTrigger || null,
+                    insightAbstraction: customLogData.insightAbstraction || null,
+                    insightApplication: customLogData.insightApplication || null
+                };
+            }
 
             const response = await fetch('/api/logs', {
                 method: 'POST',
@@ -126,26 +151,35 @@ export default function useInnerOrbit() {
                     stability: newLog.stability,
                     gravity: newLog.gravity,
                     analysis: newLog.analysisResult,
-                    // Deep Log 필드 추가
+                    // Sensory fields
                     location: newLog.location,
                     sensoryVisual: newLog.sensoryVisual,
                     sensoryAuditory: newLog.sensoryAuditory,
                     sensoryTactile: newLog.sensoryTactile,
+                    // Insight fields
+                    insightTrigger: newLog.insightTrigger,
+                    insightAbstraction: newLog.insightAbstraction,
+                    insightApplication: newLog.insightApplication,
+                    aiFeedback: newLog.aiFeedback,
+                    // Log type
+                    logType: newLog.logType || 'DAILY',
+                    // Backward compatibility
                     isDeepLog: newLog.isDeepLog || false
                 };
 
                 setEntries([newEntry, ...entries]);
                 setMessage("");
-                // Deep Log 데이터 초기화
-                if (isDeepLogSubmission) {
-                    setDeepLogData({
-                        location: '',
-                        sensoryVisual: '',
-                        sensoryAuditory: '',
-                        sensoryTactile: '',
-                        isDeepLog: false
-                    });
-                }
+                // 모든 Log 데이터 초기화
+                setDeepLogData({
+                    location: '',
+                    sensoryVisual: '',
+                    sensoryAuditory: '',
+                    sensoryTactile: '',
+                    insightTrigger: '',
+                    insightAbstraction: '',
+                    insightApplication: '',
+                    logType: 'DAILY'
+                });
                 setView('history');
             } else {
                 console.error('Failed to save log');
@@ -173,9 +207,9 @@ export default function useInnerOrbit() {
      * @param {string} newContent - 새로운 콘텐츠
      * @param {number} newGravity - 새로운 gravity 값
      * @param {number} newStability - 새로운 stability 값
-     * @param {Object} deepLogFields - (선택) Deep Log 필드들 {location, sensoryVisual, sensoryAuditory, sensoryTactile}
+     * @param {Object} logFields - (선택) Log 타입별 필드들
      */
-    const updateEntry = async (id, newContent, newGravity, newStability, deepLogFields = null) => {
+    const updateEntry = async (id, newContent, newGravity, newStability, logFields = null) => {
         if (!newContent.trim()) {
             alert('내용을 입력해주세요.');
             return;
@@ -187,11 +221,18 @@ export default function useInnerOrbit() {
                 content: newContent,
                 stability: newStability,
                 gravity: newGravity,
-                ...(deepLogFields && {
-                    location: deepLogFields.location || null,
-                    sensoryVisual: deepLogFields.sensoryVisual || null,
-                    sensoryAuditory: deepLogFields.sensoryAuditory || null,
-                    sensoryTactile: deepLogFields.sensoryTactile || null
+                ...(logFields && {
+                    // Sensory fields
+                    location: logFields.location || null,
+                    sensoryVisual: logFields.sensoryVisual || null,
+                    sensoryAuditory: logFields.sensoryAuditory || null,
+                    sensoryTactile: logFields.sensoryTactile || null,
+                    // Insight fields
+                    insightTrigger: logFields.insightTrigger || null,
+                    insightAbstraction: logFields.insightAbstraction || null,
+                    insightApplication: logFields.insightApplication || null,
+                    // Log type
+                    logType: logFields.logType || null
                 })
             };
 
@@ -215,11 +256,18 @@ export default function useInnerOrbit() {
                             gravity: updatedLog.gravity,
                             stability: updatedLog.stability,
                             updatedAt: updatedLog.updatedAt,
-                            // Deep Log 필드 업데이트
+                            // Sensory fields
                             location: updatedLog.location,
                             sensoryVisual: updatedLog.sensoryVisual,
                             sensoryAuditory: updatedLog.sensoryAuditory,
-                            sensoryTactile: updatedLog.sensoryTactile
+                            sensoryTactile: updatedLog.sensoryTactile,
+                            // Insight fields
+                            insightTrigger: updatedLog.insightTrigger,
+                            insightAbstraction: updatedLog.insightAbstraction,
+                            insightApplication: updatedLog.insightApplication,
+                            aiFeedback: updatedLog.aiFeedback,
+                            // Log type
+                            logType: updatedLog.logType
                         };
                     }
                     return entry;

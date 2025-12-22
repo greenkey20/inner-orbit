@@ -5,6 +5,7 @@ import com.greenkey20.innerorbit.domain.dto.request.LogEntryCreateRequest;
 import com.greenkey20.innerorbit.domain.dto.request.LogEntryUpdateRequest;
 import com.greenkey20.innerorbit.domain.dto.response.LogEntryResponse;
 import com.greenkey20.innerorbit.domain.entity.LogEntry;
+import com.greenkey20.innerorbit.domain.entity.LogType;
 import com.greenkey20.innerorbit.domain.dto.response.AnalysisResult;
 import com.greenkey20.innerorbit.exception.BusinessException;
 import com.greenkey20.innerorbit.exception.ErrorCode;
@@ -78,9 +79,34 @@ public class LogServiceImpl implements LogService {
      * (컨트롤러의 @Valid 외에 서비스 레벨에서 추가 비즈니스 검증)
      */
     private void validateLogEntryRequest(LogEntryCreateRequest request) {
-        // 내용 검증
-        if (request.getContent() == null || request.getContent().trim().isEmpty()) {
-            throw new BusinessException(ErrorCode.EMPTY_CONTENT);
+        LogType logType = request.getLogType() != null ? request.getLogType() : LogType.DAILY;
+
+        // logType별 content 검증
+        if (logType == LogType.DAILY || logType == LogType.SENSORY) {
+            // DAILY, SENSORY 모드는 content 필수
+            if (request.getContent() == null || request.getContent().trim().isEmpty()) {
+                throw new BusinessException(ErrorCode.EMPTY_CONTENT);
+            }
+        } else if (logType == LogType.INSIGHT) {
+            // INSIGHT 모드는 trigger, abstraction, application 필수
+            if (request.getInsightTrigger() == null || request.getInsightTrigger().trim().isEmpty()) {
+                throw new BusinessException(
+                    ErrorCode.INVALID_INPUT_VALUE,
+                    "Insight Trigger를 입력해주세요."
+                );
+            }
+            if (request.getInsightAbstraction() == null || request.getInsightAbstraction().trim().isEmpty()) {
+                throw new BusinessException(
+                    ErrorCode.INVALID_INPUT_VALUE,
+                    "Insight Abstraction을 입력해주세요."
+                );
+            }
+            if (request.getInsightApplication() == null || request.getInsightApplication().trim().isEmpty()) {
+                throw new BusinessException(
+                    ErrorCode.INVALID_INPUT_VALUE,
+                    "Insight Application을 입력해주세요."
+                );
+            }
         }
 
         // 안정성 값 검증

@@ -14,7 +14,6 @@ import lombok.*;
 @Builder
 public class LogEntryCreateRequest {
 
-    @NotBlank(message = "내용을 입력해주세요")
     @Size(max = 10000, message = "내용은 10000자를 초과할 수 없습니다")
     private String content;
 
