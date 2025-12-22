@@ -1,5 +1,7 @@
 package com.greenkey20.innerorbit.service.impl;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.greenkey20.innerorbit.domain.dto.response.AnalysisResult;
 import com.greenkey20.innerorbit.service.AiService;
 import lombok.RequiredArgsConstructor;
@@ -7,6 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * AI 서비스 구현체
@@ -18,6 +23,7 @@ import org.springframework.stereotype.Service;
 public class AiServiceImpl implements AiService {
 
     private final ChatClient.Builder chatClientBuilder;
+    private final ObjectMapper objectMapper;
 
     @Override
     public AnalysisResult analyzeCognitiveDistortions(String logContent, Integer gravity, Integer stability) {
@@ -404,6 +410,133 @@ public class AiServiceImpl implements AiService {
         } catch (Exception e) {
             log.error("Failed to generate dynamic prompt: {}", e.getMessage(), e);
             throw new RuntimeException("동적 프롬프트 생성 중 오류가 발생했습니다: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public List<String> suggestCsKeywords(String trigger) {
+        log.info("Starting CS keyword suggestion for trigger: {}", trigger.substring(0, Math.min(50, trigger.length())));
+
+        String systemPrompt = """
+                You are a creative Computer Science educator helping developers see CS concepts in everyday life.
+
+                Your task: Analyze a real-world observation and suggest 3-5 related Computer Science or Software Engineering concepts.
+
+                Guidelines:
+                - Be creative but not too far-fetched
+                - Mix fundamental concepts (algorithms, data structures) with systems concepts (networking, databases, architecture)
+                - Include both technical terms and conceptual patterns
+                - Prefer concepts that have clear real-world parallels
+                - Return concepts in both Korean and English if helpful
+
+                Examples:
+
+                Observation: "오토바이들이 신호등 앞에서 물결처럼 밀려왔다가 신호가 바뀌면 한꺼번에 빠져나간다"
+                Suggestions: ["Message Queue (메시지 큐)", "Async Processing (비동기 처리)", "Rate Limiting (처리율 제한)", "Load Balancing (부하 분산)", "Event Stream (이벤트 스트림)"]
+
+                Observation: "도서관에서 책을 찾다가 색인을 보니 훨씬 빨랐다"
+                Suggestions: ["Hash Table (해시 테이블)", "Binary Search (이진 탐색)", "Indexing (인덱싱)", "B-Tree", "Cache (캐시)"]
+
+                CRITICAL: Return ONLY a valid JSON array of strings, nothing else.
+                Format: ["Concept 1", "Concept 2", "Concept 3", "Concept 4", "Concept 5"]
+
+                Keep each concept concise (1-3 words in English, Korean translation optional in parentheses).
+                """;
+
+        try {
+            ChatClient chatClient = chatClientBuilder
+                    .defaultOptions(OpenAiChatOptions.builder()
+                            .temperature(0.8) // Creative but not too random
+                            .build())
+                    .build();
+
+            String response = chatClient.prompt()
+                    .system(systemPrompt)
+                    .user("관찰: " + trigger)
+                    .call()
+                    .content();
+
+            log.debug("Raw AI response: {}", response);
+
+            // JSON 배열 파싱
+            List<String> keywords = objectMapper.readValue(response, new TypeReference<List<String>>() {});
+
+            // 3-5개로 제한
+            if (keywords.size() > 5) {
+                keywords = keywords.subList(0, 5);
+            }
+
+            log.info("CS keyword suggestion completed - {} keywords generated", keywords.size());
+
+            return keywords;
+
+        } catch (Exception e) {
+            log.error("Failed to suggest CS keywords: {}", e.getMessage(), e);
+            // Fallback: 기본 키워드 반환
+            return List.of("Algorithm (알고리즘)", "Data Structure (자료구조)", "Pattern (패턴)");
+        }
+    }
+
+    @Override
+    public String generateInsightFeedback(String trigger, String abstraction, String application) {
+        log.info("Generating insight feedback - Abstraction: {}", abstraction);
+
+        String systemPrompt = """
+                You are a supportive mentor helping a developer build "Architecture of Insight" -
+                the skill of seeing Computer Science patterns in everyday life.
+
+                Your role:
+                - Review their insight mapping (Observation → CS Concept → Application)
+                - Provide encouraging, constructive feedback
+                - Validate creative connections
+                - Suggest additional related concepts or deeper insights
+                - Help them refine their thinking
+
+                Structure your feedback in Korean with 3 parts:
+                1. 격려 (Encouragement): What's good about this insight? (1-2 sentences)
+                2. 심화 (Deepening): How can this connection be explored further? (2-3 sentences)
+                3. 확장 (Extension): What other CS concepts could relate? (1-2 sentences, suggest 1-2 more concepts)
+
+                Keep it warm, constructive, and intellectually stimulating.
+                Total length: 4-6 sentences.
+                Write in Korean.
+                """;
+
+        String userMessage = String.format("""
+                사용자의 Insight Log:
+
+                [관찰 (Trigger)]
+                %s
+
+                [CS 개념 (Abstraction)]
+                %s
+
+                [적용점 (Application)]
+                %s
+
+                이 통찰에 대해 피드백해주세요.
+                """, trigger, abstraction, application);
+
+        try {
+            ChatClient chatClient = chatClientBuilder
+                    .defaultOptions(OpenAiChatOptions.builder()
+                            .temperature(0.7)
+                            .build())
+                    .build();
+
+            String feedback = chatClient.prompt()
+                    .system(systemPrompt)
+                    .user(userMessage)
+                    .call()
+                    .content();
+
+            log.info("Insight feedback generated successfully");
+
+            return feedback;
+
+        } catch (Exception e) {
+            log.error("Failed to generate insight feedback: {}", e.getMessage(), e);
+            return "통찰을 기록해주셔서 감사합니다. 일상에서 CS 개념을 발견하는 것은 개발자적 사고를 키우는 훌륭한 연습입니다.";
         }
     }
 }

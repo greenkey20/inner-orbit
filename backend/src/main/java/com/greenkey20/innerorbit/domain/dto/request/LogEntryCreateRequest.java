@@ -1,5 +1,6 @@
 package com.greenkey20.innerorbit.domain.dto.request;
 
+import com.greenkey20.innerorbit.domain.entity.LogType;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -39,5 +40,38 @@ public class LogEntryCreateRequest {
     @Size(max = 10000, message = "촉각 정보는 10000자를 초과할 수 없습니다")
     private String sensoryTactile;
 
-    private Boolean isDeepLog = false;
+    @Builder.Default
+    private LogType logType = LogType.DAILY;
+
+    /**
+     * Backward compatibility: isDeepLog is deprecated, use logType instead
+     * @deprecated Use {@link #logType} with value {@link LogType#SENSORY}
+     */
+    @Deprecated
+    public void setIsDeepLog(Boolean isDeepLog) {
+        if (isDeepLog != null && isDeepLog) {
+            this.logType = LogType.SENSORY;
+        }
+    }
+
+    /**
+     * Backward compatibility: computed from logType
+     * @deprecated Use {@link #logType}
+     */
+    @Deprecated
+    public Boolean getIsDeepLog() {
+        return logType == LogType.SENSORY;
+    }
+
+    @Size(max = 10000, message = "통찰 트리거는 10000자를 초과할 수 없습니다")
+    private String insightTrigger;
+
+    @Size(max = 10000, message = "통찰 추상화는 10000자를 초과할 수 없습니다")
+    private String insightAbstraction;
+
+    @Size(max = 10000, message = "통찰 적용은 10000자를 초과할 수 없습니다")
+    private String insightApplication;
+
+    @Size(max = 10000, message = "AI 피드백은 10000자를 초과할 수 없습니다")
+    private String aiFeedback;
 }

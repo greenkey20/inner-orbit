@@ -99,6 +99,15 @@ public interface LogService {
     LogEntryResponse updateLogAnalysis(Long logId);
 
     /**
+     * Insight Log에 대한 AI 피드백 생성 및 저장
+     * Insight Log의 Trigger, Abstraction, Application을 분석하여 AI 피드백을 생성하고 저장
+     *
+     * @param logId Insight Log 엔트리 ID
+     * @return 피드백이 추가된 로그 엔트리 응답 DTO
+     */
+    LogEntryResponse generateInsightFeedback(Long logId);
+
+    /**
      * 로그 엔트리 삭제
      *
      * @param id 삭제할 엔트리 ID

@@ -3,6 +3,7 @@ package com.greenkey20.innerorbit.feature;
 import com.greenkey20.innerorbit.domain.dto.request.LogEntryCreateRequest;
 import com.greenkey20.innerorbit.domain.dto.response.LogEntryResponse;
 import com.greenkey20.innerorbit.domain.entity.LogEntry;
+import com.greenkey20.innerorbit.domain.entity.LogType;
 import com.greenkey20.innerorbit.repository.LogRepository;
 import com.greenkey20.innerorbit.service.LogService;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,8 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Deep Log 기능 통합 테스트
- * 새로운 sensory field들과 isDeepLog flag의 persistence 및 retrieval을 검증
+ * Deep Log (Sensory Log) 기능 통합 테스트
+ * 새로운 sensory field들과 logType의 persistence 및 retrieval을 검증
+ * Note: isDeepLog는 deprecated, logType=SENSORY 사용
  */
 @SpringBootTest
 @ActiveProfiles("test")
@@ -35,34 +37,37 @@ class DeepLogIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        // Deep Log 요청 데이터 준비
+        // Sensory Log 요청 데이터 준비 (logType=SENSORY)
         deepLogRequest = LogEntryCreateRequest.builder()
                 .content("오늘 무이네 백사장에서의 여행 경험을 기록한다.")
                 .stability(85)
                 .gravity(25)
+                .logType(LogType.SENSORY)
                 .location("Mui Ne White Sand Dunes")
                 .sensoryVisual("Golden sunrise")
                 .sensoryAuditory("Wind blowing")
                 .sensoryTactile("Soft sand")
-                .isDeepLog(true)
                 .build();
     }
 
     @Test
-    @DisplayName("Deep Log 생성 및 조회 - 모든 새로운 필드가 정상적으로 저장되고 조회되는지 검증")
+    @DisplayName("Sensory Log 생성 및 조회 - 모든 필드가 정상적으로 저장되고 조회되는지 검증")
     void createAndRetrieveDeepLog_Success() {
-        // Step 1: Deep Log 생성
+        // Step 1: Sensory Log 생성
         LogEntryResponse createdResponse = logService.createLogEntry(deepLogRequest);
 
         // Step 2: 생성 결과 검증
         assertThat(createdResponse).isNotNull();
         assertThat(createdResponse.getId()).isNotNull();
+        assertThat(createdResponse.getLogType()).isEqualTo(LogType.SENSORY);
         assertThat(createdResponse.getLocation()).isEqualTo("Mui Ne White Sand Dunes");
         assertThat(createdResponse.getSensoryVisual()).isEqualTo("Golden sunrise");
         assertThat(createdResponse.getSensoryAuditory()).isEqualTo("Wind blowing");
         assertThat(createdResponse.getSensoryTactile()).isEqualTo("Soft sand");
+
+        // Backward compatibility: isDeepLog should be computed as true
         assertThat(createdResponse.getIsDeepLog()).isTrue();
-        
+
         // Core fields should also be correct
         assertThat(createdResponse.getContent()).isEqualTo("오늘 무이네 백사장에서의 여행 경험을 기록한다.");
         assertThat(createdResponse.getStability()).isEqualTo(85);
@@ -72,26 +77,27 @@ class DeepLogIntegrationTest {
         LogEntry savedEntity = logRepository.findById(createdResponse.getId())
                 .orElseThrow(() -> new AssertionError("저장된 엔티티를 찾을 수 없습니다."));
 
+        assertThat(savedEntity.getLogType()).isEqualTo(LogType.SENSORY);
         assertThat(savedEntity.getLocation()).isEqualTo("Mui Ne White Sand Dunes");
         assertThat(savedEntity.getSensoryVisual()).isEqualTo("Golden sunrise");
         assertThat(savedEntity.getSensoryAuditory()).isEqualTo("Wind blowing");
         assertThat(savedEntity.getSensoryTactile()).isEqualTo("Soft sand");
-        assertThat(savedEntity.getIsDeepLog()).isTrue();
 
         // Step 4: 서비스를 통한 조회로 재검증
         LogEntryResponse retrievedResponse = logService.getLogEntry(createdResponse.getId());
 
+        assertThat(retrievedResponse.getLogType()).isEqualTo(LogType.SENSORY);
         assertThat(retrievedResponse.getLocation()).isEqualTo("Mui Ne White Sand Dunes");
         assertThat(retrievedResponse.getSensoryVisual()).isEqualTo("Golden sunrise");
         assertThat(retrievedResponse.getSensoryAuditory()).isEqualTo("Wind blowing");
         assertThat(retrievedResponse.getSensoryTactile()).isEqualTo("Soft sand");
-        assertThat(retrievedResponse.getIsDeepLog()).isTrue();
+        assertThat(retrievedResponse.getIsDeepLog()).isTrue(); // Backward compatibility
     }
 
     @Test
-    @DisplayName("일반 Log 생성 - isDeepLog가 false로 기본값 설정되는지 검증")
-    void createRegularLog_DefaultIsDeepLogFalse() {
-        // 일반 로그 요청 (Deep Log 필드 없이)
+    @DisplayName("일반 Log 생성 - logType이 DAILY로 기본값 설정되는지 검증")
+    void createRegularLog_DefaultLogTypeDaily() {
+        // 일반 로그 요청 (Sensory 필드 없이)
         LogEntryCreateRequest regularRequest = LogEntryCreateRequest.builder()
                 .content("일반 감정 로그입니다.")
                 .stability(70)
@@ -101,7 +107,8 @@ class DeepLogIntegrationTest {
         // 생성 및 검증
         LogEntryResponse response = logService.createLogEntry(regularRequest);
 
-        assertThat(response.getIsDeepLog()).isFalse();
+        assertThat(response.getLogType()).isEqualTo(LogType.DAILY);
+        assertThat(response.getIsDeepLog()).isFalse(); // Backward compatibility
         assertThat(response.getLocation()).isNull();
         assertThat(response.getSensoryVisual()).isNull();
         assertThat(response.getSensoryAuditory()).isNull();
@@ -109,22 +116,23 @@ class DeepLogIntegrationTest {
     }
 
     @Test
-    @DisplayName("Deep Log with null sensory fields - 일부 sensory 필드가 null인 경우 처리")
+    @DisplayName("Sensory Log with null fields - 일부 sensory 필드가 null인 경우 처리")
     void createDeepLogWithNullSensoryFields_Success() {
-        LogEntryCreateRequest partialDeepLogRequest = LogEntryCreateRequest.builder()
-                .content("부분적인 감각 정보만 있는 Deep Log")
+        LogEntryCreateRequest partialSensoryRequest = LogEntryCreateRequest.builder()
+                .content("부분적인 감각 정보만 있는 Sensory Log")
                 .stability(60)
                 .gravity(40)
+                .logType(LogType.SENSORY)
                 .location("Seoul, Korea")
                 .sensoryVisual("Beautiful cherry blossoms")
                 .sensoryAuditory(null) // null
                 .sensoryTactile("Cool spring breeze")
-                .isDeepLog(true)
                 .build();
 
-        LogEntryResponse response = logService.createLogEntry(partialDeepLogRequest);
+        LogEntryResponse response = logService.createLogEntry(partialSensoryRequest);
 
-        assertThat(response.getIsDeepLog()).isTrue();
+        assertThat(response.getLogType()).isEqualTo(LogType.SENSORY);
+        assertThat(response.getIsDeepLog()).isTrue(); // Backward compatibility
         assertThat(response.getLocation()).isEqualTo("Seoul, Korea");
         assertThat(response.getSensoryVisual()).isEqualTo("Beautiful cherry blossoms");
         assertThat(response.getSensoryAuditory()).isNull();
@@ -141,13 +149,14 @@ class DeepLogIntegrationTest {
                 .content("긴 위치 이름 테스트")
                 .stability(75)
                 .gravity(30)
+                .logType(LogType.SENSORY)
                 .location(longLocation)
                 .sensoryVisual("Spectacular dunes stretching to the horizon")
-                .isDeepLog(true)
                 .build();
 
         LogEntryResponse response = logService.createLogEntry(longLocationRequest);
 
+        assertThat(response.getLogType()).isEqualTo(LogType.SENSORY);
         assertThat(response.getLocation()).isEqualTo(longLocation);
         assertThat(response.getLocation().length()).isLessThanOrEqualTo(500);
     }
@@ -160,20 +169,50 @@ class DeepLogIntegrationTest {
                 "Each grain feels warm and soft beneath my feet, shifting and flowing like liquid silk. The texture changes " +
                 "subtly as I walk from the fine, almost powder-like sand near the dunes to the slightly coarser grains " +
                 "where the wind has carved deeper channels. The warmth penetrates through my skin, creating a soothing " +
-                "sensation that connects me deeply to this moment in time.";
+                "sensation that connects me deeply to this moment in time. " +
+                "As the day progresses, the temperature shifts dramatically, and I can feel the transition from cool morning " +
+                "sand to the intense heat of midday. The breeze picks up, carrying with it the salt-tinged scent of the nearby " +
+                "ocean, mixing with the earthy smell of the desert landscape. Each step I take leaves a temporary imprint that " +
+                "the wind begins to erase almost immediately, as if the landscape is constantly renewing itself. " +
+                "The sensory experience is overwhelming yet calming, grounding me in the present moment while connecting me " +
+                "to the timeless nature of this environment. The interplay of heat, texture, movement, and sound creates " +
+                "a symphony of sensations that words can barely capture.";
 
         LogEntryCreateRequest longSensoryRequest = LogEntryCreateRequest.builder()
                 .content("상세한 감각 기록")
                 .stability(90)
                 .gravity(15)
+                .logType(LogType.SENSORY)
                 .location("Mui Ne")
                 .sensoryTactile(longSensoryText)
-                .isDeepLog(true)
                 .build();
 
         LogEntryResponse response = logService.createLogEntry(longSensoryRequest);
 
+        assertThat(response.getLogType()).isEqualTo(LogType.SENSORY);
         assertThat(response.getSensoryTactile()).isEqualTo(longSensoryText);
         assertThat(response.getSensoryTactile().length()).isGreaterThan(1000);
+    }
+
+    @Test
+    @DisplayName("Backward Compatibility - isDeepLog setter로 SENSORY 타입 설정")
+    void testBackwardCompatibility_IsDeepLogSetter() {
+        // Deprecated isDeepLog setter 사용 (하위 호환성)
+        LogEntryCreateRequest legacyRequest = LogEntryCreateRequest.builder()
+                .content("Legacy API 호환성 테스트")
+                .stability(80)
+                .gravity(20)
+                .location("Test Location")
+                .sensoryVisual("Test Visual")
+                .build();
+
+        // Deprecated setter 호출
+        legacyRequest.setIsDeepLog(true);
+
+        LogEntryResponse response = logService.createLogEntry(legacyRequest);
+
+        // logType이 SENSORY로 변환되어야 함
+        assertThat(response.getLogType()).isEqualTo(LogType.SENSORY);
+        assertThat(response.getIsDeepLog()).isTrue();
     }
 }
