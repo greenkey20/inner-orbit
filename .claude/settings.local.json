@@ -48,7 +48,8 @@
       "Bash(nc:*)",
       "Bash(git restore:*)",
       "Bash(./gradlew clean:*)",
-      "Bash(./gradlew build:*)"
+      "Bash(./gradlew build:*)",
+      "Bash(pkill:*)"
     ],
     "deny": [],
     "ask": []
