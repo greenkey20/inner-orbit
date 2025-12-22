@@ -158,6 +158,19 @@ public class LogController {
     }
 
     /**
+     * Insight Log에 대한 AI 피드백 요청
+     * Flight History에서 사용자가 나중에 요청하는 방식
+     *
+     * POST /api/logs/{id}/request-feedback
+     */
+    @PostMapping("/{id}/request-feedback")
+    public ResponseEntity<LogEntryResponse> requestInsightFeedback(@PathVariable Long id) {
+        log.info("Requesting AI feedback for Insight log with id: {}", id);
+        LogEntryResponse response = logService.generateInsightFeedback(id);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * 로그 엔트리 삭제
      *
      * DELETE /api/logs/{id}

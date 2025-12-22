@@ -259,4 +259,57 @@ public class LogServiceImpl implements LogService {
                 "alternative", result.getAlternative() != null ? result.getAlternative() : ""
         );
     }
+
+    @Override
+    @Transactional
+    public LogEntryResponse generateInsightFeedback(Long logId) {
+        log.info("Generating AI feedback for Insight log entry ID: {}", logId);
+
+        // 1. 로그 엔트리 조회
+        LogEntry logEntry = logRepository.findById(logId)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.LOG_ENTRY_NOT_FOUND,
+                        String.format("ID %d에 해당하는 로그를 찾을 수 없습니다.", logId)
+                ));
+
+        // 2. Insight Log 필드 검증
+        if (logEntry.getInsightTrigger() == null || logEntry.getInsightTrigger().trim().isEmpty()) {
+            throw new BusinessException(
+                    ErrorCode.INVALID_INPUT_VALUE,
+                    "Insight Trigger가 없습니다. Insight Log에만 피드백을 요청할 수 있습니다."
+            );
+        }
+
+        if (logEntry.getInsightAbstraction() == null || logEntry.getInsightAbstraction().trim().isEmpty()) {
+            throw new BusinessException(
+                    ErrorCode.INVALID_INPUT_VALUE,
+                    "Insight Abstraction이 없습니다."
+            );
+        }
+
+        if (logEntry.getInsightApplication() == null || logEntry.getInsightApplication().trim().isEmpty()) {
+            throw new BusinessException(
+                    ErrorCode.INVALID_INPUT_VALUE,
+                    "Insight Application이 없습니다."
+            );
+        }
+
+        // 3. AI 서비스를 통해 피드백 생성
+        String feedback = aiService.generateInsightFeedback(
+                logEntry.getInsightTrigger(),
+                logEntry.getInsightAbstraction(),
+                logEntry.getInsightApplication()
+        );
+
+        // 4. 피드백을 엔티티에 저장
+        logEntry.setAiFeedback(feedback);
+
+        // 5. 엔티티 저장 (updatedAt은 @PreUpdate에서 자동 설정)
+        LogEntry updatedEntry = logRepository.save(logEntry);
+
+        log.info("AI feedback generated and saved for Insight log entry ID: {}", logId);
+
+        // 6. Entity -> DTO 변환 후 반환
+        return LogEntryResponse.from(updatedEntry);
+    }
 }

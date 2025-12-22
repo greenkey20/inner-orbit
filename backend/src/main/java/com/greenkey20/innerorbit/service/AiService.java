@@ -2,9 +2,11 @@ package com.greenkey20.innerorbit.service;
 
 import com.greenkey20.innerorbit.domain.dto.response.AnalysisResult;
 
+import java.util.List;
+
 /**
  * AI 서비스 인터페이스
- * OpenAI GPT 모델을 사용한 감정 로그 분석 기능을 정의
+ * OpenAI GPT 모델을 사용한 감정 로그 분석 및 Insight 지원 기능을 정의
  */
 public interface AiService {
 
@@ -28,4 +30,24 @@ public interface AiService {
      * @return 생성된 질문 (한국어)
      */
     String generateDynamicPrompt(Integer gravity, Integer stability);
+
+    /**
+     * Insight Log용 CS 키워드 추천
+     * 일상 관찰(Trigger)을 분석하여 연관된 CS/소프트웨어 개념을 3-5개 제안
+     *
+     * @param trigger 사용자가 관찰한 일상적 현상
+     * @return CS 개념 키워드 목록 (예: ["Message Queue", "Load Balancing", ...])
+     */
+    List<String> suggestCsKeywords(String trigger);
+
+    /**
+     * Insight Log에 대한 AI 피드백 생성
+     * 사용자가 작성한 Insight를 분석하여 건설적인 피드백 제공
+     *
+     * @param trigger 관찰한 대상
+     * @param abstraction 선택한 CS 개념
+     * @param application 적용점
+     * @return AI 피드백 (격려, 개선점, 추가 연결 개념 포함)
+     */
+    String generateInsightFeedback(String trigger, String abstraction, String application);
 }
