@@ -58,10 +58,27 @@ export default function LogEditor({
             'Race Condition',
             'Dependency Injection',
             'State Machine',
-            'Circuit Breaker'
+            'Circuit Breaker',
+            'Message Queue',
+            'Asynchronous I/O',
+            'Connection Pool',
+            'Garbage Collection',
+            'Hash Collision',
+            'Binary Search Tree',
+            'Thread Pool'
         ];
-        const randomKeyword = mockKeywords[Math.floor(Math.random() * mockKeywords.length)];
-        handleFieldChange('insightAbstraction', randomKeyword);
+
+        // 3~5개 랜덤 선택
+        const numKeywords = Math.floor(Math.random() * 3) + 3; // 3, 4, 또는 5
+        const shuffled = [...mockKeywords].sort(() => 0.5 - Math.random());
+        const selectedKeywords = shuffled.slice(0, numKeywords);
+
+        // 현재 값에 해시태그 형태로 추가
+        const currentValue = deepLogData.insightAbstraction || '';
+        const keywordTags = selectedKeywords.map(k => `#${k.replace(/\s+/g, '')}`).join(' ');
+        const newValue = currentValue ? `${currentValue} ${keywordTags}` : keywordTags;
+
+        handleFieldChange('insightAbstraction', newValue);
     };
 
     const handleSubmitWithLogType = () => {
