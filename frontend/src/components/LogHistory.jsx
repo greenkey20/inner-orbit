@@ -53,6 +53,10 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
     const [editInsightAbstraction, setEditInsightAbstraction] = useState('');
     const [editInsightApplication, setEditInsightApplication] = useState('');
 
+    // AI 피드백 요청 상태
+    const [requestingFeedback, setRequestingFeedback] = useState(null);
+    const [feedbackError, setFeedbackError] = useState(null);
+
     // 페이지네이션 상태
     const [visibleCount, setVisibleCount] = useState(10);
     const observerRef = useRef(null);
@@ -204,6 +208,50 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
             setAnalysisError(error.message);
         } finally {
             setAnalyzingId(null);
+        }
+    };
+
+    // Insight Log AI 피드백 요청
+    const handleRequestFeedback = async (entry) => {
+        console.log('🟣 Request Feedback button clicked! Entry ID:', entry.id);
+        setRequestingFeedback(entry.id);
+        setFeedbackError(null);
+
+        try {
+            const response = await fetch(`/api/logs/${entry.id}/request-feedback`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `피드백 생성 실패: ${response.status}`);
+            }
+
+            const updatedLog = await response.json();
+            console.log('✅ AI Feedback Response:', updatedLog);
+
+            // 엔트리 목록 업데이트 (aiFeedback 추가)
+            const updatedEntries = entries.map(e =>
+                e.id === entry.id
+                    ? { ...e, aiFeedback: updatedLog.aiFeedback }
+                    : e
+            );
+
+            // 부모 컴포넌트의 state 업데이트를 위해 onUpdateEntry 호출은 생략
+            // 대신 로컬 상태만 업데이트 (entries는 props이므로 직접 수정 불가)
+            // 페이지 새로고침 시 백엔드에서 다시 불러오므로 괜찮음
+
+            alert('AI 피드백이 생성되었습니다! 페이지를 새로고침하면 확인할 수 있습니다.');
+            window.location.reload();
+
+        } catch (error) {
+            console.error('❌ Feedback Request Error:', error);
+            setFeedbackError(error.message);
+        } finally {
+            setRequestingFeedback(null);
         }
     };
 
@@ -529,7 +577,32 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                                 </div>
                                             )}
 
-                                            {/* AI Feedback */}
+                                            {/* AI Feedback Request Button */}
+                                            {!entry.aiFeedback && (
+                                                <div className="mt-4">
+                                                    <button
+                                                        onClick={() => handleRequestFeedback(entry)}
+                                                        disabled={requestingFeedback === entry.id}
+                                                        className="w-full px-4 py-2.5 bg-gradient-to-r from-violet-100 to-purple-100 hover:from-violet-200 hover:to-purple-200 text-violet-700 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        {requestingFeedback === entry.id ? (
+                                                            <>⏳ AI 피드백 생성 중...</>
+                                                        ) : (
+                                                            <>
+                                                                <Sparkles className="w-4 h-4" />
+                                                                AI 피드백 요청
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                    {feedbackError && requestingFeedback === entry.id && (
+                                                        <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600">
+                                                            ⚠️ {feedbackError}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {/* AI Feedback Display */}
                                             {entry.aiFeedback && (
                                                 <div className="mt-4 pt-3 border-t border-violet-200">
                                                     <div className="flex items-center gap-2 mb-2">
