@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Calendar, Trash2, Download, Upload, AlertCircle, Hexagon, Pencil, Check, X, Zap, Shield, Sparkles, MapPin, Eye, Ear, Hand } from 'lucide-react';
+import { Calendar, Trash2, Download, Upload, AlertCircle, Hexagon, Pencil, Check, X, Zap, Shield, Sparkles, MapPin, Eye, Ear, Hand, Lightbulb } from 'lucide-react';
 
 // UI 컴포넌트: 카드
 const Card = ({ children, className = "" }) => (
@@ -47,6 +47,11 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
     const [editSensoryVisual, setEditSensoryVisual] = useState('');
     const [editSensoryAuditory, setEditSensoryAuditory] = useState('');
     const [editSensoryTactile, setEditSensoryTactile] = useState('');
+
+    // Insight Log 필드 상태
+    const [editInsightTrigger, setEditInsightTrigger] = useState('');
+    const [editInsightAbstraction, setEditInsightAbstraction] = useState('');
+    const [editInsightApplication, setEditInsightApplication] = useState('');
 
     // 페이지네이션 상태
     const [visibleCount, setVisibleCount] = useState(10);
@@ -102,23 +107,41 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
             setEditSensoryAuditory(entry.sensoryAuditory || '');
             setEditSensoryTactile(entry.sensoryTactile || '');
         }
+
+        // Insight Log 필드 로드
+        if (entry.logType === 'INSIGHT') {
+            setEditInsightTrigger(entry.insightTrigger || '');
+            setEditInsightAbstraction(entry.insightAbstraction || '');
+            setEditInsightApplication(entry.insightApplication || '');
+        }
     };
 
     // 수정 저장
     const saveEdit = () => {
-        // Deep Log 엔트리인 경우 감각 필드도 함께 전달
         const entry = entries.find(e => e.id === editingId);
+        let logFields = null;
+
+        // Deep Log 엔트리인 경우 감각 필드도 함께 전달
         if (entry && entry.isDeepLog) {
-            const deepLogFields = {
+            logFields = {
                 location: editLocation,
                 sensoryVisual: editSensoryVisual,
                 sensoryAuditory: editSensoryAuditory,
-                sensoryTactile: editSensoryTactile
+                sensoryTactile: editSensoryTactile,
+                logType: 'SENSORY'
             };
-            onUpdateEntry(editingId, editContent, editGravity, editStability, deepLogFields);
-        } else {
-            onUpdateEntry(editingId, editContent, editGravity, editStability);
         }
+        // Insight Log 엔트리인 경우 통찰 필드도 함께 전달
+        else if (entry && entry.logType === 'INSIGHT') {
+            logFields = {
+                insightTrigger: editInsightTrigger,
+                insightAbstraction: editInsightAbstraction,
+                insightApplication: editInsightApplication,
+                logType: 'INSIGHT'
+            };
+        }
+
+        onUpdateEntry(editingId, editContent, editGravity, editStability, logFields);
         setEditingId(null);
     };
 
@@ -132,6 +155,11 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
         setEditSensoryVisual('');
         setEditSensoryAuditory('');
         setEditSensoryTactile('');
+
+        // Insight Log state 초기화
+        setEditInsightTrigger('');
+        setEditInsightAbstraction('');
+        setEditInsightApplication('');
     };
 
     // AI 분석 실행 - 백엔드 API 호출
@@ -411,6 +439,106 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                                     </div>
                                                 )}
                                             </div>
+                                        </>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Insight Log Data - 통찰 정보 표시/수정 */}
+                            {entry.logType === 'INSIGHT' && (
+                                <div className="mb-5 p-4 bg-gradient-to-r from-violet-50 to-purple-50 rounded-xl border border-violet-200">
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <span className="text-xs font-bold text-violet-800 uppercase tracking-wider">💡 Architecture of Insight</span>
+                                    </div>
+
+                                    {isEditing ? (
+                                        /* Edit Mode - Input Fields */
+                                        <>
+                                            {/* Trigger Input */}
+                                            <div className="mb-3">
+                                                <label className="flex items-center gap-2 text-xs font-bold text-slate-700 mb-2">
+                                                    1️⃣ Trigger (관찰)
+                                                </label>
+                                                <textarea
+                                                    value={editInsightTrigger}
+                                                    onChange={(e) => setEditInsightTrigger(e.target.value)}
+                                                    placeholder="일상에서 관찰한 것을 적어보세요..."
+                                                    className="w-full h-20 px-3 py-2 bg-white border border-violet-300 rounded-lg resize-none focus:ring-2 focus:ring-violet-400 focus:border-violet-400 text-sm text-slate-700 placeholder:text-violet-300"
+                                                />
+                                            </div>
+
+                                            {/* Abstraction Input */}
+                                            <div className="mb-3">
+                                                <label className="flex items-center gap-2 text-xs font-bold text-slate-700 mb-2">
+                                                    2️⃣ Abstraction (CS 개념 연결)
+                                                </label>
+                                                <textarea
+                                                    value={editInsightAbstraction}
+                                                    onChange={(e) => setEditInsightAbstraction(e.target.value)}
+                                                    placeholder="관찰과 연결되는 CS 개념을 적어보세요..."
+                                                    className="w-full h-20 px-3 py-2 bg-white border border-violet-300 rounded-lg resize-none focus:ring-2 focus:ring-violet-400 focus:border-violet-400 text-sm text-slate-700 placeholder:text-violet-300"
+                                                />
+                                            </div>
+
+                                            {/* Application Input */}
+                                            <div className="mb-3">
+                                                <label className="flex items-center gap-2 text-xs font-bold text-slate-700 mb-2">
+                                                    3️⃣ Application (실무 적용)
+                                                </label>
+                                                <textarea
+                                                    value={editInsightApplication}
+                                                    onChange={(e) => setEditInsightApplication(e.target.value)}
+                                                    placeholder="이 개념을 내 코드나 프로젝트에 어떻게 적용할 수 있을까요..."
+                                                    className="w-full h-24 px-3 py-2 bg-white border border-violet-300 rounded-lg resize-none focus:ring-2 focus:ring-violet-400 focus:border-violet-400 text-sm text-slate-700 placeholder:text-violet-300"
+                                                />
+                                            </div>
+                                        </>
+                                    ) : (
+                                        /* View Mode - Display Data */
+                                        <>
+                                            {/* Trigger */}
+                                            {entry.insightTrigger && (
+                                                <div className="mb-3">
+                                                    <div className="flex items-center gap-2 mb-1.5">
+                                                        <Lightbulb className="w-4 h-4 text-violet-600" />
+                                                        <span className="text-xs font-bold text-violet-700">1️⃣ Trigger (관찰)</span>
+                                                    </div>
+                                                    <p className="text-sm text-slate-700 pl-6 leading-relaxed">{entry.insightTrigger}</p>
+                                                </div>
+                                            )}
+
+                                            {/* Abstraction */}
+                                            {entry.insightAbstraction && (
+                                                <div className="mb-3">
+                                                    <div className="flex items-center gap-2 mb-1.5">
+                                                        <Sparkles className="w-4 h-4 text-purple-600" />
+                                                        <span className="text-xs font-bold text-purple-700">2️⃣ Abstraction (CS 개념)</span>
+                                                    </div>
+                                                    <p className="text-sm text-slate-700 pl-6 leading-relaxed">{entry.insightAbstraction}</p>
+                                                </div>
+                                            )}
+
+                                            {/* Application */}
+                                            {entry.insightApplication && (
+                                                <div className="mb-3">
+                                                    <div className="flex items-center gap-2 mb-1.5">
+                                                        <Hexagon className="w-4 h-4 text-violet-600" />
+                                                        <span className="text-xs font-bold text-violet-700">3️⃣ Application (실무 적용)</span>
+                                                    </div>
+                                                    <p className="text-sm text-slate-700 pl-6 leading-relaxed">{entry.insightApplication}</p>
+                                                </div>
+                                            )}
+
+                                            {/* AI Feedback */}
+                                            {entry.aiFeedback && (
+                                                <div className="mt-4 pt-3 border-t border-violet-200">
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <Sparkles className="w-4 h-4 text-amber-500" />
+                                                        <span className="text-xs font-bold text-amber-700">AI Feedback</span>
+                                                    </div>
+                                                    <p className="text-sm text-slate-600 pl-6 italic leading-relaxed">{entry.aiFeedback}</p>
+                                                </div>
+                                            )}
                                         </>
                                     )}
                                 </div>
