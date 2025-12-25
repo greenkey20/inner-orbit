@@ -55,6 +55,7 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
 
     // AI 피드백 요청 상태
     const [requestingFeedback, setRequestingFeedback] = useState(null);
+    const [feedbackResults, setFeedbackResults] = useState({});
     const [feedbackError, setFeedbackError] = useState(null);
 
     // 페이지네이션 상태
@@ -233,19 +234,13 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
             const updatedLog = await response.json();
             console.log('✅ AI Feedback Response:', updatedLog);
 
-            // 엔트리 목록 업데이트 (aiFeedback 추가)
-            const updatedEntries = entries.map(e =>
-                e.id === entry.id
-                    ? { ...e, aiFeedback: updatedLog.aiFeedback }
-                    : e
-            );
+            // 피드백 결과를 로컬 state에 저장 (Decrypt Log와 동일한 방식)
+            setFeedbackResults(prev => ({
+                ...prev,
+                [entry.id]: updatedLog.aiFeedback
+            }));
 
-            // 부모 컴포넌트의 state 업데이트를 위해 onUpdateEntry 호출은 생략
-            // 대신 로컬 상태만 업데이트 (entries는 props이므로 직접 수정 불가)
-            // 페이지 새로고침 시 백엔드에서 다시 불러오므로 괜찮음
-
-            alert('AI 피드백이 생성되었습니다! 페이지를 새로고침하면 확인할 수 있습니다.');
-            window.location.reload();
+            console.log('AI 피드백이 성공적으로 생성되었습니다.');
 
         } catch (error) {
             console.error('❌ Feedback Request Error:', error);
@@ -342,21 +337,23 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                             </div>
 
 
-                            {/* Content: Text or Textarea */}
-                            <div className="mb-5">
-                                {isEditing ? (
-                                    <textarea
-                                        value={editContent}
-                                        onChange={(e) => setEditContent(e.target.value)}
-                                        className="w-full min-h-[120px] p-3 bg-slate-50 border border-primary-200 rounded-lg resize-none focus:ring-2 focus:ring-primary-300 focus:border-primary-400 text-sm text-slate-700 leading-relaxed font-sans transition-all"
-                                        placeholder="로그 내용을 입력하세요..."
-                                    />
-                                ) : (
-                                    <div className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed font-sans">
-                                        {entry.content}
-                                    </div>
-                                )}
-                            </div>
+                            {/* Content: Text or Textarea (Insight Log는 content 필드 없음) */}
+                            {entry.logType !== 'INSIGHT' && (
+                                <div className="mb-5">
+                                    {isEditing ? (
+                                        <textarea
+                                            value={editContent}
+                                            onChange={(e) => setEditContent(e.target.value)}
+                                            className="w-full min-h-[120px] p-3 bg-slate-50 border border-primary-200 rounded-lg resize-none focus:ring-2 focus:ring-primary-300 focus:border-primary-400 text-sm text-slate-700 leading-relaxed font-sans transition-all"
+                                            placeholder="로그 내용을 입력하세요..."
+                                        />
+                                    ) : (
+                                        <div className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed font-sans">
+                                            {entry.content}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
 
                             {/* Deep Log Data - 감각 정보 표시/수정 */}
                             {entry.isDeepLog && (
@@ -578,7 +575,7 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                             )}
 
                                             {/* AI Feedback Request Button */}
-                                            {!entry.aiFeedback && (
+                                            {!entry.aiFeedback && !feedbackResults[entry.id] && (
                                                 <div className="mt-4">
                                                     <button
                                                         onClick={() => handleRequestFeedback(entry)}
@@ -603,13 +600,24 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                             )}
 
                                             {/* AI Feedback Display */}
-                                            {entry.aiFeedback && (
+                                            {(entry.aiFeedback || feedbackResults[entry.id]) && (
                                                 <div className="mt-4 pt-3 border-t border-violet-200">
-                                                    <div className="flex items-center gap-2 mb-2">
-                                                        <Sparkles className="w-4 h-4 text-amber-500" />
-                                                        <span className="text-xs font-bold text-amber-700">AI Feedback</span>
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <div className="flex items-center gap-2">
+                                                            <Sparkles className="w-4 h-4 text-amber-500" />
+                                                            <span className="text-xs font-bold text-amber-700">AI Feedback</span>
+                                                        </div>
+                                                        <button
+                                                            onClick={() => handleRequestFeedback(entry)}
+                                                            disabled={requestingFeedback === entry.id}
+                                                            className="px-2 py-1 text-xs text-violet-600 hover:text-violet-800 hover:bg-violet-50 rounded transition-all disabled:opacity-50"
+                                                        >
+                                                            {requestingFeedback === entry.id ? '생성 중...' : '🔄 Re-feedback'}
+                                                        </button>
                                                     </div>
-                                                    <p className="text-sm text-slate-600 pl-6 italic leading-relaxed">{entry.aiFeedback}</p>
+                                                    <p className="text-sm text-slate-600 pl-6 italic leading-relaxed">
+                                                        {feedbackResults[entry.id] || entry.aiFeedback}
+                                                    </p>
                                                 </div>
                                             )}
                                         </>
@@ -671,8 +679,8 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                 </div>
                             )}
 
-                            {/* AI Co-Pilot: Decrypt Log Button */}
-                            {!isEditing && (
+                            {/* AI Co-Pilot: Decrypt Log Button (Insight Log는 제외) */}
+                            {!isEditing && entry.logType !== 'INSIGHT' && (
                                 <div className="mt-4 pt-4 border-t border-slate-100">
                                     {analysisResults[entry.id] ? (
                                         <div className="space-y-3">
