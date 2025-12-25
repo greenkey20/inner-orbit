@@ -210,7 +210,10 @@ export default function useInnerOrbit() {
      * @param {Object} logFields - (선택) Log 타입별 필드들
      */
     const updateEntry = async (id, newContent, newGravity, newStability, logFields = null) => {
-        if (!newContent.trim()) {
+        // Insight Log는 content 필드가 없으므로 검증 건너뛰기
+        const isInsightLog = logFields && logFields.logType === 'INSIGHT';
+
+        if (!isInsightLog && !newContent.trim()) {
             alert('내용을 입력해주세요.');
             return;
         }
