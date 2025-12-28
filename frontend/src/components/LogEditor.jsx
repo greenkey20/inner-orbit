@@ -40,6 +40,7 @@ export default function LogEditor({
     onDeepLogChange = () => {}
 }) {
     const [logMode, setLogMode] = useState('DAILY'); // DAILY, SENSORY, INSIGHT
+    const [loadingKeywords, setLoadingKeywords] = useState(false);
 
     const handleFieldChange = (field, value) => {
         onDeepLogChange({
@@ -49,36 +50,41 @@ export default function LogEditor({
         });
     };
 
-    const handleMockKeywordSuggestion = () => {
-        const mockKeywords = [
-            'Load Balancer',
-            'Deadlock',
-            'Cache Invalidation',
-            'Event-Driven Architecture',
-            'Race Condition',
-            'Dependency Injection',
-            'State Machine',
-            'Circuit Breaker',
-            'Message Queue',
-            'Asynchronous I/O',
-            'Connection Pool',
-            'Garbage Collection',
-            'Hash Collision',
-            'Binary Search Tree',
-            'Thread Pool'
-        ];
+    const handleAiKeywordSuggestion = async () => {
+        // Validation: Trigger 필드 확인
+        if (!deepLogData.insightTrigger || deepLogData.insightTrigger.trim().length < 10) {
+            alert('관찰 내용을 10자 이상 입력해주세요. AI가 더 정확한 키워드를 추천할 수 있습니다.');
+            return;
+        }
 
-        // 3~5개 랜덤 선택
-        const numKeywords = Math.floor(Math.random() * 3) + 3; // 3, 4, 또는 5
-        const shuffled = [...mockKeywords].sort(() => 0.5 - Math.random());
-        const selectedKeywords = shuffled.slice(0, numKeywords);
+        setLoadingKeywords(true);
 
-        // 현재 값에 해시태그 형태로 추가
-        const currentValue = deepLogData.insightAbstraction || '';
-        const keywordTags = selectedKeywords.map(k => `#${k.replace(/\s+/g, '')}`).join(' ');
-        const newValue = currentValue ? `${currentValue} ${keywordTags}` : keywordTags;
+        try {
+            const response = await fetch('/api/ai/insights/suggest-keywords', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ trigger: deepLogData.insightTrigger })
+            });
 
-        handleFieldChange('insightAbstraction', newValue);
+            if (!response.ok) {
+                throw new Error('AI 키워드 추천 API 호출 실패');
+            }
+
+            const data = await response.json();
+            const keywords = data.keywords;
+
+            // 현재 값에 해시태그 형태로 추가
+            const currentValue = deepLogData.insightAbstraction || '';
+            const keywordTags = keywords.map(k => `#${k.replace(/\s+/g, '')}`).join(' ');
+            const newValue = currentValue ? `${currentValue} ${keywordTags}` : keywordTags;
+
+            handleFieldChange('insightAbstraction', newValue);
+        } catch (error) {
+            console.error('AI 키워드 추천 실패:', error);
+            alert('AI 키워드 추천에 실패했습니다. 다시 시도해주세요.');
+        } finally {
+            setLoadingKeywords(false);
+        }
     };
 
     const handleSubmitWithLogType = () => {
@@ -255,11 +261,12 @@ export default function LogEditor({
                             <label className="text-xs font-semibold text-violet-600 mb-1.5 block flex items-center justify-between">
                                 <span>2️⃣ Abstraction (CS 개념 연결)</span>
                                 <button
-                                    onClick={handleMockKeywordSuggestion}
-                                    className="px-3 py-1 bg-gradient-to-r from-violet-100 to-purple-100 hover:from-violet-200 hover:to-purple-200 text-violet-700 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm"
+                                    onClick={handleAiKeywordSuggestion}
+                                    disabled={loadingKeywords}
+                                    className="px-3 py-1 bg-gradient-to-r from-violet-100 to-purple-100 hover:from-violet-200 hover:to-purple-200 text-violet-700 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     <Sparkles className="w-3.5 h-3.5" />
-                                    AI Suggest
+                                    {loadingKeywords ? '생성 중...' : 'AI Suggest'}
                                 </button>
                             </label>
                             <textarea

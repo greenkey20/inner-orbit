@@ -53,6 +53,11 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
     const [editInsightAbstraction, setEditInsightAbstraction] = useState('');
     const [editInsightApplication, setEditInsightApplication] = useState('');
 
+    // AI 피드백 요청 상태
+    const [requestingFeedback, setRequestingFeedback] = useState(null);
+    const [feedbackResults, setFeedbackResults] = useState({});
+    const [feedbackError, setFeedbackError] = useState(null);
+
     // 페이지네이션 상태
     const [visibleCount, setVisibleCount] = useState(10);
     const observerRef = useRef(null);
@@ -207,6 +212,44 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
         }
     };
 
+    // Insight Log AI 피드백 요청
+    const handleRequestFeedback = async (entry) => {
+        console.log('🟣 Request Feedback button clicked! Entry ID:', entry.id);
+        setRequestingFeedback(entry.id);
+        setFeedbackError(null);
+
+        try {
+            const response = await fetch(`/api/logs/${entry.id}/request-feedback`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `피드백 생성 실패: ${response.status}`);
+            }
+
+            const updatedLog = await response.json();
+            console.log('✅ AI Feedback Response:', updatedLog);
+
+            // 피드백 결과를 로컬 state에 저장 (Decrypt Log와 동일한 방식)
+            setFeedbackResults(prev => ({
+                ...prev,
+                [entry.id]: updatedLog.aiFeedback
+            }));
+
+            console.log('AI 피드백이 성공적으로 생성되었습니다.');
+
+        } catch (error) {
+            console.error('❌ Feedback Request Error:', error);
+            setFeedbackError(error.message);
+        } finally {
+            setRequestingFeedback(null);
+        }
+    };
+
     return (
         <div className="space-y-6 animate-fade-in">
             {entries.length === 0 ? (
@@ -294,21 +337,23 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                             </div>
 
 
-                            {/* Content: Text or Textarea */}
-                            <div className="mb-5">
-                                {isEditing ? (
-                                    <textarea
-                                        value={editContent}
-                                        onChange={(e) => setEditContent(e.target.value)}
-                                        className="w-full min-h-[120px] p-3 bg-slate-50 border border-primary-200 rounded-lg resize-none focus:ring-2 focus:ring-primary-300 focus:border-primary-400 text-sm text-slate-700 leading-relaxed font-sans transition-all"
-                                        placeholder="로그 내용을 입력하세요..."
-                                    />
-                                ) : (
-                                    <div className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed font-sans">
-                                        {entry.content}
-                                    </div>
-                                )}
-                            </div>
+                            {/* Content: Text or Textarea (Insight Log는 content 필드 없음) */}
+                            {entry.logType !== 'INSIGHT' && (
+                                <div className="mb-5">
+                                    {isEditing ? (
+                                        <textarea
+                                            value={editContent}
+                                            onChange={(e) => setEditContent(e.target.value)}
+                                            className="w-full min-h-[120px] p-3 bg-slate-50 border border-primary-200 rounded-lg resize-none focus:ring-2 focus:ring-primary-300 focus:border-primary-400 text-sm text-slate-700 leading-relaxed font-sans transition-all"
+                                            placeholder="로그 내용을 입력하세요..."
+                                        />
+                                    ) : (
+                                        <div className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed font-sans">
+                                            {entry.content}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
 
                             {/* Deep Log Data - 감각 정보 표시/수정 */}
                             {entry.isDeepLog && (
@@ -529,14 +574,50 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                                 </div>
                                             )}
 
-                                            {/* AI Feedback */}
-                                            {entry.aiFeedback && (
+                                            {/* AI Feedback Request Button */}
+                                            {!entry.aiFeedback && !feedbackResults[entry.id] && (
+                                                <div className="mt-4">
+                                                    <button
+                                                        onClick={() => handleRequestFeedback(entry)}
+                                                        disabled={requestingFeedback === entry.id}
+                                                        className="w-full px-4 py-2.5 bg-gradient-to-r from-violet-100 to-purple-100 hover:from-violet-200 hover:to-purple-200 text-violet-700 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        {requestingFeedback === entry.id ? (
+                                                            <>⏳ AI 피드백 생성 중...</>
+                                                        ) : (
+                                                            <>
+                                                                <Sparkles className="w-4 h-4" />
+                                                                AI 피드백 요청
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                    {feedbackError && requestingFeedback === entry.id && (
+                                                        <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600">
+                                                            ⚠️ {feedbackError}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {/* AI Feedback Display */}
+                                            {(entry.aiFeedback || feedbackResults[entry.id]) && (
                                                 <div className="mt-4 pt-3 border-t border-violet-200">
-                                                    <div className="flex items-center gap-2 mb-2">
-                                                        <Sparkles className="w-4 h-4 text-amber-500" />
-                                                        <span className="text-xs font-bold text-amber-700">AI Feedback</span>
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <div className="flex items-center gap-2">
+                                                            <Sparkles className="w-4 h-4 text-amber-500" />
+                                                            <span className="text-xs font-bold text-amber-700">AI Feedback</span>
+                                                        </div>
+                                                        <button
+                                                            onClick={() => handleRequestFeedback(entry)}
+                                                            disabled={requestingFeedback === entry.id}
+                                                            className="px-2 py-1 text-xs text-violet-600 hover:text-violet-800 hover:bg-violet-50 rounded transition-all disabled:opacity-50"
+                                                        >
+                                                            {requestingFeedback === entry.id ? '생성 중...' : '🔄 Re-feedback'}
+                                                        </button>
                                                     </div>
-                                                    <p className="text-sm text-slate-600 pl-6 italic leading-relaxed">{entry.aiFeedback}</p>
+                                                    <p className="text-sm text-slate-600 pl-6 italic leading-relaxed">
+                                                        {feedbackResults[entry.id] || entry.aiFeedback}
+                                                    </p>
                                                 </div>
                                             )}
                                         </>
@@ -598,8 +679,8 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                 </div>
                             )}
 
-                            {/* AI Co-Pilot: Decrypt Log Button */}
-                            {!isEditing && (
+                            {/* AI Co-Pilot: Decrypt Log Button (Insight Log는 제외) */}
+                            {!isEditing && entry.logType !== 'INSIGHT' && (
                                 <div className="mt-4 pt-4 border-t border-slate-100">
                                     {analysisResults[entry.id] ? (
                                         <div className="space-y-3">
