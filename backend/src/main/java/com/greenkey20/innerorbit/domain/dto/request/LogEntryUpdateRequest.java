@@ -14,7 +14,8 @@ import lombok.*;
 @Builder
 public class LogEntryUpdateRequest {
 
-    @NotBlank(message = "내용을 입력해주세요")
+    // Content is optional for INSIGHT logs (required for DAILY/SENSORY)
+    // Validation happens in service layer based on logType
     @Size(max = 10000, message = "내용은 10000자를 초과할 수 없습니다")
     private String content;
 
