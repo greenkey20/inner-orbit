@@ -52,13 +52,67 @@
 ## 🔴 Git 관리 규칙
 
 ### ❌ 절대 금지
+- **main 브랜치에서 직접 작업 금지**
+- **main 브랜치에 직접 push 금지**
 - 운영에 영향을 주는 파일 삭제 (migration, 설정 파일 등)
 - 강제 푸시 (`git push -f`)
 
-### ✅ 올바른 방법
-- 변경사항은 항상 새 브랜치에서 작업
-- PR 생성하여 검토 후 merge
-- 실수 시 revert commit으로 복구
+### ✅ 올바른 Git 워크플로우
+
+#### 1. Feature 브랜치 생성 (필수!)
+```bash
+# main 브랜치에서 시작
+git checkout main
+git pull origin main
+
+# feature 브랜치 생성 (명명 규칙)
+git checkout -b feature/기능명
+# 또는
+git checkout -b fix/버그명
+```
+
+#### 2. 작업 및 커밋
+```bash
+# 작업 진행
+# ...
+
+# 커밋
+git add .
+git commit -m "feat: 기능 추가"
+```
+
+#### 3. Feature 브랜치 Push
+```bash
+# feature 브랜치를 원격에 push
+git push origin feature/기능명
+```
+
+#### 4. PR 생성
+```bash
+# gh CLI 사용
+gh pr create --title "제목" --body "내용"
+
+# 또는 GitHub 웹에서 PR 생성
+```
+
+#### 5. 리뷰 및 Merge
+- PR에서 코드 리뷰
+- 문제 없으면 GitHub에서 merge
+- Merge 후 feature 브랜치 삭제
+
+#### 브랜치 명명 규칙
+```
+feature/기능명       - 새 기능 추가
+fix/버그명          - 버그 수정
+refactor/리팩토링명 - 코드 리팩토링
+docs/문서명         - 문서 작업
+```
+
+### ⚠️ 예외 상황
+다음의 경우만 main에 직접 push 가능:
+- 급한 hotfix (운영 장애 상황)
+- 문서만 수정 (README.md 오타 등)
+- **그 외에는 무조건 feature 브랜치 + PR**
 
 ---
 
@@ -81,6 +135,7 @@
 작업을 시작하기 전에 다음을 확인하세요:
 
 - [ ] 이 CLAUDE_RULES.md 파일을 읽었는가?
+- [ ] **Feature 브랜치를 생성했는가?** → main에서 직접 작업 금지!
 - [ ] Migration 파일을 건드릴 계획인가? → 절대 삭제/수정 금지 확인
 - [ ] DB 볼륨을 건드릴 계획인가? → `-v` 옵션 사용 금지 확인
 - [ ] 운영 서버에 영향을 주는 작업인가? → 사용자에게 먼저 확인
