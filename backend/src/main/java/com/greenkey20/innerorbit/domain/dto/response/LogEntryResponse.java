@@ -36,7 +36,6 @@ public class LogEntryResponse {
     private String sensoryAuditory;
     private String sensoryTactile;
     private LogType logType;
-    private String insightTrigger;
     private String insightAbstraction;
     private String insightApplication;
     private String aiFeedback;
@@ -67,7 +66,6 @@ public class LogEntryResponse {
                 .sensoryAuditory(entity.getSensoryAuditory())
                 .sensoryTactile(entity.getSensoryTactile())
                 .logType(entity.getLogType())
-                .insightTrigger(entity.getInsightTrigger())
                 .insightAbstraction(entity.getInsightAbstraction())
                 .insightApplication(entity.getInsightApplication())
                 .aiFeedback(entity.getAiFeedback())

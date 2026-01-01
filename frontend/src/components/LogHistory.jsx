@@ -49,7 +49,6 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
     const [editSensoryTactile, setEditSensoryTactile] = useState('');
 
     // Insight Log 필드 상태
-    const [editInsightTrigger, setEditInsightTrigger] = useState('');
     const [editInsightAbstraction, setEditInsightAbstraction] = useState('');
     const [editInsightApplication, setEditInsightApplication] = useState('');
 
@@ -115,7 +114,6 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
 
         // Insight Log 필드 로드
         if (entry.logType === 'INSIGHT') {
-            setEditInsightTrigger(entry.insightTrigger || '');
             setEditInsightAbstraction(entry.insightAbstraction || '');
             setEditInsightApplication(entry.insightApplication || '');
         }
@@ -139,7 +137,6 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
         // Insight Log 엔트리인 경우 통찰 필드도 함께 전달
         else if (entry && entry.logType === 'INSIGHT') {
             logFields = {
-                insightTrigger: editInsightTrigger,
                 insightAbstraction: editInsightAbstraction,
                 insightApplication: editInsightApplication,
                 logType: 'INSIGHT'
@@ -501,23 +498,10 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                     {isEditing ? (
                                         /* Edit Mode - Input Fields */
                                         <>
-                                            {/* Trigger Input */}
-                                            <div className="mb-3">
-                                                <label className="flex items-center gap-2 text-xs font-bold text-slate-700 mb-2">
-                                                    1️⃣ Trigger (관찰)
-                                                </label>
-                                                <textarea
-                                                    value={editInsightTrigger}
-                                                    onChange={(e) => setEditInsightTrigger(e.target.value)}
-                                                    placeholder="일상에서 관찰한 것을 적어보세요..."
-                                                    className="w-full h-20 px-3 py-2 bg-white border border-violet-300 rounded-lg resize-none focus:ring-2 focus:ring-violet-400 focus:border-violet-400 text-sm text-slate-700 placeholder:text-violet-300"
-                                                />
-                                            </div>
-
                                             {/* Abstraction Input */}
                                             <div className="mb-3">
                                                 <label className="flex items-center gap-2 text-xs font-bold text-slate-700 mb-2">
-                                                    2️⃣ Abstraction (CS 개념 연결)
+                                                    1️⃣ Abstraction (CS 개념 연결)
                                                 </label>
                                                 <textarea
                                                     value={editInsightAbstraction}
@@ -530,7 +514,7 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                             {/* Application Input */}
                                             <div className="mb-3">
                                                 <label className="flex items-center gap-2 text-xs font-bold text-slate-700 mb-2">
-                                                    3️⃣ Application (실무 적용)
+                                                    2️⃣ Application (실무 적용)
                                                 </label>
                                                 <textarea
                                                     value={editInsightApplication}
@@ -543,14 +527,14 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                     ) : (
                                         /* View Mode - Display Data */
                                         <>
-                                            {/* Trigger */}
-                                            {entry.insightTrigger && (
+                                            {/* Observation */}
+                                            {entry.content && (
                                                 <div className="mb-3">
                                                     <div className="flex items-center gap-2 mb-1.5">
                                                         <Lightbulb className="w-4 h-4 text-violet-600" />
-                                                        <span className="text-xs font-bold text-violet-700">1️⃣ Trigger (관찰)</span>
+                                                        <span className="text-xs font-bold text-violet-700">1️⃣ Observation (관찰)</span>
                                                     </div>
-                                                    <p className="text-sm text-slate-700 pl-6 leading-relaxed">{entry.insightTrigger}</p>
+                                                    <p className="text-sm text-slate-700 pl-6 leading-relaxed">{entry.content}</p>
                                                 </div>
                                             )}
 
@@ -559,7 +543,7 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                                 <div className="mb-3">
                                                     <div className="flex items-center gap-2 mb-1.5">
                                                         <Sparkles className="w-4 h-4 text-purple-600" />
-                                                        <span className="text-xs font-bold text-purple-700">2️⃣ Abstraction (CS 개념)</span>
+                                                        <span className="text-xs font-bold text-purple-700">1️⃣ Abstraction (CS 개념)</span>
                                                     </div>
                                                     <p className="text-sm text-slate-700 pl-6 leading-relaxed">{entry.insightAbstraction}</p>
                                                 </div>
@@ -570,7 +554,7 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                                 <div className="mb-3">
                                                     <div className="flex items-center gap-2 mb-1.5">
                                                         <Hexagon className="w-4 h-4 text-violet-600" />
-                                                        <span className="text-xs font-bold text-violet-700">3️⃣ Application (실무 적용)</span>
+                                                        <span className="text-xs font-bold text-violet-700">2️⃣ Application (실무 적용)</span>
                                                     </div>
                                                     <p className="text-sm text-slate-700 pl-6 leading-relaxed">{entry.insightApplication}</p>
                                                 </div>

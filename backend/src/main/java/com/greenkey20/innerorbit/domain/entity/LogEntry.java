@@ -67,9 +67,6 @@ public class LogEntry {
     @Builder.Default
     private LogType logType = LogType.DAILY;
 
-    @Column(name = "insight_trigger", columnDefinition = "TEXT")
-    private String insightTrigger;
-
     @Column(name = "insight_abstraction", columnDefinition = "TEXT")
     private String insightAbstraction;
 

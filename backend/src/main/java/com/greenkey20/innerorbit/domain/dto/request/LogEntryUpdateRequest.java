@@ -14,8 +14,7 @@ import lombok.*;
 @Builder
 public class LogEntryUpdateRequest {
 
-    // Content is optional for INSIGHT logs (required for DAILY/SENSORY)
-    // Validation happens in service layer based on logType
+    @NotBlank(message = "내용은 필수입니다")
     @Size(max = 10000, message = "내용은 10000자를 초과할 수 없습니다")
     private String content;
 
@@ -62,9 +61,6 @@ public class LogEntryUpdateRequest {
     public Boolean getIsDeepLog() {
         return logType != null && logType == LogType.SENSORY;
     }
-
-    @Size(max = 10000, message = "통찰 트리거는 10000자를 초과할 수 없습니다")
-    private String insightTrigger;
 
     @Size(max = 10000, message = "통찰 추상화는 10000자를 초과할 수 없습니다")
     private String insightAbstraction;
