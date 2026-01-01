@@ -234,7 +234,9 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
             const updatedLog = await response.json();
             console.log('✅ AI Feedback Response:', updatedLog);
 
-            // 피드백 결과를 로컬 state에 저장 (Decrypt Log와 동일한 방식)
+            // 피드백 결과를 localStorage에 영구 저장 (Decrypt Log와 동일한 방식)
+            onUpdateEntryAnalysis(entry.id, updatedLog.aiFeedback);
+
             setFeedbackResults(prev => ({
                 ...prev,
                 [entry.id]: updatedLog.aiFeedback
@@ -637,7 +639,7 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                 <div className="mt-4 pt-4 border-t border-slate-100">
                                     {entry.logType === 'INSIGHT' ? (
                                         // Insight Log용 AI Feedback 섹션
-                                        (feedbackResults[entry.id] || entry.aiFeedback) ? (
+                                        feedbackResults[entry.id] ? (
                                             <div className="space-y-3">
                                                 {/* AI Feedback Results */}
                                                 <div className="p-4 bg-gradient-to-br from-slate-50 to-violet-50 rounded-lg border border-violet-200">
@@ -646,7 +648,7 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                                         <span className="text-xs font-bold text-violet-800 uppercase tracking-wider">AI Feedback</span>
                                                     </div>
                                                     <p className="text-sm text-slate-700 leading-relaxed">
-                                                        {feedbackResults[entry.id] || entry.aiFeedback}
+                                                        {feedbackResults[entry.id]}
                                                     </p>
                                                 </div>
 
@@ -667,6 +669,14 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                                     </button>
                                                 </div>
                                             </div>
+                                        ) : entry.aiFeedback ? (
+                                            <button
+                                                onClick={() => setFeedbackResults(prev => ({ ...prev, [entry.id]: entry.aiFeedback }))}
+                                                className="w-full px-4 py-2 bg-gradient-to-r from-slate-600 to-violet-400 text-white rounded-lg hover:from-slate-700 hover:to-violet-500 transition-all flex items-center justify-center gap-2 text-sm font-medium"
+                                            >
+                                                <Sparkles className="w-4 h-4" />
+                                                View Analysis
+                                            </button>
                                         ) : (
                                             <button
                                                 onClick={() => handleRequestFeedback(entry)}
