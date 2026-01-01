@@ -32,7 +32,6 @@ export default function useInnerOrbit() {
         sensoryAuditory: '',
         sensoryTactile: '',
         // Insight fields
-        insightTrigger: '',
         insightAbstraction: '',
         insightApplication: '',
         // Log type
@@ -62,7 +61,6 @@ export default function useInnerOrbit() {
                         sensoryAuditory: log.sensoryAuditory,
                         sensoryTactile: log.sensoryTactile,
                         // Insight fields
-                        insightTrigger: log.insightTrigger,
                         insightAbstraction: log.insightAbstraction,
                         insightApplication: log.insightApplication,
                         aiFeedback: log.aiFeedback,
@@ -97,7 +95,7 @@ export default function useInnerOrbit() {
                         customLogData.sensoryVisual?.trim() || customLogData.sensoryAuditory?.trim() ||
                         customLogData.sensoryTactile?.trim();
         } else if (logType === 'INSIGHT') {
-            hasContent = customLogData.insightTrigger?.trim() &&
+            hasContent = customLogData.content?.trim() &&
                         customLogData.insightAbstraction?.trim() &&
                         customLogData.insightApplication?.trim();
         } else {
@@ -127,7 +125,6 @@ export default function useInnerOrbit() {
             } else if (logType === 'INSIGHT') {
                 requestData = {
                     ...requestData,
-                    insightTrigger: customLogData.insightTrigger || null,
                     insightAbstraction: customLogData.insightAbstraction || null,
                     insightApplication: customLogData.insightApplication || null
                 };
@@ -157,7 +154,6 @@ export default function useInnerOrbit() {
                     sensoryAuditory: newLog.sensoryAuditory,
                     sensoryTactile: newLog.sensoryTactile,
                     // Insight fields
-                    insightTrigger: newLog.insightTrigger,
                     insightAbstraction: newLog.insightAbstraction,
                     insightApplication: newLog.insightApplication,
                     aiFeedback: newLog.aiFeedback,
@@ -175,7 +171,6 @@ export default function useInnerOrbit() {
                     sensoryVisual: '',
                     sensoryAuditory: '',
                     sensoryTactile: '',
-                    insightTrigger: '',
                     insightAbstraction: '',
                     insightApplication: '',
                     logType: 'DAILY'
@@ -231,7 +226,6 @@ export default function useInnerOrbit() {
                     sensoryAuditory: logFields.sensoryAuditory || null,
                     sensoryTactile: logFields.sensoryTactile || null,
                     // Insight fields
-                    insightTrigger: logFields.insightTrigger || null,
                     insightAbstraction: logFields.insightAbstraction || null,
                     insightApplication: logFields.insightApplication || null,
                     // Log type
@@ -265,7 +259,6 @@ export default function useInnerOrbit() {
                             sensoryAuditory: updatedLog.sensoryAuditory,
                             sensoryTactile: updatedLog.sensoryTactile,
                             // Insight fields
-                            insightTrigger: updatedLog.insightTrigger,
                             insightAbstraction: updatedLog.insightAbstraction,
                             insightApplication: updatedLog.insightApplication,
                             aiFeedback: updatedLog.aiFeedback,
@@ -286,13 +279,21 @@ export default function useInnerOrbit() {
     };
 
     /**
-     * 로그 엔트리의 AI 분석 결과 저장
+     * 로그 엔트리의 AI 분석 결과 저장 (Insight Log의 AI Feedback 포함)
      * @param {number} id - 엔트리 ID
-     * @param {Object} analysis - 분석 결과 객체
+     * @param {Object|string} analysis - 분석 결과 객체 또는 AI Feedback 문자열
      */
     const updateEntryAnalysis = (id, analysis) => {
         setEntries(entries.map(entry => {
             if (entry.id === id) {
+                // analysis가 문자열이면 aiFeedback으로 저장 (Insight Log)
+                if (typeof analysis === 'string') {
+                    return {
+                        ...entry,
+                        aiFeedback: analysis
+                    };
+                }
+                // 객체이면 analysis로 저장 (일반 Log)
                 return {
                     ...entry,
                     analysis: {
