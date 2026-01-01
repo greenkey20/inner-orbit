@@ -573,53 +573,6 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                                     <p className="text-sm text-slate-700 pl-6 leading-relaxed">{entry.insightApplication}</p>
                                                 </div>
                                             )}
-
-                                            {/* AI Feedback Request Button */}
-                                            {!entry.aiFeedback && !feedbackResults[entry.id] && (
-                                                <div className="mt-4">
-                                                    <button
-                                                        onClick={() => handleRequestFeedback(entry)}
-                                                        disabled={requestingFeedback === entry.id}
-                                                        className="w-full px-4 py-2.5 bg-gradient-to-r from-violet-100 to-purple-100 hover:from-violet-200 hover:to-purple-200 text-violet-700 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                    >
-                                                        {requestingFeedback === entry.id ? (
-                                                            <>⏳ AI 피드백 생성 중...</>
-                                                        ) : (
-                                                            <>
-                                                                <Sparkles className="w-4 h-4" />
-                                                                AI 피드백 요청
-                                                            </>
-                                                        )}
-                                                    </button>
-                                                    {feedbackError && requestingFeedback === entry.id && (
-                                                        <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600">
-                                                            ⚠️ {feedbackError}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
-
-                                            {/* AI Feedback Display */}
-                                            {(entry.aiFeedback || feedbackResults[entry.id]) && (
-                                                <div className="mt-4 pt-3 border-t border-violet-200">
-                                                    <div className="flex items-center justify-between mb-2">
-                                                        <div className="flex items-center gap-2">
-                                                            <Sparkles className="w-4 h-4 text-amber-500" />
-                                                            <span className="text-xs font-bold text-amber-700">AI Feedback</span>
-                                                        </div>
-                                                        <button
-                                                            onClick={() => handleRequestFeedback(entry)}
-                                                            disabled={requestingFeedback === entry.id}
-                                                            className="px-2 py-1 text-xs text-violet-600 hover:text-violet-800 hover:bg-violet-50 rounded transition-all disabled:opacity-50"
-                                                        >
-                                                            {requestingFeedback === entry.id ? '생성 중...' : '🔄 Re-feedback'}
-                                                        </button>
-                                                    </div>
-                                                    <p className="text-sm text-slate-600 pl-6 italic leading-relaxed">
-                                                        {feedbackResults[entry.id] || entry.aiFeedback}
-                                                    </p>
-                                                </div>
-                                            )}
                                         </>
                                     )}
                                 </div>
@@ -679,111 +632,165 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                 </div>
                             )}
 
-                            {/* AI Co-Pilot: Decrypt Log Button (Insight Log는 제외) */}
-                            {!isEditing && entry.logType !== 'INSIGHT' && (
+                            {/* AI Co-Pilot: Decrypt Log / AI Feedback Button */}
+                            {!isEditing && (
                                 <div className="mt-4 pt-4 border-t border-slate-100">
-                                    {analysisResults[entry.id] ? (
-                                        <div className="space-y-3">
-                                            {/* Analysis Results */}
-                                            <div className="p-4 bg-gradient-to-br from-slate-50 to-emerald-50 rounded-lg border border-emerald-200">
-                                                <div className="flex items-center gap-2 mb-3">
-                                                    <Sparkles className="w-4 h-4 text-emerald-600" />
-                                                    <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">로그 해독 리포트</span>
+                                    {entry.logType === 'INSIGHT' ? (
+                                        // Insight Log용 AI Feedback 섹션
+                                        (feedbackResults[entry.id] || entry.aiFeedback) ? (
+                                            <div className="space-y-3">
+                                                {/* AI Feedback Results */}
+                                                <div className="p-4 bg-gradient-to-br from-slate-50 to-violet-50 rounded-lg border border-violet-200">
+                                                    <div className="flex items-center gap-2 mb-3">
+                                                        <Sparkles className="w-4 h-4 text-violet-600" />
+                                                        <span className="text-xs font-bold text-violet-800 uppercase tracking-wider">AI Feedback</span>
+                                                    </div>
+                                                    <p className="text-sm text-slate-700 leading-relaxed">
+                                                        {feedbackResults[entry.id] || entry.aiFeedback}
+                                                    </p>
                                                 </div>
 
-                                                {/* Distortions */}
-                                                {analysisResults[entry.id].distortions && analysisResults[entry.id].distortions.length > 0 && (
-                                                    <div className="mb-3">
-                                                        <span className="text-xs font-bold text-slate-700">🔍 발견된 왜곡:</span>
-                                                        <ul className="mt-2 space-y-1">
-                                                            {analysisResults[entry.id].distortions.map((d, idx) => (
-                                                                <li key={idx} className="text-xs text-slate-600 ml-2">
-                                                                    <span className="font-semibold text-rose-600">{d.type}</span>: "{d.quote}"
-                                                                </li>
-                                                            ))}
-                                                        </ul>
-                                                    </div>
-                                                )}
-
-                                                {/* Reframed Perspective */}
-                                                {analysisResults[entry.id].reframed && (
-                                                    <div className="mb-3">
-                                                        <span className="text-xs font-bold text-slate-700">💡 재해석:</span>
-                                                        <p className="text-sm text-slate-700 leading-relaxed mt-1">
-                                                            {analysisResults[entry.id].reframed}
-                                                        </p>
-                                                    </div>
-                                                )}
-
-                                                {/* Alternative Perspective */}
-                                                {analysisResults[entry.id].alternative && (
-                                                    <div>
-                                                        <span className="text-xs font-bold text-slate-700">✨ 대안적 관점:</span>
-                                                        <p className="text-sm text-emerald-700 leading-relaxed mt-1">
-                                                            {analysisResults[entry.id].alternative}
-                                                        </p>
-                                                    </div>
-                                                )}
-
-                                                {/* Fallback for empty result */}
-                                                {(!analysisResults[entry.id].distortions?.length && !analysisResults[entry.id].reframed && !analysisResults[entry.id].alternative) && (
-                                                    <div className="text-xs text-slate-500 italic">
-                                                        특이 사항이 발견되지 않았습니다.
-                                                    </div>
-                                                )}
+                                                {/* Action Buttons */}
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => setFeedbackResults(prev => { const newResults = { ...prev }; delete newResults[entry.id]; return newResults; })}
+                                                        className="flex-1 text-xs text-slate-400 hover:text-slate-600 transition-colors py-2 px-3 rounded bg-slate-50 hover:bg-slate-100"
+                                                    >
+                                                        Close Analysis
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleRequestFeedback(entry)}
+                                                        disabled={requestingFeedback === entry.id}
+                                                        className="flex-1 text-xs text-violet-600 hover:text-violet-700 transition-colors py-2 px-3 rounded bg-violet-50 hover:bg-violet-100 disabled:opacity-50"
+                                                    >
+                                                        {requestingFeedback === entry.id ? 'Generating...' : 'Re-analyze'}
+                                                    </button>
+                                                </div>
                                             </div>
-
-                                            {/* Action Buttons */}
-                                            <div className="flex gap-2">
-                                                <button
-                                                    onClick={() => setAnalysisResults(prev => { const newResults = { ...prev }; delete newResults[entry.id]; return newResults; })}
-                                                    className="flex-1 text-xs text-slate-400 hover:text-slate-600 transition-colors py-2 px-3 rounded bg-slate-50 hover:bg-slate-100"
-                                                >
-                                                    Close Analysis
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDecryptLog(entry)}
-                                                    disabled={analyzingId === entry.id}
-                                                    className="flex-1 text-xs text-emerald-600 hover:text-emerald-700 transition-colors py-2 px-3 rounded bg-emerald-50 hover:bg-emerald-100 disabled:opacity-50"
-                                                >
-                                                    Re-analyze
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ) : entry.analysis ? (
-                                        <button
-                                            onClick={() => setAnalysisResults(prev => ({ ...prev, [entry.id]: entry.analysis }))}
-                                            className="w-full px-4 py-2 bg-gradient-to-r from-slate-600 to-emerald-400 text-white rounded-lg hover:from-slate-700 hover:to-emerald-500 transition-all flex items-center justify-center gap-2 text-sm font-medium"
-                                        >
-                                            <Sparkles className="w-4 h-4" />
-                                            View Analysis
-                                        </button>
+                                        ) : (
+                                            <button
+                                                onClick={() => handleRequestFeedback(entry)}
+                                                disabled={requestingFeedback === entry.id}
+                                                className="w-full px-4 py-2 bg-gradient-to-r from-slate-700 to-violet-500 text-white rounded-lg hover:from-slate-800 hover:to-violet-600 transition-all flex items-center justify-center gap-2 text-sm font-medium disabled:opacity-50"
+                                            >
+                                                {requestingFeedback === entry.id ? (
+                                                    <>
+                                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                                        Generating AI Feedback...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Sparkles className="w-4 h-4" />
+                                                        AI Feedback
+                                                    </>
+                                                )}
+                                            </button>
+                                        )
                                     ) : (
-                                        <button
-                                            onClick={() => handleDecryptLog(entry)}
-                                            disabled={analyzingId === entry.id}
-                                            className="w-full px-4 py-2 bg-gradient-to-r from-slate-700 to-emerald-500 text-white rounded-lg hover:from-slate-800 hover:to-emerald-600 transition-all flex items-center justify-center gap-2 text-sm font-medium disabled:opacity-50"
-                                        >
-                                            {analyzingId === entry.id ? (
-                                                <>
-                                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                                    Decrypting Log...
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Sparkles className="w-4 h-4" />
-                                                    Decrypt Log
-                                                </>
-                                            )}
-                                        </button>
+                                        // 일반 Log용 Decrypt Log 섹션
+                                        analysisResults[entry.id] ? (
+                                            <div className="space-y-3">
+                                                {/* Analysis Results */}
+                                                <div className="p-4 bg-gradient-to-br from-slate-50 to-emerald-50 rounded-lg border border-emerald-200">
+                                                    <div className="flex items-center gap-2 mb-3">
+                                                        <Sparkles className="w-4 h-4 text-emerald-600" />
+                                                        <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">로그 해독 리포트</span>
+                                                    </div>
+
+                                                    {/* Distortions */}
+                                                    {analysisResults[entry.id].distortions && analysisResults[entry.id].distortions.length > 0 && (
+                                                        <div className="mb-3">
+                                                            <span className="text-xs font-bold text-slate-700">🔍 발견된 왜곡:</span>
+                                                            <ul className="mt-2 space-y-1">
+                                                                {analysisResults[entry.id].distortions.map((d, idx) => (
+                                                                    <li key={idx} className="text-xs text-slate-600 ml-2">
+                                                                        <span className="font-semibold text-rose-600">{d.type}</span>: "{d.quote}"
+                                                                    </li>
+                                                                ))}
+                                                            </ul>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Reframed Perspective */}
+                                                    {analysisResults[entry.id].reframed && (
+                                                        <div className="mb-3">
+                                                            <span className="text-xs font-bold text-slate-700">💡 재해석:</span>
+                                                            <p className="text-sm text-slate-700 leading-relaxed mt-1">
+                                                                {analysisResults[entry.id].reframed}
+                                                            </p>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Alternative Perspective */}
+                                                    {analysisResults[entry.id].alternative && (
+                                                        <div>
+                                                            <span className="text-xs font-bold text-slate-700">✨ 대안적 관점:</span>
+                                                            <p className="text-sm text-emerald-700 leading-relaxed mt-1">
+                                                                {analysisResults[entry.id].alternative}
+                                                            </p>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Fallback for empty result */}
+                                                    {(!analysisResults[entry.id].distortions?.length && !analysisResults[entry.id].reframed && !analysisResults[entry.id].alternative) && (
+                                                        <div className="text-xs text-slate-500 italic">
+                                                            특이 사항이 발견되지 않았습니다.
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Action Buttons */}
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => setAnalysisResults(prev => { const newResults = { ...prev }; delete newResults[entry.id]; return newResults; })}
+                                                        className="flex-1 text-xs text-slate-400 hover:text-slate-600 transition-colors py-2 px-3 rounded bg-slate-50 hover:bg-slate-100"
+                                                    >
+                                                        Close Analysis
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDecryptLog(entry)}
+                                                        disabled={analyzingId === entry.id}
+                                                        className="flex-1 text-xs text-emerald-600 hover:text-emerald-700 transition-colors py-2 px-3 rounded bg-emerald-50 hover:bg-emerald-100 disabled:opacity-50"
+                                                    >
+                                                        Re-analyze
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ) : entry.analysis ? (
+                                            <button
+                                                onClick={() => setAnalysisResults(prev => ({ ...prev, [entry.id]: entry.analysis }))}
+                                                className="w-full px-4 py-2 bg-gradient-to-r from-slate-600 to-emerald-400 text-white rounded-lg hover:from-slate-700 hover:to-emerald-500 transition-all flex items-center justify-center gap-2 text-sm font-medium"
+                                            >
+                                                <Sparkles className="w-4 h-4" />
+                                                View Analysis
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={() => handleDecryptLog(entry)}
+                                                disabled={analyzingId === entry.id}
+                                                className="w-full px-4 py-2 bg-gradient-to-r from-slate-700 to-emerald-500 text-white rounded-lg hover:from-slate-800 hover:to-emerald-600 transition-all flex items-center justify-center gap-2 text-sm font-medium disabled:opacity-50"
+                                            >
+                                                {analyzingId === entry.id ? (
+                                                    <>
+                                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                                        Decrypting Log...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Sparkles className="w-4 h-4" />
+                                                        Decrypt Log
+                                                    </>
+                                                )}
+                                            </button>
+                                        )
                                     )}
 
                                     {/* Error Message */}
-                                    {analysisError && analyzingId === entry.id && (
+                                    {(analysisError && analyzingId === entry.id) || (feedbackError && requestingFeedback === entry.id) ? (
                                         <div className="mt-2 p-2 bg-rose-50 border border-rose-200 rounded text-xs text-rose-600">
-                                            {analysisError}
+                                            {entry.logType === 'INSIGHT' ? feedbackError : analysisError}
                                         </div>
-                                    )}
+                                    ) : null}
                                 </div>
                             )
                             }
