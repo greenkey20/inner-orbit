@@ -57,7 +57,6 @@ public class LogServiceImpl implements LogService {
                 .sensoryAuditory(request.getSensoryAuditory())
                 .sensoryTactile(request.getSensoryTactile())
                 .logType(request.getLogType() != null ? request.getLogType() : com.greenkey20.innerorbit.domain.entity.LogType.DAILY)
-                .insightTrigger(request.getInsightTrigger())
                 .insightAbstraction(request.getInsightAbstraction())
                 .insightApplication(request.getInsightApplication())
                 .aiFeedback(request.getAiFeedback())
@@ -81,20 +80,13 @@ public class LogServiceImpl implements LogService {
     private void validateLogEntryRequest(LogEntryCreateRequest request) {
         LogType logType = request.getLogType() != null ? request.getLogType() : LogType.DAILY;
 
-        // logType별 content 검증
-        if (logType == LogType.DAILY || logType == LogType.SENSORY) {
-            // DAILY, SENSORY 모드는 content 필수
-            if (request.getContent() == null || request.getContent().trim().isEmpty()) {
-                throw new BusinessException(ErrorCode.EMPTY_CONTENT);
-            }
-        } else if (logType == LogType.INSIGHT) {
-            // INSIGHT 모드는 trigger, abstraction, application 필수
-            if (request.getInsightTrigger() == null || request.getInsightTrigger().trim().isEmpty()) {
-                throw new BusinessException(
-                    ErrorCode.INVALID_INPUT_VALUE,
-                    "Insight Trigger를 입력해주세요."
-                );
-            }
+        // content는 모든 logType에서 필수
+        if (request.getContent() == null || request.getContent().trim().isEmpty()) {
+            throw new BusinessException(ErrorCode.EMPTY_CONTENT);
+        }
+
+        // INSIGHT 모드 추가 검증: abstraction, application 필수
+        if (logType == LogType.INSIGHT) {
             if (request.getInsightAbstraction() == null || request.getInsightAbstraction().trim().isEmpty()) {
                 throw new BusinessException(
                     ErrorCode.INVALID_INPUT_VALUE,
@@ -195,7 +187,6 @@ public class LogServiceImpl implements LogService {
         logEntry.setSensoryTactile(request.getSensoryTactile());
 
         // Insight Log 필드 업데이트 (null 허용)
-        logEntry.setInsightTrigger(request.getInsightTrigger());
         logEntry.setInsightAbstraction(request.getInsightAbstraction());
         logEntry.setInsightApplication(request.getInsightApplication());
         logEntry.setAiFeedback(request.getAiFeedback());
@@ -296,10 +287,10 @@ public class LogServiceImpl implements LogService {
                 ));
 
         // 2. Insight Log 필드 검증
-        if (logEntry.getInsightTrigger() == null || logEntry.getInsightTrigger().trim().isEmpty()) {
+        if (logEntry.getContent() == null || logEntry.getContent().trim().isEmpty()) {
             throw new BusinessException(
                     ErrorCode.INVALID_INPUT_VALUE,
-                    "Insight Trigger가 없습니다. Insight Log에만 피드백을 요청할 수 있습니다."
+                    "관찰 내용(content)이 없습니다."
             );
         }
 
@@ -317,9 +308,9 @@ public class LogServiceImpl implements LogService {
             );
         }
 
-        // 3. AI 서비스를 통해 피드백 생성
+        // 3. AI 서비스를 통해 피드백 생성 (content를 trigger로 사용)
         String feedback = aiService.generateInsightFeedback(
-                logEntry.getInsightTrigger(),
+                logEntry.getContent(),
                 logEntry.getInsightAbstraction(),
                 logEntry.getInsightApplication()
         );

@@ -51,8 +51,8 @@ export default function LogEditor({
     };
 
     const handleAiKeywordSuggestion = async () => {
-        // Validation: Trigger 필드 확인
-        if (!deepLogData.insightTrigger || deepLogData.insightTrigger.trim().length < 10) {
+        // Validation: Content 필드 확인
+        if (!message || message.trim().length < 10) {
             alert('관찰 내용을 10자 이상 입력해주세요. AI가 더 정확한 키워드를 추천할 수 있습니다.');
             return;
         }
@@ -63,7 +63,7 @@ export default function LogEditor({
             const response = await fetch('/api/ai/insights/suggest-keywords', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ trigger: deepLogData.insightTrigger })
+                body: JSON.stringify({ trigger: message })
             });
 
             if (!response.ok) {
@@ -108,7 +108,7 @@ export default function LogEditor({
     const isSubmitDisabled = logMode === 'SENSORY'
         ? !message.trim() && !deepLogData.location && !deepLogData.sensoryVisual && !deepLogData.sensoryAuditory && !deepLogData.sensoryTactile
         : logMode === 'INSIGHT'
-        ? !deepLogData.insightTrigger?.trim() || !deepLogData.insightAbstraction?.trim() || !deepLogData.insightApplication?.trim()
+        ? !message.trim() || !deepLogData.insightAbstraction?.trim() || !deepLogData.insightApplication?.trim()
         : !message.trim();
     return (
         <>
@@ -243,14 +243,14 @@ export default function LogEditor({
                 ) : logMode === 'INSIGHT' ? (
                     /* Insight Mode - CS Concept Mapping Form */
                     <div className="space-y-4">
-                        {/* Trigger Input */}
+                        {/* Observation (Content) Input */}
                         <div className="relative group">
                             <label className="text-xs font-semibold text-violet-600 mb-1.5 block">
-                                1️⃣ Trigger (관찰)
+                                1️⃣ Observation (관찰)
                             </label>
                             <textarea
-                                value={deepLogData.insightTrigger || ''}
-                                onChange={(e) => handleFieldChange('insightTrigger', e.target.value)}
+                                value={message}
+                                onChange={(e) => onMessageChange(e.target.value)}
                                 placeholder="일상에서 관찰한 것을 적어보세요... (예: 친구가 동시에 여러 채팅에 답장하다 놓친 메시지가 있었다)"
                                 className="w-full h-24 p-4 bg-white border border-violet-200 rounded-xl resize-none focus:ring-2 focus:ring-violet-300 focus:border-violet-400 text-slate-700 leading-relaxed placeholder:text-violet-300 text-sm transition-all shadow-sm font-sans"
                             />
