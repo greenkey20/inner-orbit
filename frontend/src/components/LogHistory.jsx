@@ -65,6 +65,20 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
     // AI Co-Pilot 상태
     const [analyzingId, setAnalyzingId] = useState(null);
     const [analysisResults, setAnalysisResults] = useState({});
+
+    // ISO 8601 → 한글 날짜 표시 변환 함수
+    const formatDateKorean = (isoDateStr) => {
+        if (!isoDateStr) return '';
+
+        const date = new Date(isoDateStr);
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
+        const hour = String(date.getHours()).padStart(2, '0');
+        const minute = String(date.getMinutes()).padStart(2, '0');
+
+        return `${year}년 ${month}월 ${day}일 ${hour}:${minute}`;
+    };
     const [analysisError, setAnalysisError] = useState(null);
 
     // 무한 스크롤 Observer 설정
@@ -277,14 +291,14 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                     <div className="flex items-center gap-2">
                                         <Calendar className="w-3 h-3 text-slate-400" />
                                         <span className="text-xs font-mono font-medium text-slate-500">
-                                            {entry.date}
+                                            {formatDateKorean(entry.date)}
                                         </span>
                                     </div>
                                     {/* Audit Timestamp - Show if updated */}
                                     {entry.updatedAt && (
                                         <div className="flex items-center gap-2 ml-5">
                                             <span className="text-[10px] font-mono text-slate-400">
-                                                (수정: {entry.updatedAt})
+                                                (수정: {formatDateKorean(entry.updatedAt)})
                                             </span>
                                         </div>
                                     )}
