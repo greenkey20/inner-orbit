@@ -23,11 +23,8 @@ public class LogEntryResponse {
     private Integer stability;
     private Integer gravity;
 
-    // [FIX] timezone을 명시하여 타임존 혼동 방지
-    @JsonFormat(pattern = "yyyy년 M월 d일 HH:mm", timezone = "Asia/Seoul")
+    // ISO 8601 표준 포맷 사용 (Spring Boot 기본값)
     private LocalDateTime createdAt;
-
-    @JsonFormat(pattern = "yyyy년 M월 d일 HH:mm", timezone = "Asia/Seoul")
     private LocalDateTime updatedAt;
 
     private Map<String, Object> analysisResult;

@@ -8,24 +8,10 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
  * @param {Array} entries - 로그 엔트리 배열 (각 엔트리는 id, date, gravity, stability 포함)
  */
 export default function FlightTrajectory({ entries }) {
-    // 한글 날짜 포맷 파싱 함수 ("2025년 1월 15일 14:30" → Date 객체)
-    const parseKoreanDate = (dateStr) => {
-        if (!dateStr) return new Date();
-
-        // "2025년 1월 15일 14:30" 형식 파싱
-        const match = dateStr.match(/(\d+)년 (\d+)월 (\d+)일 (\d+):(\d+)/);
-        if (match) {
-            const [_, year, month, day, hour, minute] = match;
-            return new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hour), parseInt(minute));
-        }
-
-        // fallback: 표준 ISO 포맷 시도
-        return new Date(dateStr);
-    };
-
     // 데이터 변환: entries를 recharts 형식으로 변환
+    // ISO 8601 포맷은 new Date()가 직접 파싱 가능
     const chartData = entries.map(entry => ({
-        timestamp: parseKoreanDate(entry.date).getTime(), // 한글 날짜를 밀리초 타임스탬프로 변환
+        timestamp: new Date(entry.date).getTime(),
         gravity: entry.gravity ?? 0,
         stability: entry.stability ?? 0,
         date: entry.date, // 툴팁용
