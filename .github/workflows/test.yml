@@ -40,13 +40,6 @@ jobs:
           # Spring Boot가 test profile에서 자동으로 H2 사용
           SPRING_PROFILES_ACTIVE: test
 
-      - name: Publish test results
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        if: always()
-        with:
-          files: |
-            backend/build/test-results/test/*.xml
-
       - name: Upload test report
         uses: actions/upload-artifact@v4
         if: failure()
