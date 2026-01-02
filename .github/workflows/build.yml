@@ -1,0 +1,56 @@
+name: Build Validation
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'docker-compose.yml'
+      - '.github/workflows/build.yml'
+
+jobs:
+  build:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x backend/gradlew
+
+      - name: Build backend with Gradle
+        run: |
+          cd backend
+          ./gradlew clean build -x test --no-daemon
+        env:
+          SPRING_PROFILES_ACTIVE: test
+
+      - name: Create .env file for docker-compose
+        run: |
+          cat << EOF > .env
+          DB_NAME=innerorbit_db
+          DB_USER=postgres
+          DB_PASSWORD=dummy_password_for_build
+          OPENAI_API_KEY=dummy_key_for_build
+          EOF
+
+      - name: Build Docker images
+        run: docker-compose build
+
+      - name: List Docker images
+        run: docker images | grep inner-orbit || echo "No inner-orbit images found"
+
+      - name: Check Docker image sizes
+        run: |
+          echo "=== Docker Image Sizes ==="
+          docker images --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}" | grep -E "inner-orbit|REPOSITORY"
