@@ -45,7 +45,7 @@ jobs:
           EOF
 
       - name: Build Docker images
-        run: docker-compose build
+        run: docker compose build
 
       - name: List Docker images
         run: docker images | grep inner-orbit || echo "No inner-orbit images found"
