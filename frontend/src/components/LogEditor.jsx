@@ -145,7 +145,7 @@ export default function LogEditor({
                         onClick={() => setLogMode('INSIGHT')}
                         className={`flex-1 py-2.5 px-3 rounded-md text-xs font-bold uppercase tracking-wider transition-all ${
                             logMode === 'INSIGHT'
-                                ? 'bg-gradient-to-r from-violet-50 to-purple-50 shadow-sm text-violet-700 border border-violet-200'
+                                ? 'bg-gradient-to-r from-teal-50 to-cyan-50 shadow-sm text-teal-700 border border-teal-200'
                                 : 'text-slate-500 hover:text-slate-700'
                         }`}
                     >
@@ -245,25 +245,25 @@ export default function LogEditor({
                     <div className="space-y-4">
                         {/* Observation (Content) Input */}
                         <div className="relative group">
-                            <label className="text-xs font-semibold text-violet-600 mb-1.5 block">
+                            <label className="text-xs font-semibold text-teal-600 mb-1.5 block">
                                 1️⃣ Observation (관찰)
                             </label>
                             <textarea
                                 value={message}
                                 onChange={(e) => onMessageChange(e.target.value)}
                                 placeholder="일상에서 관찰한 것을 적어보세요... (예: 친구가 동시에 여러 채팅에 답장하다 놓친 메시지가 있었다)"
-                                className="w-full h-24 p-4 bg-white border border-violet-200 rounded-xl resize-none focus:ring-2 focus:ring-violet-300 focus:border-violet-400 text-slate-700 leading-relaxed placeholder:text-violet-300 text-sm transition-all shadow-sm font-sans"
+                                className="w-full h-24 p-4 bg-white border border-teal-200 rounded-xl resize-none focus:ring-2 focus:ring-teal-300 focus:border-teal-400 text-slate-700 leading-relaxed placeholder:text-teal-300 text-sm transition-all shadow-sm font-sans"
                             />
                         </div>
 
                         {/* Abstraction Input with AI Button */}
                         <div className="relative group">
-                            <label className="text-xs font-semibold text-violet-600 mb-1.5 block flex items-center justify-between">
+                            <label className="text-xs font-semibold text-teal-600 mb-1.5 block flex items-center justify-between">
                                 <span>2️⃣ Abstraction (CS 개념 연결)</span>
                                 <button
                                     onClick={handleAiKeywordSuggestion}
                                     disabled={loadingKeywords}
-                                    className="px-3 py-1 bg-gradient-to-r from-violet-100 to-purple-100 hover:from-violet-200 hover:to-purple-200 text-violet-700 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="px-3 py-1 bg-gradient-to-r from-teal-100 to-cyan-100 hover:from-teal-200 hover:to-cyan-200 text-teal-700 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     <Sparkles className="w-3.5 h-3.5" />
                                     {loadingKeywords ? '생성 중...' : 'AI Suggest'}
@@ -273,20 +273,20 @@ export default function LogEditor({
                                 value={deepLogData.insightAbstraction || ''}
                                 onChange={(e) => handleFieldChange('insightAbstraction', e.target.value)}
                                 placeholder="관찰과 연결되는 CS 개념을 적어보세요... (예: Race Condition, Deadlock, Load Balancer)"
-                                className="w-full h-20 p-4 bg-white border border-violet-200 rounded-xl resize-none focus:ring-2 focus:ring-violet-300 focus:border-violet-400 text-slate-700 leading-relaxed placeholder:text-violet-300 text-sm transition-all shadow-sm font-sans"
+                                className="w-full h-20 p-4 bg-white border border-teal-200 rounded-xl resize-none focus:ring-2 focus:ring-teal-300 focus:border-teal-400 text-slate-700 leading-relaxed placeholder:text-teal-300 text-sm transition-all shadow-sm font-sans"
                             />
                         </div>
 
                         {/* Application Input */}
                         <div className="relative group">
-                            <label className="text-xs font-semibold text-violet-600 mb-1.5 block">
+                            <label className="text-xs font-semibold text-teal-600 mb-1.5 block">
                                 3️⃣ Application (실무 적용)
                             </label>
                             <textarea
                                 value={deepLogData.insightApplication || ''}
                                 onChange={(e) => handleFieldChange('insightApplication', e.target.value)}
                                 placeholder="이 개념을 내 코드나 프로젝트에 어떻게 적용할 수 있을까요? (예: 채팅 앱에서 message queue를 사용해 순서 보장)"
-                                className="w-full h-28 p-4 bg-white border border-violet-200 rounded-xl resize-none focus:ring-2 focus:ring-violet-300 focus:border-violet-400 text-slate-700 leading-relaxed placeholder:text-violet-300 text-sm transition-all shadow-sm font-sans"
+                                className="w-full h-28 p-4 bg-white border border-teal-200 rounded-xl resize-none focus:ring-2 focus:ring-teal-300 focus:border-teal-400 text-slate-700 leading-relaxed placeholder:text-teal-300 text-sm transition-all shadow-sm font-sans"
                             />
                         </div>
                     </div>
@@ -307,7 +307,7 @@ export default function LogEditor({
             <div className="flex flex-col items-center justify-center my-4">
                 <p className={`text-xs text-center transition-colors duration-200 ${
                     logMode === 'SENSORY' ? 'text-lime-600 font-medium' :
-                    logMode === 'INSIGHT' ? 'text-violet-600 font-medium' :
+                    logMode === 'INSIGHT' ? 'text-teal-600 font-medium' :
                     'text-slate-500'
                 }`}>
                     {logMode === 'SENSORY' ? '✈️ 여행 중 감각적 경험을 상세히 기록합니다' :
@@ -323,7 +323,7 @@ export default function LogEditor({
                     logMode === 'SENSORY'
                         ? 'bg-gradient-to-r from-lime-600 to-emerald-600 hover:from-lime-700 hover:to-emerald-700'
                         : logMode === 'INSIGHT'
-                        ? 'bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700'
+                        ? 'bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700'
                         : ''
                 }`}
             >
