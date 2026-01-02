@@ -193,6 +193,7 @@ public class LogServiceImpl implements LogService {
 
         // 3. 저장 (updatedAt은 @PreUpdate로 자동 설정됨)
         LogEntry updated = logRepository.save(logEntry);
+        logRepository.flush(); // DB에 즉시 반영하여 @PreUpdate 실행 보장
 
         // 4. DTO로 변환하여 반환
         return LogEntryResponse.from(updated);

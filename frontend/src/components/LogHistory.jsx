@@ -294,8 +294,8 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                             {formatDateKorean(entry.date)}
                                         </span>
                                     </div>
-                                    {/* Audit Timestamp - Show if updated */}
-                                    {entry.updatedAt && (
+                                    {/* Audit Timestamp - Show only if actually updated */}
+                                    {entry.updatedAt && entry.updatedAt !== entry.date && (
                                         <div className="flex items-center gap-2 ml-5">
                                             <span className="text-[10px] font-mono text-slate-400">
                                                 (수정: {formatDateKorean(entry.updatedAt)})
