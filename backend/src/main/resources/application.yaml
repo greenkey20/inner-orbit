@@ -3,6 +3,7 @@ spring:
     name: inner-orbit
 
   # PostgreSQL 데이터베이스 설정
+  # CI/CD Phase 2: Docker build validation enabled
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/innerorbit_db}
     username: ${SPRING_DATASOURCE_USERNAME:postgres}
