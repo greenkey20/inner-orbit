@@ -498,6 +498,19 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                     {isEditing ? (
                                         /* Edit Mode - Input Fields */
                                         <>
+                                            {/* Observation (Content) Input */}
+                                            <div className="mb-3">
+                                                <label className="flex items-center gap-2 text-xs font-bold text-slate-700 mb-2">
+                                                    📝 Observation (관찰)
+                                                </label>
+                                                <textarea
+                                                    value={editContent}
+                                                    onChange={(e) => setEditContent(e.target.value)}
+                                                    placeholder="일상에서 관찰한 것을 적어보세요..."
+                                                    className="w-full h-24 px-3 py-2 bg-white border border-violet-300 rounded-lg resize-none focus:ring-2 focus:ring-violet-400 focus:border-violet-400 text-sm text-slate-700 placeholder:text-violet-300"
+                                                />
+                                            </div>
+
                                             {/* Abstraction Input */}
                                             <div className="mb-3">
                                                 <label className="flex items-center gap-2 text-xs font-bold text-slate-700 mb-2">
