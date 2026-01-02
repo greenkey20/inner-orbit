@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BookOpen, RefreshCw, Trash2, Sparkles } from 'lucide-react';
+import { BookOpen, RefreshCw, Trash2, Sparkles, List } from 'lucide-react';
 import { generateDynamicPrompt } from '../services/openaiService';
 
 // UI 컴포넌트: 버튼
@@ -68,6 +68,14 @@ export default function PromptAssistant({
         }
     };
 
+    const handleAiTabClick = async () => {
+        setMode('ai');
+        // AI 프롬프트가 아직 없으면 자동으로 생성
+        if (!aiPrompt && !isGenerating) {
+            await handleGenerateAiPrompt();
+        }
+    };
+
     if (!showPrompt) return null;
 
     return (
@@ -97,15 +105,16 @@ export default function PromptAssistant({
                         : 'bg-slate-800 text-slate-400 hover:text-slate-200'
                         }`}
                 >
-                    <RefreshCw className="w-3 h-3 inline mr-1" />
+                    <List className="w-3 h-3 inline mr-1" />
                     Static
                 </button>
                 <button
-                    onClick={() => setMode('ai')}
+                    onClick={handleAiTabClick}
+                    disabled={mode === 'ai' && aiPrompt}
                     className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-all ${mode === 'ai'
                         ? 'bg-gradient-to-r from-slate-700 to-emerald-500 text-white shadow-sm'
                         : 'bg-slate-800 text-slate-400 hover:text-slate-200'
-                        }`}
+                        } ${mode === 'ai' && aiPrompt ? 'opacity-75 cursor-not-allowed' : ''}`}
                 >
                     <Sparkles className="w-3 h-3 inline mr-1" />
                     AI Request
@@ -147,12 +156,6 @@ export default function PromptAssistant({
                         </div>
                     )}
 
-                    {aiPrompt && !isGenerating && (
-                        <p className="text-sm font-medium leading-relaxed mb-4 text-slate-100">
-                            "{aiPrompt}"
-                        </p>
-                    )}
-
                     {isGenerating && (
                         <div className="mb-4 flex items-center justify-center gap-2 text-slate-300">
                             <RefreshCw className="w-4 h-4 animate-spin" />
@@ -160,26 +163,31 @@ export default function PromptAssistant({
                         </div>
                     )}
 
-                    <div className="flex gap-2">
-                        <Button
-                            variant="ai"
-                            onClick={handleGenerateAiPrompt}
-                            disabled={isGenerating}
-                            className="flex-1 text-xs py-2 h-auto"
-                        >
-                            <Sparkles className="w-3 h-3" />
-                            {isGenerating ? 'Requesting...' : 'Request Signal'}
-                        </Button>
-                        {aiPrompt && !isGenerating && (
-                            <Button
-                                variant="secondary"
-                                onClick={handleInsertCurrentPrompt}
-                                className="flex-1 text-xs py-2 h-auto bg-primary-700 border-primary-600 text-white hover:bg-primary-600"
-                            >
-                                Apply to Log
-                            </Button>
-                        )}
-                    </div>
+                    {aiPrompt && !isGenerating && (
+                        <>
+                            <p className="text-sm font-medium leading-relaxed mb-4 text-slate-100">
+                                "{aiPrompt}"
+                            </p>
+                            <div className="flex gap-2">
+                                <Button
+                                    variant="ai"
+                                    onClick={handleGenerateAiPrompt}
+                                    disabled={isGenerating}
+                                    className="flex-1 text-xs py-2 h-auto"
+                                >
+                                    <RefreshCw className="w-3 h-3" />
+                                    New Signal
+                                </Button>
+                                <Button
+                                    variant="secondary"
+                                    onClick={handleInsertCurrentPrompt}
+                                    className="flex-1 text-xs py-2 h-auto bg-primary-700 border-primary-600 text-white hover:bg-primary-600"
+                                >
+                                    Apply to Log
+                                </Button>
+                            </div>
+                        </>
+                    )}
                 </>
             )}
         </div>

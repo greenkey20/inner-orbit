@@ -490,9 +490,9 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
 
                             {/* Insight Log Data - 통찰 정보 표시/수정 */}
                             {entry.logType === 'INSIGHT' && (
-                                <div className="mb-5 p-4 bg-gradient-to-r from-violet-50 to-purple-50 rounded-xl border border-violet-200">
+                                <div className="mb-5 p-4 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl border border-teal-200">
                                     <div className="flex items-center gap-2 mb-3">
-                                        <span className="text-xs font-bold text-violet-800 uppercase tracking-wider">💡 Architecture of Insight</span>
+                                        <span className="text-xs font-bold text-teal-800 uppercase tracking-wider">💡 Architecture of Insight</span>
                                     </div>
 
                                     {isEditing ? (
@@ -507,7 +507,7 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                                     value={editContent}
                                                     onChange={(e) => setEditContent(e.target.value)}
                                                     placeholder="일상에서 관찰한 것을 적어보세요..."
-                                                    className="w-full h-24 px-3 py-2 bg-white border border-violet-300 rounded-lg resize-none focus:ring-2 focus:ring-violet-400 focus:border-violet-400 text-sm text-slate-700 placeholder:text-violet-300"
+                                                    className="w-full h-24 px-3 py-2 bg-white border border-teal-300 rounded-lg resize-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400 text-sm text-slate-700 placeholder:text-teal-300"
                                                 />
                                             </div>
 
@@ -520,7 +520,7 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                                     value={editInsightAbstraction}
                                                     onChange={(e) => setEditInsightAbstraction(e.target.value)}
                                                     placeholder="관찰과 연결되는 CS 개념을 적어보세요..."
-                                                    className="w-full h-20 px-3 py-2 bg-white border border-violet-300 rounded-lg resize-none focus:ring-2 focus:ring-violet-400 focus:border-violet-400 text-sm text-slate-700 placeholder:text-violet-300"
+                                                    className="w-full h-20 px-3 py-2 bg-white border border-teal-300 rounded-lg resize-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400 text-sm text-slate-700 placeholder:text-teal-300"
                                                 />
                                             </div>
 
@@ -533,7 +533,7 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                                     value={editInsightApplication}
                                                     onChange={(e) => setEditInsightApplication(e.target.value)}
                                                     placeholder="이 개념을 내 코드나 프로젝트에 어떻게 적용할 수 있을까요..."
-                                                    className="w-full h-24 px-3 py-2 bg-white border border-violet-300 rounded-lg resize-none focus:ring-2 focus:ring-violet-400 focus:border-violet-400 text-sm text-slate-700 placeholder:text-violet-300"
+                                                    className="w-full h-24 px-3 py-2 bg-white border border-teal-300 rounded-lg resize-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400 text-sm text-slate-700 placeholder:text-teal-300"
                                                 />
                                             </div>
                                         </>
@@ -544,8 +544,8 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                             {entry.content && (
                                                 <div className="mb-3">
                                                     <div className="flex items-center gap-2 mb-1.5">
-                                                        <Lightbulb className="w-4 h-4 text-violet-600" />
-                                                        <span className="text-xs font-bold text-violet-700">1️⃣ Observation (관찰)</span>
+                                                        <Lightbulb className="w-4 h-4 text-teal-600" />
+                                                        <span className="text-xs font-bold text-teal-700">1️⃣ Observation (관찰)</span>
                                                     </div>
                                                     <p className="text-sm text-slate-700 pl-6 leading-relaxed">{entry.content}</p>
                                                 </div>
@@ -555,8 +555,8 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                             {entry.insightAbstraction && (
                                                 <div className="mb-3">
                                                     <div className="flex items-center gap-2 mb-1.5">
-                                                        <Sparkles className="w-4 h-4 text-purple-600" />
-                                                        <span className="text-xs font-bold text-purple-700">1️⃣ Abstraction (CS 개념)</span>
+                                                        <Sparkles className="w-4 h-4 text-cyan-600" />
+                                                        <span className="text-xs font-bold text-cyan-700">1️⃣ Abstraction (CS 개념)</span>
                                                     </div>
                                                     <p className="text-sm text-slate-700 pl-6 leading-relaxed">{entry.insightAbstraction}</p>
                                                 </div>
@@ -566,8 +566,8 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                             {entry.insightApplication && (
                                                 <div className="mb-3">
                                                     <div className="flex items-center gap-2 mb-1.5">
-                                                        <Hexagon className="w-4 h-4 text-violet-600" />
-                                                        <span className="text-xs font-bold text-violet-700">2️⃣ Application (실무 적용)</span>
+                                                        <Hexagon className="w-4 h-4 text-teal-600" />
+                                                        <span className="text-xs font-bold text-teal-700">2️⃣ Application (실무 적용)</span>
                                                     </div>
                                                     <p className="text-sm text-slate-700 pl-6 leading-relaxed">{entry.insightApplication}</p>
                                                 </div>
@@ -639,10 +639,10 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                         feedbackResults[entry.id] ? (
                                             <div className="space-y-3">
                                                 {/* AI Feedback Results */}
-                                                <div className="p-4 bg-gradient-to-br from-slate-50 to-violet-50 rounded-lg border border-violet-200">
+                                                <div className="p-4 bg-gradient-to-br from-slate-50 to-teal-50 rounded-lg border border-teal-200">
                                                     <div className="flex items-center gap-2 mb-3">
-                                                        <Sparkles className="w-4 h-4 text-violet-600" />
-                                                        <span className="text-xs font-bold text-violet-800 uppercase tracking-wider">AI Feedback</span>
+                                                        <Sparkles className="w-4 h-4 text-teal-600" />
+                                                        <span className="text-xs font-bold text-teal-800 uppercase tracking-wider">AI Feedback</span>
                                                     </div>
                                                     <p className="text-sm text-slate-700 leading-relaxed">
                                                         {feedbackResults[entry.id]}
@@ -660,7 +660,7 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                                     <button
                                                         onClick={() => handleRequestFeedback(entry)}
                                                         disabled={requestingFeedback === entry.id}
-                                                        className="flex-1 text-xs text-violet-600 hover:text-violet-700 transition-colors py-2 px-3 rounded bg-violet-50 hover:bg-violet-100 disabled:opacity-50"
+                                                        className="flex-1 text-xs text-teal-600 hover:text-teal-700 transition-colors py-2 px-3 rounded bg-teal-50 hover:bg-teal-100 disabled:opacity-50"
                                                     >
                                                         {requestingFeedback === entry.id ? 'Generating...' : 'Re-analyze'}
                                                     </button>
@@ -669,7 +669,7 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                         ) : entry.aiFeedback ? (
                                             <button
                                                 onClick={() => setFeedbackResults(prev => ({ ...prev, [entry.id]: entry.aiFeedback }))}
-                                                className="w-full px-4 py-2 bg-gradient-to-r from-slate-600 to-violet-400 text-white rounded-lg hover:from-slate-700 hover:to-violet-500 transition-all flex items-center justify-center gap-2 text-sm font-medium"
+                                                className="w-full px-4 py-2 bg-gradient-to-r from-slate-600 to-teal-400 text-white rounded-lg hover:from-slate-700 hover:to-teal-500 transition-all flex items-center justify-center gap-2 text-sm font-medium"
                                             >
                                                 <Sparkles className="w-4 h-4" />
                                                 View Analysis
@@ -678,7 +678,7 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
                                             <button
                                                 onClick={() => handleRequestFeedback(entry)}
                                                 disabled={requestingFeedback === entry.id}
-                                                className="w-full px-4 py-2 bg-gradient-to-r from-slate-700 to-violet-500 text-white rounded-lg hover:from-slate-800 hover:to-violet-600 transition-all flex items-center justify-center gap-2 text-sm font-medium disabled:opacity-50"
+                                                className="w-full px-4 py-2 bg-gradient-to-r from-slate-700 to-teal-500 text-white rounded-lg hover:from-slate-800 hover:to-teal-600 transition-all flex items-center justify-center gap-2 text-sm font-medium disabled:opacity-50"
                                             >
                                                 {requestingFeedback === entry.id ? (
                                                     <>
