@@ -3,6 +3,9 @@ package com.greenkey20.innerorbit.service.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.greenkey20.innerorbit.domain.dto.response.AnalysisResult;
+import com.greenkey20.innerorbit.domain.entity.LogEntry;
+import com.greenkey20.innerorbit.domain.entity.LogType;
+import com.greenkey20.innerorbit.repository.LogRepository;
 import com.greenkey20.innerorbit.service.AiService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * AI 서비스 구현체
@@ -24,6 +28,7 @@ public class AiServiceImpl implements AiService {
 
     private final ChatClient.Builder chatClientBuilder;
     private final ObjectMapper objectMapper;
+    private final LogRepository logRepository;
 
     @Override
     public AnalysisResult analyzeCognitiveDistortions(String logContent, Integer gravity, Integer stability) {
@@ -481,6 +486,31 @@ public class AiServiceImpl implements AiService {
     public String generateInsightFeedback(String trigger, String abstraction, String application) {
         log.info("Generating insight feedback - Abstraction: {}", abstraction);
 
+        // Issue #30: 최근 Flight Log 컨텍스트 추가
+        String recentLogsContext = buildRecentFlightLogsContext();
+
+        // ========================================
+        // TODO (은영님이 작성할 부분): System Prompt
+        // ========================================
+        // 힌트:
+        // 1. AI의 역할 정의: "당신은 ___입니다"
+        // 2. recentLogsContext를 활용하여 최근 감정 패턴 참고
+        // 3. Few-shot learning: 좋은 피드백 예시 1-2개 추가
+        // 4. 피드백 구조: 격려 → 심화 → 확장 (기존과 동일하게 유지)
+        // 5. Output format: 4-6 문장, 한국어
+        // 6. 톤: warm, constructive, intellectually stimulating
+        //
+        // 참고: Prompt_Engineering_Learning_Guide.md의 섹션 3, 5, 6 참조
+        //
+        // recentLogsContext 사용 예시:
+        // """
+        // You are a supportive mentor...
+        //
+        // %s
+        //
+        // 위 감정 패턴을 고려하여, 사용자의 Insight Log가 어떤 의미를 가지는지 연결해보세요.
+        // """.formatted(recentLogsContext)
+
         String systemPrompt = """
                 You are a supportive mentor helping a developer build "Architecture of Insight" -
                 the skill of seeing Computer Science patterns in everyday life.
@@ -501,6 +531,14 @@ public class AiServiceImpl implements AiService {
                 Total length: 4-6 sentences.
                 Write in Korean.
                 """;
+
+        // ========================================
+        // TODO (은영님이 작성할 부분): User Message
+        // ========================================
+        // 힌트:
+        // 1. 사용자의 Insight Log 정보 포함 (trigger, abstraction, application)
+        // 2. 명확한 요청: "이 통찰에 대해 피드백해주세요"
+        // 3. (선택) 최근 로그 맥락 강조: "최근 감정 패턴과 연결하여 피드백해주세요"
 
         String userMessage = String.format("""
                 사용자의 Insight Log:
@@ -537,6 +575,99 @@ public class AiServiceImpl implements AiService {
         } catch (Exception e) {
             log.error("Failed to generate insight feedback: {}", e.getMessage(), e);
             return "통찰을 기록해주셔서 감사합니다. 일상에서 CS 개념을 발견하는 것은 개발자적 사고를 키우는 훌륭한 연습입니다.";
+        }
+    }
+
+    /**
+     * Issue #30: 최근 Flight Log를 요약하여 컨텍스트 문자열 생성
+     * Insight Feedback에 사용자의 최근 감정 패턴을 제공하기 위함
+     *
+     * @return 최근 로그 요약 문자열 (없으면 빈 문자열)
+     */
+    private String buildRecentFlightLogsContext() {
+        try {
+            // 1. 최근 5개의 DAILY 로그 조회
+            List<LogEntry> recentLogs = logRepository.findTop5ByLogTypeOrderByCreatedAtDesc(LogType.DAILY);
+
+            if (recentLogs.isEmpty()) {
+                return "";
+            }
+
+            // 2. 로그 요약 생성
+            StringBuilder context = new StringBuilder();
+            context.append("\n[사용자의 최근 감정 패턴 (Flight Logs)]\n");
+
+            for (int i = 0; i < recentLogs.size(); i++) {
+                LogEntry log = recentLogs.get(i);
+
+                // 로그 내용 요약 (처음 50자)
+                String contentSummary = log.getContent().length() > 50
+                        ? log.getContent().substring(0, 50) + "..."
+                        : log.getContent();
+
+                // Gravity/Stability 정보
+                String emotionalState = String.format("(G:%d%%, S:%d%%)",
+                        log.getGravity(), log.getStability());
+
+                // 인지왜곡 패턴 추출 (있다면)
+                String distortionPattern = extractDistortionPattern(log);
+
+                // 로그 항목 추가
+                context.append(String.format("%d. \"%s\" %s",
+                        i + 1, contentSummary, emotionalState));
+
+                if (!distortionPattern.isEmpty()) {
+                    context.append(" - ").append(distortionPattern);
+                }
+
+                context.append("\n");
+            }
+
+            log.debug("Recent Flight Logs context built: {} logs", recentLogs.size());
+            return context.toString();
+
+        } catch (Exception e) {
+            log.warn("Failed to build recent logs context: {}", e.getMessage());
+            return "";
+        }
+    }
+
+    /**
+     * AnalysisResult에서 인지왜곡 패턴 추출
+     *
+     * @param logEntry 로그 엔트리
+     * @return 인지왜곡 패턴 문자열 (예: "흑백논리, 과잉일반화 감지")
+     */
+    @SuppressWarnings("unchecked")
+    private String extractDistortionPattern(LogEntry logEntry) {
+        try {
+            Map<String, Object> analysisResult = logEntry.getAnalysisResult();
+            if (analysisResult == null || !analysisResult.containsKey("distortions")) {
+                return "";
+            }
+
+            List<Map<String, String>> distortions =
+                    (List<Map<String, String>>) analysisResult.get("distortions");
+
+            if (distortions == null || distortions.isEmpty()) {
+                return "";
+            }
+
+            // 왜곡 타입들을 쉼표로 연결
+            List<String> types = distortions.stream()
+                    .map(d -> d.get("type"))
+                    .filter(type -> type != null && !type.isEmpty())
+                    .toList();
+
+            if (types.isEmpty()) {
+                return "";
+            }
+
+            return String.join(", ", types) + " 감지";
+
+        } catch (Exception e) {
+            log.warn("Failed to extract distortion pattern: {}", e.getMessage());
+            return "";
         }
     }
 }
