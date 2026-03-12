@@ -12,22 +12,10 @@ import Analytics from './components/Analytics';
 import { authService } from './services/apiService';
 
 /**
- * App - Inner Orbit 메인 애플리케이션 컴포넌트
- * 모든 비즈니스 로직은 useInnerOrbit 훅에 위임하고,
- * UI 컴포넌트들을 조립(Composition)하는 역할만 수행합니다.
+ * MainApp - 인증된 사용자에게 보여주는 메인 앱
+ * 훅(useInnerOrbit)은 항상 이 컴포넌트 안에서만 호출됩니다.
  */
-export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(authService.isAuthenticated());
-
-  useEffect(() => {
-    const handleLogout = () => setIsAuthenticated(false);
-    window.addEventListener('auth:logout', handleLogout);
-    return () => window.removeEventListener('auth:logout', handleLogout);
-  }, []);
-
-  if (!isAuthenticated) {
-    return <LoginPage onLoginSuccess={() => setIsAuthenticated(true)} />;
-  }
+function MainApp() {
   const {
     // 상태
     entries,
@@ -170,4 +158,23 @@ export default function App() {
       `}</style>
     </div>
   );
+}
+
+/**
+ * App - 인증 상태에 따라 LoginPage 또는 MainApp을 렌더링
+ */
+export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(authService.isAuthenticated());
+
+  useEffect(() => {
+    const handleLogout = () => setIsAuthenticated(false);
+    window.addEventListener('auth:logout', handleLogout);
+    return () => window.removeEventListener('auth:logout', handleLogout);
+  }, []);
+
+  if (!isAuthenticated) {
+    return <LoginPage onLoginSuccess={() => setIsAuthenticated(true)} />;
+  }
+
+  return <MainApp />;
 }
