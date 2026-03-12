@@ -1,11 +1,11 @@
 package com.greenkey20.innerorbit.feature;
 
-import com.greenkey20.innerorbit.domain.dto.request.LogEntryCreateRequest;
-import com.greenkey20.innerorbit.domain.dto.response.LogEntryResponse;
-import com.greenkey20.innerorbit.domain.entity.LogEntry;
-import com.greenkey20.innerorbit.domain.entity.LogType;
-import com.greenkey20.innerorbit.repository.LogRepository;
-import com.greenkey20.innerorbit.service.LogService;
+import com.greenkey20.innerorbit.log.domain.dto.request.LogEntryCreateRequest;
+import com.greenkey20.innerorbit.log.domain.dto.response.LogEntryResponse;
+import com.greenkey20.innerorbit.log.domain.entity.LogEntry;
+import com.greenkey20.innerorbit.log.domain.entity.LogType;
+import com.greenkey20.innerorbit.log.repository.LogRepository;
+import com.greenkey20.innerorbit.log.service.LogService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
