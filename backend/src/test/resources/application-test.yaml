@@ -24,6 +24,14 @@ spring:
         options:
           model: gpt-4o-mini
 
+admin:
+  username: testadmin
+  password: testpassword
+
+jwt:
+  secret: test-secret-key-for-unit-tests-must-be-at-least-256-bits-long!!
+  expiration-ms: 3600000
+
 logging:
   level:
     com.greenkey20.innerorbit: DEBUG

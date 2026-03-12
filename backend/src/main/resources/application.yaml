@@ -50,6 +50,16 @@ spring:
         connect-timeout: 10s
         read-timeout: 60s
 
+# 관리자 계정 설정 (단일 계정 인증)
+admin:
+  username: ${ADMIN_USERNAME:admin}
+  password: ${ADMIN_PASSWORD:changeme}
+
+# JWT 설정
+jwt:
+  secret: ${JWT_SECRET:inner-orbit-default-secret-key-must-be-at-least-256-bits-long!!}
+  expiration-ms: 604800000  # 7일 (7 * 24 * 60 * 60 * 1000)
+
 # 로깅 설정
 logging:
   level:

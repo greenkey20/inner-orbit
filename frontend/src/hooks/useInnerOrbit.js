@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { apiFetch } from '../services/apiService';
 
 const PROMPTS = [
     "현재 감지되는 '외부 인력(그리움)'의 강도는 어떠하며, 이에 대응하기 위해 나는 어떤 '코어 활동'을 하고 있나요?",
@@ -43,7 +44,7 @@ export default function useInnerOrbit() {
     useEffect(() => {
         const fetchLogs = async () => {
             try {
-                const response = await fetch('/api/logs');
+                const response = await apiFetch('/api/logs');
                 if (response.ok) {
                     const data = await response.json();
                     // 백엔드 응답을 프론트엔드 형식으로 변환
@@ -130,11 +131,8 @@ export default function useInnerOrbit() {
                 };
             }
 
-            const response = await fetch('/api/logs', {
+            const response = await apiFetch('/api/logs', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
                 body: JSON.stringify(requestData)
             });
 
@@ -234,11 +232,8 @@ export default function useInnerOrbit() {
             };
 
             // 백엔드에 PUT 요청
-            const response = await fetch(`/api/logs/${id}`, {
+            const response = await apiFetch(`/api/logs/${id}`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
                 body: JSON.stringify(requestData)
             });
 

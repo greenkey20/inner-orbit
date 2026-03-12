@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { PenTool, Send, MapPin, Eye, Ear, Hand, Lightbulb, Sparkles } from 'lucide-react';
+import { apiFetch } from '../services/apiService';
 
 // UI 컴포넌트: 버튼
 const Button = ({ onClick, children, variant = "primary", className = "", ...props }) => {
@@ -60,9 +61,8 @@ export default function LogEditor({
         setLoadingKeywords(true);
 
         try {
-            const response = await fetch('/api/ai/insights/suggest-keywords', {
+            const response = await apiFetch('/api/ai/insights/suggest-keywords', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ trigger: message })
             });
 

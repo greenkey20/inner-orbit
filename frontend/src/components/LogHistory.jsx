@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Calendar, Trash2, Download, Upload, AlertCircle, Hexagon, Pencil, Check, X, Zap, Shield, Sparkles, MapPin, Eye, Ear, Hand, Lightbulb } from 'lucide-react';
+import { apiFetch } from '../services/apiService';
 
 // UI 컴포넌트: 카드
 const Card = ({ children, className = "" }) => (
@@ -187,11 +188,8 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
 
         try {
             // 백엔드 API 호출
-            const response = await fetch(`/api/logs/${entry.id}/analyze`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
+            const response = await apiFetch(`/api/logs/${entry.id}/analyze`, {
+                method: 'POST'
             });
 
             if (!response.ok) {
@@ -230,11 +228,8 @@ export default function LogHistory({ entries, onDeleteEntry, onUpdateEntry, onUp
         setFeedbackError(null);
 
         try {
-            const response = await fetch(`/api/logs/${entry.id}/request-feedback`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
+            const response = await apiFetch(`/api/logs/${entry.id}/request-feedback`, {
+                method: 'POST'
             });
 
             if (!response.ok) {
