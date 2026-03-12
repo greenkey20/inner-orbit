@@ -1,12 +1,12 @@
 package com.greenkey20.innerorbit.service;
 
 import com.greenkey20.innerorbit.common.exception.BusinessException;
-import com.greenkey20.innerorbit.common.exception.ErrorCode;
-import com.greenkey20.innerorbit.log.domain.dto.request.LogEntryCreateRequest;
-import com.greenkey20.innerorbit.log.domain.dto.response.LogEntryResponse;
-import com.greenkey20.innerorbit.log.domain.entity.LogEntry;
-import com.greenkey20.innerorbit.log.repository.LogRepository;
-import com.greenkey20.innerorbit.log.service.LogServiceImpl;
+import com.greenkey20.innerorbit.log.application.port.out.AiAnalysisPort;
+import com.greenkey20.innerorbit.log.application.port.out.LogRepository;
+import com.greenkey20.innerorbit.log.application.service.LogService;
+import com.greenkey20.innerorbit.log.domain.model.LogEntry;
+import com.greenkey20.innerorbit.log.infrastructure.adapter.in.web.dto.request.LogEntryCreateRequest;
+import com.greenkey20.innerorbit.log.infrastructure.adapter.in.web.dto.response.LogEntryResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,8 +33,11 @@ class LogServiceTest {
     @Mock
     private LogRepository logRepository;
 
+    @Mock
+    private AiAnalysisPort aiAnalysisPort;
+
     @InjectMocks
-    private LogServiceImpl logService;
+    private LogService logService;
 
     private LogEntryCreateRequest validRequest;
     private LogEntry savedLogEntry;
@@ -48,7 +51,7 @@ class LogServiceTest {
                 .gravity(40)
                 .build();
 
-        // Given: 저장될 엔티티 준비
+        // Given: 저장될 도메인 모델 준비
         savedLogEntry = LogEntry.builder()
                 .id(1L)
                 .content(validRequest.getContent())
@@ -89,8 +92,6 @@ class LogServiceTest {
                 .build();
 
         // When & Then
-        // Note: @Valid 어노테이션은 컨트롤러 레벨에서 작동하므로,
-        // 서비스 레벨에서는 비즈니스 로직 검증을 수행
         assertThatThrownBy(() -> logService.createLogEntry(emptyContentRequest))
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("내용을 입력해주세요");

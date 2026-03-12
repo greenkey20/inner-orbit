@@ -1,11 +1,11 @@
 package com.greenkey20.innerorbit.feature;
 
-import com.greenkey20.innerorbit.domain.dto.request.LogEntryCreateRequest;
-import com.greenkey20.innerorbit.domain.dto.response.LogEntryResponse;
-import com.greenkey20.innerorbit.domain.entity.LogEntry;
-import com.greenkey20.innerorbit.domain.entity.LogType;
-import com.greenkey20.innerorbit.repository.LogRepository;
-import com.greenkey20.innerorbit.service.LogService;
+import com.greenkey20.innerorbit.log.application.port.in.LogUseCase;
+import com.greenkey20.innerorbit.log.application.port.out.LogRepository;
+import com.greenkey20.innerorbit.log.domain.model.LogEntry;
+import com.greenkey20.innerorbit.log.domain.model.LogType;
+import com.greenkey20.innerorbit.log.infrastructure.adapter.in.web.dto.request.LogEntryCreateRequest;
+import com.greenkey20.innerorbit.log.infrastructure.adapter.in.web.dto.response.LogEntryResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DeepLogIntegrationTest {
 
     @Autowired
-    private LogService logService;
+    private LogUseCase logUseCase;
 
     @Autowired
     private LogRepository logRepository;
@@ -54,7 +54,7 @@ class DeepLogIntegrationTest {
     @DisplayName("Sensory Log 생성 및 조회 - 모든 필드가 정상적으로 저장되고 조회되는지 검증")
     void createAndRetrieveDeepLog_Success() {
         // Step 1: Sensory Log 생성
-        LogEntryResponse createdResponse = logService.createLogEntry(deepLogRequest);
+        LogEntryResponse createdResponse = logUseCase.createLogEntry(deepLogRequest);
 
         // Step 2: 생성 결과 검증
         assertThat(createdResponse).isNotNull();
@@ -84,7 +84,7 @@ class DeepLogIntegrationTest {
         assertThat(savedEntity.getSensoryTactile()).isEqualTo("Soft sand");
 
         // Step 4: 서비스를 통한 조회로 재검증
-        LogEntryResponse retrievedResponse = logService.getLogEntry(createdResponse.getId());
+        LogEntryResponse retrievedResponse = logUseCase.getLogEntry(createdResponse.getId());
 
         assertThat(retrievedResponse.getLogType()).isEqualTo(LogType.SENSORY);
         assertThat(retrievedResponse.getLocation()).isEqualTo("Mui Ne White Sand Dunes");
@@ -105,7 +105,7 @@ class DeepLogIntegrationTest {
                 .build();
 
         // 생성 및 검증
-        LogEntryResponse response = logService.createLogEntry(regularRequest);
+        LogEntryResponse response = logUseCase.createLogEntry(regularRequest);
 
         assertThat(response.getLogType()).isEqualTo(LogType.DAILY);
         assertThat(response.getIsDeepLog()).isFalse(); // Backward compatibility
@@ -129,7 +129,7 @@ class DeepLogIntegrationTest {
                 .sensoryTactile("Cool spring breeze")
                 .build();
 
-        LogEntryResponse response = logService.createLogEntry(partialSensoryRequest);
+        LogEntryResponse response = logUseCase.createLogEntry(partialSensoryRequest);
 
         assertThat(response.getLogType()).isEqualTo(LogType.SENSORY);
         assertThat(response.getIsDeepLog()).isTrue(); // Backward compatibility
@@ -154,7 +154,7 @@ class DeepLogIntegrationTest {
                 .sensoryVisual("Spectacular dunes stretching to the horizon")
                 .build();
 
-        LogEntryResponse response = logService.createLogEntry(longLocationRequest);
+        LogEntryResponse response = logUseCase.createLogEntry(longLocationRequest);
 
         assertThat(response.getLogType()).isEqualTo(LogType.SENSORY);
         assertThat(response.getLocation()).isEqualTo(longLocation);
@@ -187,7 +187,7 @@ class DeepLogIntegrationTest {
                 .sensoryTactile(longSensoryText)
                 .build();
 
-        LogEntryResponse response = logService.createLogEntry(longSensoryRequest);
+        LogEntryResponse response = logUseCase.createLogEntry(longSensoryRequest);
 
         assertThat(response.getLogType()).isEqualTo(LogType.SENSORY);
         assertThat(response.getSensoryTactile()).isEqualTo(longSensoryText);
@@ -209,7 +209,7 @@ class DeepLogIntegrationTest {
         // Deprecated setter 호출
         legacyRequest.setIsDeepLog(true);
 
-        LogEntryResponse response = logService.createLogEntry(legacyRequest);
+        LogEntryResponse response = logUseCase.createLogEntry(legacyRequest);
 
         // logType이 SENSORY로 변환되어야 함
         assertThat(response.getLogType()).isEqualTo(LogType.SENSORY);
