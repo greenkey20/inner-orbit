@@ -7,6 +7,7 @@
  * - 동적 프롬프트 생성: GET /api/ai/prompt
  * - OpenAI API Key는 백엔드에서 안전하게 관리됩니다.
  */
+import { apiFetch } from './apiService';
 
 /**
  * API Key 가져오기 (하위 호환성 유지)
@@ -25,7 +26,7 @@ export function getApiKey() {
 export async function generateDynamicPrompt(gravity, stability) {
     try {
         // 백엔드 API 호출
-        const response = await fetch(`/api/ai/prompt?gravity=${gravity}&stability=${stability}`);
+        const response = await apiFetch(`/api/ai/prompt?gravity=${gravity}&stability=${stability}`);
 
         if (!response.ok) {
             throw new Error(`서버 오류: ${response.status}`);

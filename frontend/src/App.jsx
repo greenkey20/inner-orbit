@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import useInnerOrbit from './hooks/useInnerOrbit';
 import Header from './components/Header';
+import LoginPage from './components/LoginPage';
 import StatusDashboard from './components/StatusDashboard';
 import PromptAssistant from './components/PromptAssistant';
 import LogEditor from './components/LogEditor';
@@ -8,13 +9,25 @@ import LogHistory from './components/LogHistory';
 import TelemetryGuide from './components/TelemetryGuide';
 import FlightTrajectory from './components/FlightTrajectory';
 import Analytics from './components/Analytics';
+import { authService } from './services/apiService';
 
 /**
  * App - Inner Orbit 메인 애플리케이션 컴포넌트
- * 모든 비즈니스 로직은 useInnerOrbit 훅에 위임하고, 
+ * 모든 비즈니스 로직은 useInnerOrbit 훅에 위임하고,
  * UI 컴포넌트들을 조립(Composition)하는 역할만 수행합니다.
  */
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(authService.isAuthenticated());
+
+  useEffect(() => {
+    const handleLogout = () => setIsAuthenticated(false);
+    window.addEventListener('auth:logout', handleLogout);
+    return () => window.removeEventListener('auth:logout', handleLogout);
+  }, []);
+
+  if (!isAuthenticated) {
+    return <LoginPage onLoginSuccess={() => setIsAuthenticated(true)} />;
+  }
   const {
     // 상태
     entries,
