@@ -16,4 +16,8 @@ public interface LogJpaRepository extends JpaRepository<LogEntryJpaEntity, Long>
     List<LogEntryJpaEntity> findAllByOrderByCreatedAtDesc();
 
     List<LogEntryJpaEntity> findTop5ByLogTypeOrderByCreatedAtDesc(LogType logType);
+
+    List<LogEntryJpaEntity> findAllByUserIdOrderByCreatedAtDesc(Long userId);
+
+    List<LogEntryJpaEntity> findTop5ByLogTypeAndUserIdOrderByCreatedAtDesc(LogType logType, Long userId);
 }
