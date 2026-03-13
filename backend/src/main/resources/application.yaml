@@ -28,6 +28,12 @@ spring:
         jdbc:
           time_zone: Asia/Seoul
 
+  # Redis 설정
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
   # Flyway 설정
   flyway:
     enabled: true

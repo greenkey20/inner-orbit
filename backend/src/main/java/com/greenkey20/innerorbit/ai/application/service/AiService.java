@@ -3,11 +3,13 @@ package com.greenkey20.innerorbit.ai.application.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.greenkey20.innerorbit.ai.application.port.in.AiUseCase;
+import com.greenkey20.innerorbit.ai.infrastructure.adapter.out.redis.NavPromptHistoryRepository;
 import com.greenkey20.innerorbit.log.infrastructure.adapter.out.ai.dto.AnalysisResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,6 +25,7 @@ public class AiService implements AiUseCase {
 
     private final ChatClient.Builder chatClientBuilder;
     private final ObjectMapper objectMapper;
+    private final NavPromptHistoryRepository navPromptHistoryRepository;
 
     @Override
     public AnalysisResult analyzeCognitiveDistortions(String logContent, Integer gravity, Integer stability) {
@@ -367,10 +370,14 @@ public class AiService implements AiUseCase {
     @Override
     public String generateDynamicPrompt(Integer gravity, Integer stability) {
         String situation = determineSituation(gravity, stability);
-        log.info("Generating dynamic prompt - Gravity: {}, Stability: {} -> Situation: {}",
-                gravity, stability, situation);
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.info("Generating dynamic prompt - Gravity: {}, Stability: {} -> Situation: {}, User: {}",
+                gravity, stability, situation, username);
 
-        String systemPrompt = buildPromptForSituation(situation, gravity, stability);
+        List<String> recentPrompts = navPromptHistoryRepository.getRecentPrompts(username, situation);
+        String exclusionContext = buildExclusionContext(recentPrompts);
+
+        String systemPrompt = buildPromptForSituation(situation, gravity, stability) + exclusionContext;
         String userMessage = "Generate one question.";
 
         try {
@@ -386,13 +393,23 @@ public class AiService implements AiUseCase {
                     .call()
                     .content();
 
-            log.info("Dynamic prompt generated successfully: {}", prompt);
+            navPromptHistoryRepository.savePrompt(username, situation, prompt);
+            log.info("Dynamic prompt generated and saved to history: {}", prompt);
             return prompt;
 
         } catch (Exception e) {
             log.error("Failed to generate dynamic prompt: {}", e.getMessage(), e);
             throw new RuntimeException("동적 프롬프트 생성 중 오류가 발생했습니다: " + e.getMessage(), e);
         }
+    }
+
+    private String buildExclusionContext(List<String> recentPrompts) {
+        if (recentPrompts.isEmpty()) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder("\n\nAvoid these recently asked questions:\n");
+        recentPrompts.forEach(p -> sb.append("- ").append(p).append("\n"));
+        return sb.toString();
     }
 
     @Override
