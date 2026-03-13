@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -124,8 +125,8 @@ class WeeklyReportServiceTest {
     @Test
     @DisplayName("generateForCurrentWeek — 이미 존재하면 generator 호출 없이 기존 리포트 반환")
     void generateForCurrentWeek_AlreadyExists_ReturnsExisting() {
-        LocalDate yesterday  = LocalDate.now().minusDays(1);
-        LocalDate weekStart  = yesterday.with(DayOfWeek.MONDAY);
+        LocalDate weekEnd   = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.SATURDAY));
+        LocalDate weekStart = weekEnd.minusDays(6);
         WeeklyReport existing = report(5L, WeeklyReportStatus.GENERATED);
 
         given(weeklyReportRepository.existsByUserIdAndWeekStart(USER_ID, weekStart)).willReturn(true);
@@ -141,18 +142,18 @@ class WeeklyReportServiceTest {
     @Test
     @DisplayName("generateForCurrentWeek — 없으면 generator 위임하고 결과 반환")
     void generateForCurrentWeek_NotExists_DelegatesToGenerator() {
-        LocalDate yesterday = LocalDate.now().minusDays(1);
-        LocalDate weekStart = yesterday.with(DayOfWeek.MONDAY);
+        LocalDate weekEnd   = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.SATURDAY));
+        LocalDate weekStart = weekEnd.minusDays(6);
         WeeklyReport generated = report(6L, WeeklyReportStatus.GENERATED);
 
         given(weeklyReportRepository.existsByUserIdAndWeekStart(USER_ID, weekStart)).willReturn(false);
-        given(weeklyReportGenerator.generateReportForUser(eq(USER_ID), eq(weekStart), eq(yesterday)))
+        given(weeklyReportGenerator.generateReportForUser(eq(USER_ID), eq(weekStart), eq(weekEnd)))
                 .willReturn(generated);
 
         WeeklyReport result = weeklyReportService.generateForCurrentWeek(USER_ID);
 
         assertThat(result.getId()).isEqualTo(6L);
-        verify(weeklyReportGenerator).generateReportForUser(USER_ID, weekStart, yesterday);
+        verify(weeklyReportGenerator).generateReportForUser(USER_ID, weekStart, weekEnd);
     }
 
     // -----------------------------------------------------------------------

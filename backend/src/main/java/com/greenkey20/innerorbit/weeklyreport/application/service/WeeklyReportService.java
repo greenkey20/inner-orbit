@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
 /**
@@ -59,8 +60,9 @@ public class WeeklyReportService implements WeeklyReportUseCase {
 
     @Override
     public WeeklyReport generateForCurrentWeek(Long userId) {
-        LocalDate yesterday = LocalDate.now().minusDays(1);
-        LocalDate weekStart = yesterday.with(DayOfWeek.MONDAY);
+        // 가장 최근 완료된 토요일 기준 — 일~토 한 주 집계 (Asia/Seoul 기준)
+        LocalDate weekEnd   = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.SATURDAY));
+        LocalDate weekStart = weekEnd.minusDays(6);  // 일요일
 
         if (weeklyReportRepository.existsByUserIdAndWeekStart(userId, weekStart)) {
             log.info("Weekly report already exists for userId={}, weekStart={}", userId, weekStart);
@@ -68,6 +70,6 @@ public class WeeklyReportService implements WeeklyReportUseCase {
                     .orElseThrow(() -> new BusinessException(ErrorCode.WEEKLY_REPORT_NOT_FOUND));
         }
 
-        return weeklyReportGenerator.generateReportForUser(userId, weekStart, yesterday);
+        return weeklyReportGenerator.generateReportForUser(userId, weekStart, weekEnd);
     }
 }
