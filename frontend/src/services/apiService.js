@@ -40,9 +40,23 @@ export const authService = {
         if (response.ok) {
             const { token } = await response.json();
             authService.setToken(token);
-            return true;
+            return { success: true };
         }
-        return false;
+        return { success: false, status: response.status };
+    },
+
+    register: async (username, password) => {
+        const response = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password }),
+        });
+        if (response.ok) {
+            const { token } = await response.json();
+            authService.setToken(token);
+            return { success: true };
+        }
+        return { success: false, status: response.status };
     },
 
     logout: () => {

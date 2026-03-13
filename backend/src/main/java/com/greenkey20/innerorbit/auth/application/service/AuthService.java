@@ -27,4 +27,18 @@ public class AuthService implements AuthUseCase {
 
         return jwtUtil.generateToken(user.getUsername(), user.getId());
     }
+
+    @Override
+    public String register(String username, String password) {
+        if (userRepository.findByUsername(username).isPresent()) {
+            throw new IllegalStateException("Username already exists");
+        }
+
+        User saved = userRepository.save(User.builder()
+                .username(username)
+                .password(passwordEncoder.encode(password))
+                .build());
+
+        return jwtUtil.generateToken(saved.getUsername(), saved.getId());
+    }
 }
