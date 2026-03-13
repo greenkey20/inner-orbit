@@ -14,9 +14,9 @@ import java.util.Map;
  * DB 스키마: log_entry (변경 없음)
  */
 @Entity
-@Table(name = "log_entry", indexes = {
-    @Index(name = "idx_created_at", columnList = "created_at"),
-    @Index(name = "idx_user_id", columnList = "user_id")
+@Table(name = "log_entries", indexes = {
+    @Index(name = "idx_log_entries_created_at", columnList = "created_at"),
+    @Index(name = "idx_log_entries_user_id", columnList = "user_id")
 })
 @Getter
 @Setter
