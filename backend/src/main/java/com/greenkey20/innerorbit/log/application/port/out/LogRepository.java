@@ -19,5 +19,9 @@ public interface LogRepository {
 
     List<LogEntry> findTop5ByLogType(LogType logType);
 
+    List<LogEntry> findAllByUserIdOrderByCreatedAtDesc(Long userId);
+
+    List<LogEntry> findTop5ByLogTypeAndUserId(LogType logType, Long userId);
+
     void flush();
 }

@@ -48,7 +48,7 @@ public class LogEntryJpaEntity {
     @Column(name = "analysis_result", columnDefinition = "TEXT")
     private Map<String, Object> analysisResult;
 
-    @Column(name = "user_id")
+    @Column(name = "user_id", nullable = false)
     private Long userId;
 
     @Column(length = 500)

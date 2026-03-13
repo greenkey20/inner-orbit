@@ -46,6 +46,18 @@ public class LogPersistenceAdapter implements LogRepository {
     }
 
     @Override
+    public List<LogEntry> findAllByUserIdOrderByCreatedAtDesc(Long userId) {
+        return logJpaRepository.findAllByUserIdOrderByCreatedAtDesc(userId)
+                .stream().map(this::toDomainModel).toList();
+    }
+
+    @Override
+    public List<LogEntry> findTop5ByLogTypeAndUserId(LogType logType, Long userId) {
+        return logJpaRepository.findTop5ByLogTypeAndUserIdOrderByCreatedAtDesc(logType, userId)
+                .stream().map(this::toDomainModel).toList();
+    }
+
+    @Override
     public void flush() {
         logJpaRepository.flush();
     }

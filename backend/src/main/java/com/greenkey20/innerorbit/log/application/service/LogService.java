@@ -29,6 +29,9 @@ import java.util.Map;
 @Slf4j
 public class LogService implements LogUseCase {
 
+    // TODO: #72 Phase 2 — SecurityContext에서 실제 userId로 교체
+    private static final Long TEMP_SINGLE_USER_ID = 1L;
+
     private final LogRepository logRepository;
     private final AiAnalysisPort aiAnalysisPort;
 
@@ -54,6 +57,7 @@ public class LogService implements LogUseCase {
                 .insightApplication(request.getInsightApplication())
                 .aiFeedback(request.getAiFeedback())
                 .analysisResult(request.getAnalysisResult())
+                .userId(TEMP_SINGLE_USER_ID)
                 .build();
 
         LogEntry savedEntry = logRepository.save(logEntry);
@@ -103,7 +107,7 @@ public class LogService implements LogUseCase {
     @Override
     public List<LogEntryResponse> getAllLogEntries() {
         log.info("Fetching all log entries");
-        return logRepository.findAllOrderByCreatedAtDesc().stream()
+        return logRepository.findAllByUserIdOrderByCreatedAtDesc(TEMP_SINGLE_USER_ID).stream()
                 .map(LogEntryResponse::from)
                 .toList();
     }
@@ -253,7 +257,7 @@ public class LogService implements LogUseCase {
      */
     private String buildRecentFlightLogsContext() {
         try {
-            List<LogEntry> recentLogs = logRepository.findTop5ByLogType(LogType.DAILY);
+            List<LogEntry> recentLogs = logRepository.findTop5ByLogTypeAndUserId(LogType.DAILY, TEMP_SINGLE_USER_ID);
 
             if (recentLogs.isEmpty()) {
                 return "";
