@@ -42,6 +42,8 @@ export default function LogEditor({
 }) {
     const [logMode, setLogMode] = useState('DAILY'); // DAILY, SENSORY, INSIGHT
     const [loadingKeywords, setLoadingKeywords] = useState(false);
+    const [loadingAnalysis, setLoadingAnalysis] = useState(false);
+    const [analysisResult, setAnalysisResult] = useState(null);
 
     const handleFieldChange = (field, value) => {
         onDeepLogChange({
@@ -84,6 +86,29 @@ export default function LogEditor({
             alert('AI 키워드 추천에 실패했습니다. 다시 시도해주세요.');
         } finally {
             setLoadingKeywords(false);
+        }
+    };
+
+    const handleAnalyzePreview = async () => {
+        if (!message || message.trim().length < 10) {
+            alert('분석할 내용을 10자 이상 입력해주세요.');
+            return;
+        }
+        setLoadingAnalysis(true);
+        setAnalysisResult(null);
+        try {
+            const response = await apiFetch('/api/ai/analyze-text', {
+                method: 'POST',
+                body: JSON.stringify({ text: message })
+            });
+            if (!response.ok) throw new Error('분석 실패');
+            const data = await response.json();
+            setAnalysisResult(data);
+        } catch (error) {
+            console.error('텍스트 분석 실패:', error);
+            alert('분석에 실패했습니다. 다시 시도해주세요.');
+        } finally {
+            setLoadingAnalysis(false);
         }
     };
 
@@ -291,14 +316,64 @@ export default function LogEditor({
                         </div>
                     </div>
                 ) : (
-                    /* Normal Mode - Simple Text Area */
-                    <div className="relative group">
-                        <textarea
-                            value={message}
-                            onChange={(e) => onMessageChange(e.target.value)}
-                            placeholder="감정의 인력을 성장의 동력으로. 오늘 당신의 항해 기록을 남겨주세요."
-                            className="w-full h-60 p-5 bg-white border border-slate-200 rounded-xl resize-none focus:ring-2 focus:ring-slate-200 focus:border-slate-400 text-slate-700 leading-relaxed placeholder:text-slate-300 text-sm transition-all shadow-sm font-sans"
-                        />
+                    /* Normal Mode - Simple Text Area + Analyze Preview */
+                    <div className="space-y-3">
+                        <div className="relative group">
+                            <textarea
+                                value={message}
+                                onChange={(e) => { onMessageChange(e.target.value); setAnalysisResult(null); }}
+                                placeholder="감정의 인력을 성장의 동력으로. 오늘 당신의 항해 기록을 남겨주세요."
+                                className="w-full h-60 p-5 bg-white border border-slate-200 rounded-xl resize-none focus:ring-2 focus:ring-slate-200 focus:border-slate-400 text-slate-700 leading-relaxed placeholder:text-slate-300 text-sm transition-all shadow-sm font-sans"
+                            />
+                        </div>
+
+                        {/* Analyze Preview Button */}
+                        <button
+                            onClick={handleAnalyzePreview}
+                            disabled={loadingAnalysis || !message.trim()}
+                            className="w-full py-2 border border-slate-300 rounded-lg text-xs font-medium text-slate-500 hover:bg-slate-50 hover:border-slate-400 hover:text-slate-700 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        >
+                            <Sparkles className="w-3.5 h-3.5" />
+                            {loadingAnalysis ? '분석 중...' : 'AI 인지왜곡 미리 분석 (저장 안 됨)'}
+                        </button>
+
+                        {/* Analysis Result Panel */}
+                        {analysisResult && (
+                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3 text-sm">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">AI 분석 결과</span>
+                                    <button onClick={() => setAnalysisResult(null)} className="text-slate-300 hover:text-slate-500 text-xs">✕</button>
+                                </div>
+
+                                {analysisResult.distortions && analysisResult.distortions.length > 0 ? (
+                                    <div className="space-y-1">
+                                        <p className="text-xs font-semibold text-rose-500">발견된 인지왜곡</p>
+                                        {analysisResult.distortions.map((d, i) => (
+                                            <div key={i} className="bg-rose-50 rounded-lg px-3 py-2">
+                                                <span className="text-xs font-bold text-rose-600">{d.type}</span>
+                                                <p className="text-xs text-slate-500 mt-0.5">"{d.quote}"</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-xs text-emerald-600 font-medium">인지왜곡이 발견되지 않았습니다.</p>
+                                )}
+
+                                {analysisResult.reframed && (
+                                    <div className="bg-blue-50 rounded-lg px-3 py-2">
+                                        <p className="text-xs font-semibold text-blue-600 mb-1">재해석</p>
+                                        <p className="text-xs text-slate-600 leading-relaxed">{analysisResult.reframed}</p>
+                                    </div>
+                                )}
+
+                                {analysisResult.alternative && (
+                                    <div className="bg-teal-50 rounded-lg px-3 py-2">
+                                        <p className="text-xs font-semibold text-teal-600 mb-1">대안적 관점</p>
+                                        <p className="text-xs text-slate-600 leading-relaxed">{analysisResult.alternative}</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 )}
             </section>
