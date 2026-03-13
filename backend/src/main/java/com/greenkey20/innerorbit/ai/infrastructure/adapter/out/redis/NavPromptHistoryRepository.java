@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * 최근 생성된 항법 질문을 Redis List에 저장 — 반복 질문 방지용
  *
- * Key 구조: nav:recent:{username}:{situation}
+ * Key 구조: nav:recent:{userId}:{situation}
  * - situation별로 분리하여 같은 감정 상태에서의 질문만 exclusion 적용
  * 자료구조: Redis List (LPUSH + LTRIM으로 최근 N개만 유지)
  * TTL: 30일 / MAX_HISTORY: 100개 (3회/일 × 30일 기준)
@@ -26,20 +26,20 @@ public class NavPromptHistoryRepository {
 
     private final StringRedisTemplate redisTemplate;
 
-    public List<String> getRecentPrompts(String username, String situation) {
-        String key = buildKey(username, situation);
+    public List<String> getRecentPrompts(Long userId, String situation) {
+        String key = buildKey(userId, situation);
         List<String> prompts = redisTemplate.opsForList().range(key, 0, MAX_HISTORY - 1);
         return prompts != null ? prompts : Collections.emptyList();
     }
 
-    public void savePrompt(String username, String situation, String prompt) {
-        String key = buildKey(username, situation);
+    public void savePrompt(Long userId, String situation, String prompt) {
+        String key = buildKey(userId, situation);
         redisTemplate.opsForList().leftPush(key, prompt);
         redisTemplate.opsForList().trim(key, 0, MAX_HISTORY - 1);
         redisTemplate.expire(key, TTL);
     }
 
-    private String buildKey(String username, String situation) {
-        return KEY_PREFIX + username + ":" + situation;
+    private String buildKey(Long userId, String situation) {
+        return KEY_PREFIX + userId + ":" + situation;
     }
 }

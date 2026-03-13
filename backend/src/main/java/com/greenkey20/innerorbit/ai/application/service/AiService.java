@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.greenkey20.innerorbit.ai.application.port.in.AiUseCase;
 import com.greenkey20.innerorbit.ai.infrastructure.adapter.out.redis.NavPromptHistoryRepository;
 import com.greenkey20.innerorbit.log.infrastructure.adapter.out.ai.dto.AnalysisResult;
+import com.greenkey20.innerorbit.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -370,11 +371,11 @@ public class AiService implements AiUseCase {
     @Override
     public String generateDynamicPrompt(Integer gravity, Integer stability) {
         String situation = determineSituation(gravity, stability);
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        log.info("Generating dynamic prompt - Gravity: {}, Stability: {} -> Situation: {}, User: {}",
-                gravity, stability, situation, username);
+        Long userId = ((UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).userId();
+        log.info("Generating dynamic prompt - Gravity: {}, Stability: {} -> Situation: {}, UserId: {}",
+                gravity, stability, situation, userId);
 
-        List<String> recentPrompts = navPromptHistoryRepository.getRecentPrompts(username, situation);
+        List<String> recentPrompts = navPromptHistoryRepository.getRecentPrompts(userId, situation);
         String exclusionContext = buildExclusionContext(recentPrompts);
 
         String systemPrompt = buildPromptForSituation(situation, gravity, stability) + exclusionContext;
@@ -393,7 +394,7 @@ public class AiService implements AiUseCase {
                     .call()
                     .content();
 
-            navPromptHistoryRepository.savePrompt(username, situation, prompt);
+            navPromptHistoryRepository.savePrompt(userId, situation, prompt);
             log.info("Dynamic prompt generated and saved to history: {}", prompt);
             return prompt;
 
