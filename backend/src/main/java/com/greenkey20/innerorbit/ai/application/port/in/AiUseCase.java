@@ -30,4 +30,9 @@ public interface AiUseCase {
      * @param recentLogsContext 최근 Flight Log 컨텍스트 (log 도메인에서 빌드)
      */
     String generateInsightFeedback(String trigger, String abstraction, String application, String recentLogsContext);
+
+    /**
+     * DB 저장 없는 Stateless 텍스트 분석 — 인지왜곡 분석 결과만 반환
+     */
+    AnalysisResult analyzeTextOnly(String text, Integer gravity, Integer stability);
 }

@@ -4,6 +4,8 @@ import com.greenkey20.innerorbit.log.domain.model.LogType;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
+import java.util.Map;
+
 /**
  * 로그 엔트리 생성 요청 DTO
  */
@@ -71,4 +73,7 @@ public class LogEntryCreateRequest {
 
     @Size(max = 10000, message = "AI 피드백은 10000자를 초과할 수 없습니다")
     private String aiFeedback;
+
+    /** 미리보기 분석 결과 — 클라이언트에서 이미 분석한 경우 함께 저장 (선택) */
+    private Map<String, Object> analysisResult;
 }

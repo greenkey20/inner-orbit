@@ -131,6 +131,11 @@ export default function useInnerOrbit() {
                 };
             }
 
+            // 미리보기 분석 결과가 있으면 함께 저장 (AI 재호출 불필요)
+            if (customLogData?.analysisResult) {
+                requestData.analysisResult = customLogData.analysisResult;
+            }
+
             const response = await apiFetch('/api/logs', {
                 method: 'POST',
                 body: JSON.stringify(requestData)

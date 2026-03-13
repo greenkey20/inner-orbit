@@ -42,6 +42,8 @@ export default function LogEditor({
 }) {
     const [logMode, setLogMode] = useState('DAILY'); // DAILY, SENSORY, INSIGHT
     const [loadingKeywords, setLoadingKeywords] = useState(false);
+    const [loadingAnalysis, setLoadingAnalysis] = useState(false);
+    const [analysisResult, setAnalysisResult] = useState(null);
 
     const handleFieldChange = (field, value) => {
         onDeepLogChange({
@@ -87,6 +89,29 @@ export default function LogEditor({
         }
     };
 
+    const handleAnalyzePreview = async () => {
+        if (!message || message.trim().length < 10) {
+            alert('분석할 내용을 10자 이상 입력해주세요.');
+            return;
+        }
+        setLoadingAnalysis(true);
+        setAnalysisResult(null);
+        try {
+            const response = await apiFetch('/api/ai/analyze-text', {
+                method: 'POST',
+                body: JSON.stringify({ text: message })
+            });
+            if (!response.ok) throw new Error('분석 실패');
+            const data = await response.json();
+            setAnalysisResult(data);
+        } catch (error) {
+            console.error('텍스트 분석 실패:', error);
+            alert('분석에 실패했습니다. 다시 시도해주세요.');
+        } finally {
+            setLoadingAnalysis(false);
+        }
+    };
+
     const handleSubmitWithLogType = () => {
         if (logMode === 'SENSORY') {
             onSubmit({
@@ -101,7 +126,7 @@ export default function LogEditor({
                 logType: 'INSIGHT'
             });
         } else {
-            onSubmit();
+            onSubmit(analysisResult ? { analysisResult } : undefined);
         }
     };
 
@@ -291,14 +316,68 @@ export default function LogEditor({
                         </div>
                     </div>
                 ) : (
-                    /* Normal Mode - Simple Text Area */
-                    <div className="relative group">
-                        <textarea
-                            value={message}
-                            onChange={(e) => onMessageChange(e.target.value)}
-                            placeholder="감정의 인력을 성장의 동력으로. 오늘 당신의 항해 기록을 남겨주세요."
-                            className="w-full h-60 p-5 bg-white border border-slate-200 rounded-xl resize-none focus:ring-2 focus:ring-slate-200 focus:border-slate-400 text-slate-700 leading-relaxed placeholder:text-slate-300 text-sm transition-all shadow-sm font-sans"
-                        />
+                    /* Normal Mode - Simple Text Area + Analyze Preview */
+                    <div className="space-y-3">
+                        <div className="relative group">
+                            <textarea
+                                value={message}
+                                onChange={(e) => { onMessageChange(e.target.value); setAnalysisResult(null); }}
+                                placeholder="감정의 인력을 성장의 동력으로. 오늘 당신의 항해 기록을 남겨주세요."
+                                className="w-full h-60 p-5 bg-white border border-slate-200 rounded-xl resize-none focus:ring-2 focus:ring-slate-200 focus:border-slate-400 text-slate-700 leading-relaxed placeholder:text-slate-300 text-sm transition-all shadow-sm font-sans"
+                            />
+                        </div>
+
+                        {/* Analyze Preview Button */}
+                        <button
+                            onClick={handleAnalyzePreview}
+                            disabled={loadingAnalysis || !message.trim()}
+                            className="w-full py-2 border border-slate-300 rounded-lg text-xs font-medium text-slate-500 hover:bg-slate-50 hover:border-slate-400 hover:text-slate-700 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        >
+                            <Sparkles className="w-3.5 h-3.5" />
+                            {loadingAnalysis ? '분석 중...' : 'AI 인지왜곡 미리 분석 (저장 안 됨)'}
+                        </button>
+
+                        {/* Analysis Result Panel — 로그 해독 리포트와 동일한 스타일 */}
+                        {analysisResult && (
+                            <div className="p-4 bg-gradient-to-br from-slate-50 to-emerald-50 rounded-lg border border-emerald-200 space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <Sparkles className="w-4 h-4 text-emerald-600" />
+                                        <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">로그 해독 리포트</span>
+                                    </div>
+                                    <button onClick={() => setAnalysisResult(null)} className="text-slate-300 hover:text-slate-500 text-xs">✕</button>
+                                </div>
+
+                                {analysisResult.distortions && analysisResult.distortions.length > 0 ? (
+                                    <div>
+                                        <span className="text-xs font-bold text-slate-700">🔍 발견된 왜곡:</span>
+                                        <ul className="mt-2 space-y-1">
+                                            {analysisResult.distortions.map((d, i) => (
+                                                <li key={i} className="text-xs text-slate-600 ml-2">
+                                                    <span className="font-semibold text-rose-600">{d.type}</span>: "{d.quote}"
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                ) : (
+                                    <p className="text-xs text-slate-500 italic">특이 사항이 발견되지 않았습니다.</p>
+                                )}
+
+                                {analysisResult.reframed && (
+                                    <div>
+                                        <span className="text-xs font-bold text-slate-700">💡 재해석:</span>
+                                        <p className="text-sm text-slate-700 leading-relaxed mt-1">{analysisResult.reframed}</p>
+                                    </div>
+                                )}
+
+                                {analysisResult.alternative && (
+                                    <div>
+                                        <span className="text-xs font-bold text-slate-700">✨ 대안적 관점:</span>
+                                        <p className="text-sm text-emerald-700 leading-relaxed mt-1">{analysisResult.alternative}</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 )}
             </section>

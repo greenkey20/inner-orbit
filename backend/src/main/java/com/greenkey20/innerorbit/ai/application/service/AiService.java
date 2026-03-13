@@ -473,6 +473,12 @@ public class AiService implements AiUseCase {
     }
 
     @Override
+    public AnalysisResult analyzeTextOnly(String text, Integer gravity, Integer stability) {
+        log.info("Stateless text analysis requested (no DB save) - Gravity: {}, Stability: {}", gravity, stability);
+        return analyzeCognitiveDistortions(text, gravity, stability);
+    }
+
+    @Override
     public String generateInsightFeedback(String trigger, String abstraction, String application, String recentLogsContext) {
         log.info("Generating insight feedback - Abstraction: {}", abstraction);
 
