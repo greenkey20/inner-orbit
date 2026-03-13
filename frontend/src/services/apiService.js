@@ -5,6 +5,14 @@
 
 const TOKEN_KEY = 'inner_orbit_token';
 
+const parseTokenPayload = (token) => {
+    try {
+        return JSON.parse(atob(token.split('.')[1]));
+    } catch {
+        return null;
+    }
+};
+
 export const authService = {
     getToken: () => localStorage.getItem(TOKEN_KEY),
 
@@ -12,7 +20,16 @@ export const authService = {
 
     removeToken: () => localStorage.removeItem(TOKEN_KEY),
 
-    isAuthenticated: () => !!localStorage.getItem(TOKEN_KEY),
+    isAuthenticated: () => {
+        const token = localStorage.getItem(TOKEN_KEY);
+        if (!token) return false;
+        const payload = parseTokenPayload(token);
+        if (!payload || payload.userId == null) {
+            localStorage.removeItem(TOKEN_KEY);
+            return false;
+        }
+        return true;
+    },
 
     login: async (username, password) => {
         const response = await fetch('/api/auth/login', {
