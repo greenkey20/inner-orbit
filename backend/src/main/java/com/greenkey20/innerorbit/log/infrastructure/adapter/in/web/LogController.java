@@ -5,12 +5,14 @@ import com.greenkey20.innerorbit.log.infrastructure.adapter.in.web.dto.request.A
 import com.greenkey20.innerorbit.log.infrastructure.adapter.in.web.dto.request.LogEntryCreateRequest;
 import com.greenkey20.innerorbit.log.infrastructure.adapter.in.web.dto.request.LogEntryUpdateRequest;
 import com.greenkey20.innerorbit.log.infrastructure.adapter.in.web.dto.response.LogEntryResponse;
+import com.greenkey20.innerorbit.security.UserPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -30,9 +32,12 @@ public class LogController {
     private final LogUseCase logUseCase;
 
     @PostMapping
-    public ResponseEntity<LogEntryResponse> createLogEntry(@Valid @RequestBody LogEntryCreateRequest request) {
+    public ResponseEntity<LogEntryResponse> createLogEntry(
+            @Valid @RequestBody LogEntryCreateRequest request,
+            Authentication authentication) {
         log.info("Creating new log entry");
-        LogEntryResponse response = logUseCase.createLogEntry(request);
+        Long userId = ((UserPrincipal) authentication.getPrincipal()).userId();
+        LogEntryResponse response = logUseCase.createLogEntry(request, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -44,16 +49,10 @@ public class LogController {
     }
 
     @GetMapping
-    public ResponseEntity<List<LogEntryResponse>> getAllLogEntries() {
+    public ResponseEntity<List<LogEntryResponse>> getAllLogEntries(Authentication authentication) {
         log.info("Fetching all log entries");
-        List<LogEntryResponse> responses = logUseCase.getAllLogEntries();
-        return ResponseEntity.ok(responses);
-    }
-
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<LogEntryResponse>> getLogEntriesByUserId(@PathVariable Long userId) {
-        log.info("Fetching log entries for user: {}", userId);
-        List<LogEntryResponse> responses = logUseCase.getLogEntriesByUserId(userId);
+        Long userId = ((UserPrincipal) authentication.getPrincipal()).userId();
+        List<LogEntryResponse> responses = logUseCase.getAllLogEntries(userId);
         return ResponseEntity.ok(responses);
     }
 

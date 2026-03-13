@@ -68,7 +68,7 @@ class LogServiceTest {
         given(logRepository.save(any(LogEntry.class))).willReturn(savedLogEntry);
 
         // When
-        LogEntryResponse response = logService.createLogEntry(validRequest);
+        LogEntryResponse response = logService.createLogEntry(validRequest, 1L);
 
         // Then
         assertThat(response).isNotNull();
@@ -92,7 +92,7 @@ class LogServiceTest {
                 .build();
 
         // When & Then
-        assertThatThrownBy(() -> logService.createLogEntry(emptyContentRequest))
+        assertThatThrownBy(() -> logService.createLogEntry(emptyContentRequest, 1L))
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("내용을 입력해주세요");
     }
@@ -108,7 +108,7 @@ class LogServiceTest {
                 .build();
 
         // When & Then
-        assertThatThrownBy(() -> logService.createLogEntry(invalidStabilityRequest))
+        assertThatThrownBy(() -> logService.createLogEntry(invalidStabilityRequest, 1L))
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("안정성");
     }
@@ -124,7 +124,7 @@ class LogServiceTest {
                 .build();
 
         // When & Then
-        assertThatThrownBy(() -> logService.createLogEntry(invalidGravityRequest))
+        assertThatThrownBy(() -> logService.createLogEntry(invalidGravityRequest, 1L))
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("그리움");
     }
@@ -150,7 +150,7 @@ class LogServiceTest {
         given(logRepository.save(any(LogEntry.class))).willReturn(boundaryEntry);
 
         // When
-        LogEntryResponse response = logService.createLogEntry(boundaryRequest);
+        LogEntryResponse response = logService.createLogEntry(boundaryRequest, 1L);
 
         // Then
         assertThat(response).isNotNull();
@@ -164,7 +164,7 @@ class LogServiceTest {
     @DisplayName("null 값 입력 - 실패")
     void createLogEntry_NullRequest_Fail() {
         // When & Then
-        assertThatThrownBy(() -> logService.createLogEntry(null))
+        assertThatThrownBy(() -> logService.createLogEntry(null, 1L))
                 .isInstanceOf(BusinessException.class);
     }
 }

@@ -14,13 +14,11 @@ import java.util.Map;
  */
 public interface LogUseCase {
 
-    LogEntryResponse createLogEntry(LogEntryCreateRequest request);
+    LogEntryResponse createLogEntry(LogEntryCreateRequest request, Long userId);
 
     LogEntryResponse getLogEntry(Long id);
 
-    List<LogEntryResponse> getAllLogEntries();
-
-    List<LogEntryResponse> getLogEntriesByUserId(Long userId);
+    List<LogEntryResponse> getAllLogEntries(Long userId);
 
     List<LogEntryResponse> getLogEntriesByDateRange(LocalDateTime startDate, LocalDateTime endDate);
 
