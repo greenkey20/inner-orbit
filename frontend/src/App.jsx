@@ -9,6 +9,7 @@ import LogHistory from './components/LogHistory';
 import TelemetryGuide from './components/TelemetryGuide';
 import FlightTrajectory from './components/FlightTrajectory';
 import Analytics from './components/Analytics';
+import RegisterPage from './components/RegisterPage';
 import { authService } from './services/apiService';
 
 /**
@@ -165,15 +166,32 @@ function MainApp() {
  */
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(authService.isAuthenticated());
+  const [authView, setAuthView] = useState('login'); // 'login' | 'register'
 
   useEffect(() => {
-    const handleLogout = () => setIsAuthenticated(false);
+    const handleLogout = () => {
+      setIsAuthenticated(false);
+      setAuthView('login');
+    };
     window.addEventListener('auth:logout', handleLogout);
     return () => window.removeEventListener('auth:logout', handleLogout);
   }, []);
 
   if (!isAuthenticated) {
-    return <LoginPage onLoginSuccess={() => setIsAuthenticated(true)} />;
+    if (authView === 'register') {
+      return (
+        <RegisterPage
+          onRegisterSuccess={() => setIsAuthenticated(true)}
+          onGoToLogin={() => setAuthView('login')}
+        />
+      );
+    }
+    return (
+      <LoginPage
+        onLoginSuccess={() => setIsAuthenticated(true)}
+        onGoToRegister={() => setAuthView('register')}
+      />
+    );
   }
 
   return <MainApp />;

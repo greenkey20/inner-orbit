@@ -22,6 +22,16 @@ public class UserPersistenceAdapter implements UserRepository {
         return userJpaRepository.findByUsername(username).map(this::toDomainModel);
     }
 
+    @Override
+    public User save(User user) {
+        UserJpaEntity saved = userJpaRepository.save(UserJpaEntity.builder()
+                .username(user.getUsername())
+                .password(user.getPassword())
+                .createdAt(java.time.LocalDateTime.now())
+                .build());
+        return toDomainModel(saved);
+    }
+
     private User toDomainModel(UserJpaEntity entity) {
         return User.builder()
                 .id(entity.getId())

@@ -1,27 +1,35 @@
 import React, { useState } from 'react';
-import { Hexagon, Lock } from 'lucide-react';
+import { Hexagon, UserPlus } from 'lucide-react';
 import { authService } from '../services/apiService';
 
 /**
- * LoginPage - 로그인 페이지
+ * RegisterPage - 회원가입 페이지
  */
-export default function LoginPage({ onLoginSuccess, onGoToRegister }) {
+export default function RegisterPage({ onRegisterSuccess, onGoToLogin }) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [passwordConfirm, setPasswordConfirm] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
-        setLoading(true);
 
+        if (password !== passwordConfirm) {
+            setError('비밀번호가 일치하지 않습니다.');
+            return;
+        }
+
+        setLoading(true);
         try {
-            const result = await authService.login(username, password);
+            const result = await authService.register(username, password);
             if (result.success) {
-                onLoginSuccess();
+                onRegisterSuccess();
+            } else if (result.status === 409) {
+                setError('이미 사용 중인 아이디입니다.');
             } else {
-                setError('아이디 또는 비밀번호가 올바르지 않습니다.');
+                setError('회원가입에 실패했습니다. 다시 시도해주세요.');
             }
         } catch {
             setError('서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.');
@@ -42,11 +50,11 @@ export default function LoginPage({ onLoginSuccess, onGoToRegister }) {
                     <p className="text-slate-400 text-sm">Gravity Assist Protocol</p>
                 </div>
 
-                {/* Login Card */}
+                {/* Register Card */}
                 <div className="bg-slate-800 rounded-2xl p-8 shadow-2xl border border-slate-700">
                     <div className="flex items-center gap-2 mb-6">
-                        <Lock className="w-4 h-4 text-slate-400" />
-                        <span className="text-slate-300 text-sm font-medium">System Authentication</span>
+                        <UserPlus className="w-4 h-4 text-slate-400" />
+                        <span className="text-slate-300 text-sm font-medium">Create Account</span>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
@@ -59,9 +67,11 @@ export default function LoginPage({ onLoginSuccess, onGoToRegister }) {
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 required
+                                minLength={3}
+                                maxLength={50}
                                 autoComplete="username"
                                 className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors"
-                                placeholder="Enter username"
+                                placeholder="3자 이상 입력"
                             />
                         </div>
 
@@ -74,9 +84,25 @@ export default function LoginPage({ onLoginSuccess, onGoToRegister }) {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
-                                autoComplete="current-password"
+                                minLength={4}
+                                autoComplete="new-password"
                                 className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors"
-                                placeholder="Enter password"
+                                placeholder="4자 이상 입력"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-mono text-slate-400 mb-1.5 uppercase tracking-wider">
+                                Confirm Password
+                            </label>
+                            <input
+                                type="password"
+                                value={passwordConfirm}
+                                onChange={(e) => setPasswordConfirm(e.target.value)}
+                                required
+                                autoComplete="new-password"
+                                className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors"
+                                placeholder="비밀번호 재입력"
                             />
                         </div>
 
@@ -91,25 +117,21 @@ export default function LoginPage({ onLoginSuccess, onGoToRegister }) {
                             disabled={loading}
                             className="w-full py-3 bg-primary-600 hover:bg-primary-500 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors text-sm mt-2"
                         >
-                            {loading ? 'Authenticating...' : 'Login'}
+                            {loading ? 'Creating account...' : 'Sign Up'}
                         </button>
                     </form>
                 </div>
 
                 <p className="text-center text-slate-500 text-xs mt-6">
-                    계정이 없으신가요?{' '}
+                    이미 계정이 있으신가요?{' '}
                     <button
-                        onClick={onGoToRegister}
+                        onClick={onGoToLogin}
                         className="text-primary-400 hover:text-primary-300 underline transition-colors"
                     >
-                        회원가입
+                        로그인
                     </button>
                 </p>
             </div>
-
-            <style>{`
-                @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-            `}</style>
         </div>
     );
 }

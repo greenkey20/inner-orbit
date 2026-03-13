@@ -3,8 +3,10 @@ package com.greenkey20.innerorbit.auth.infrastructure.adapter.in.web;
 import com.greenkey20.innerorbit.auth.application.port.in.AuthUseCase;
 import com.greenkey20.innerorbit.auth.infrastructure.adapter.in.web.dto.LoginRequest;
 import com.greenkey20.innerorbit.auth.infrastructure.adapter.in.web.dto.LoginResponse;
+import com.greenkey20.innerorbit.auth.infrastructure.adapter.in.web.dto.RegisterRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +24,16 @@ public class AuthController {
             return ResponseEntity.ok(new LoginResponse(token));
         } catch (Exception e) {
             return ResponseEntity.status(401).build();
+        }
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<LoginResponse> register(@Valid @RequestBody RegisterRequest request) {
+        try {
+            String token = authUseCase.register(request.username(), request.password());
+            return ResponseEntity.status(HttpStatus.CREATED).body(new LoginResponse(token));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(409).build();
         }
     }
 }
