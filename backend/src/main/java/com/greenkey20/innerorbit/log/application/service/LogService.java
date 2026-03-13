@@ -29,15 +29,12 @@ import java.util.Map;
 @Slf4j
 public class LogService implements LogUseCase {
 
-    // TODO: #72 Phase 2 — SecurityContext에서 실제 userId로 교체
-    private static final Long TEMP_SINGLE_USER_ID = 1L;
-
     private final LogRepository logRepository;
     private final AiAnalysisPort aiAnalysisPort;
 
     @Override
     @Transactional
-    public LogEntryResponse createLogEntry(LogEntryCreateRequest request) {
+    public LogEntryResponse createLogEntry(LogEntryCreateRequest request, Long userId) {
         if (request == null) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "요청 데이터가 null입니다.");
         }
@@ -57,7 +54,7 @@ public class LogService implements LogUseCase {
                 .insightApplication(request.getInsightApplication())
                 .aiFeedback(request.getAiFeedback())
                 .analysisResult(request.getAnalysisResult())
-                .userId(TEMP_SINGLE_USER_ID)
+                .userId(userId)
                 .build();
 
         LogEntry savedEntry = logRepository.save(logEntry);
@@ -105,16 +102,11 @@ public class LogService implements LogUseCase {
     }
 
     @Override
-    public List<LogEntryResponse> getAllLogEntries() {
+    public List<LogEntryResponse> getAllLogEntries(Long userId) {
         log.info("Fetching all log entries");
-        return logRepository.findAllByUserIdOrderByCreatedAtDesc(TEMP_SINGLE_USER_ID).stream()
+        return logRepository.findAllByUserIdOrderByCreatedAtDesc(userId).stream()
                 .map(LogEntryResponse::from)
                 .toList();
-    }
-
-    @Override
-    public List<LogEntryResponse> getLogEntriesByUserId(Long userId) {
-        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
@@ -235,7 +227,7 @@ public class LogService implements LogUseCase {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "Insight Application이 없습니다.");
         }
 
-        String recentLogsContext = buildRecentFlightLogsContext();
+        String recentLogsContext = buildRecentFlightLogsContext(logEntry.getUserId());
 
         String feedback = aiAnalysisPort.generateInsightFeedback(
                 logEntry.getContent(),
@@ -255,9 +247,9 @@ public class LogService implements LogUseCase {
      * 최근 Flight Log를 요약하여 컨텍스트 문자열 생성
      * Insight Feedback에 사용자의 최근 감정 패턴을 제공하기 위함
      */
-    private String buildRecentFlightLogsContext() {
+    private String buildRecentFlightLogsContext(Long userId) {
         try {
-            List<LogEntry> recentLogs = logRepository.findTop5ByLogTypeAndUserId(LogType.DAILY, TEMP_SINGLE_USER_ID);
+            List<LogEntry> recentLogs = logRepository.findTop5ByLogTypeAndUserId(LogType.DAILY, userId);
 
             if (recentLogs.isEmpty()) {
                 return "";
