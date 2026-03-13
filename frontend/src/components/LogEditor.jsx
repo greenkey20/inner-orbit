@@ -337,39 +337,43 @@ export default function LogEditor({
                             {loadingAnalysis ? '분석 중...' : 'AI 인지왜곡 미리 분석 (저장 안 됨)'}
                         </button>
 
-                        {/* Analysis Result Panel */}
+                        {/* Analysis Result Panel — 로그 해독 리포트와 동일한 스타일 */}
                         {analysisResult && (
-                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3 text-sm">
+                            <div className="p-4 bg-gradient-to-br from-slate-50 to-emerald-50 rounded-lg border border-emerald-200 space-y-3">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">AI 분석 결과</span>
+                                    <div className="flex items-center gap-2">
+                                        <Sparkles className="w-4 h-4 text-emerald-600" />
+                                        <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">로그 해독 리포트</span>
+                                    </div>
                                     <button onClick={() => setAnalysisResult(null)} className="text-slate-300 hover:text-slate-500 text-xs">✕</button>
                                 </div>
 
                                 {analysisResult.distortions && analysisResult.distortions.length > 0 ? (
-                                    <div className="space-y-1">
-                                        <p className="text-xs font-semibold text-rose-500">발견된 인지왜곡</p>
-                                        {analysisResult.distortions.map((d, i) => (
-                                            <div key={i} className="bg-rose-50 rounded-lg px-3 py-2">
-                                                <span className="text-xs font-bold text-rose-600">{d.type}</span>
-                                                <p className="text-xs text-slate-500 mt-0.5">"{d.quote}"</p>
-                                            </div>
-                                        ))}
+                                    <div>
+                                        <span className="text-xs font-bold text-slate-700">🔍 발견된 왜곡:</span>
+                                        <ul className="mt-2 space-y-1">
+                                            {analysisResult.distortions.map((d, i) => (
+                                                <li key={i} className="text-xs text-slate-600 ml-2">
+                                                    <span className="font-semibold text-rose-600">{d.type}</span>: "{d.quote}"
+                                                </li>
+                                            ))}
+                                        </ul>
                                     </div>
                                 ) : (
-                                    <p className="text-xs text-emerald-600 font-medium">인지왜곡이 발견되지 않았습니다.</p>
+                                    <p className="text-xs text-slate-500 italic">특이 사항이 발견되지 않았습니다.</p>
                                 )}
 
                                 {analysisResult.reframed && (
-                                    <div className="bg-blue-50 rounded-lg px-3 py-2">
-                                        <p className="text-xs font-semibold text-blue-600 mb-1">재해석</p>
-                                        <p className="text-xs text-slate-600 leading-relaxed">{analysisResult.reframed}</p>
+                                    <div>
+                                        <span className="text-xs font-bold text-slate-700">💡 재해석:</span>
+                                        <p className="text-sm text-slate-700 leading-relaxed mt-1">{analysisResult.reframed}</p>
                                     </div>
                                 )}
 
                                 {analysisResult.alternative && (
-                                    <div className="bg-teal-50 rounded-lg px-3 py-2">
-                                        <p className="text-xs font-semibold text-teal-600 mb-1">대안적 관점</p>
-                                        <p className="text-xs text-slate-600 leading-relaxed">{analysisResult.alternative}</p>
+                                    <div>
+                                        <span className="text-xs font-bold text-slate-700">✨ 대안적 관점:</span>
+                                        <p className="text-sm text-emerald-700 leading-relaxed mt-1">{analysisResult.alternative}</p>
                                     </div>
                                 )}
                             </div>
