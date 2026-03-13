@@ -53,6 +53,7 @@ public class LogService implements LogUseCase {
                 .insightAbstraction(request.getInsightAbstraction())
                 .insightApplication(request.getInsightApplication())
                 .aiFeedback(request.getAiFeedback())
+                .analysisResult(request.getAnalysisResult())
                 .build();
 
         LogEntry savedEntry = logRepository.save(logEntry);

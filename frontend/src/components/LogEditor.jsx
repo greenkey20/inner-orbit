@@ -126,7 +126,7 @@ export default function LogEditor({
                 logType: 'INSIGHT'
             });
         } else {
-            onSubmit();
+            onSubmit(analysisResult ? { analysisResult } : undefined);
         }
     };
 
