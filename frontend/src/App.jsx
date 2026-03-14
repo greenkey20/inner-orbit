@@ -9,6 +9,7 @@ import LogHistory from './components/LogHistory';
 import TelemetryGuide from './components/TelemetryGuide';
 import FlightTrajectory from './components/FlightTrajectory';
 import Analytics from './components/Analytics';
+import WeeklyReportPage from './components/WeeklyReportPage';
 import RegisterPage from './components/RegisterPage';
 import { authService } from './services/apiService';
 
@@ -93,6 +94,15 @@ function MainApp() {
           >
             Analytics
           </button>
+          <button
+            onClick={() => setView('weekly-reports')}
+            className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors ${view === 'weekly-reports'
+              ? 'bg-white shadow-sm text-slate-800 border border-slate-200'
+              : 'text-slate-500 hover:text-slate-700'
+              }`}
+          >
+            Weekly
+          </button>
         </div>
 
         {/* Main Content */}
@@ -141,6 +151,10 @@ function MainApp() {
                 onFileUpload={handleFileUpload}
                 fileInputRef={fileInputRef}
               />
+            </div>
+          ) : view === 'weekly-reports' ? (
+            <div className="animate-fade-in">
+              <WeeklyReportPage />
             </div>
           ) : (
             <div className="animate-fade-in">

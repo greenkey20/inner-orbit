@@ -7,6 +7,7 @@ import com.greenkey20.innerorbit.log.infrastructure.adapter.out.persistence.enti
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -54,6 +55,12 @@ public class LogPersistenceAdapter implements LogRepository {
     @Override
     public List<LogEntry> findTop5ByLogTypeAndUserId(LogType logType, Long userId) {
         return logJpaRepository.findTop5ByLogTypeAndUserIdOrderByCreatedAtDesc(logType, userId)
+                .stream().map(this::toDomainModel).toList();
+    }
+
+    @Override
+    public List<LogEntry> findByUserIdAndCreatedAtBetween(Long userId, LocalDateTime from, LocalDateTime to) {
+        return logJpaRepository.findByUserIdAndCreatedAtBetween(userId, from, to)
                 .stream().map(this::toDomainModel).toList();
     }
 

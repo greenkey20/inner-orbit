@@ -3,6 +3,7 @@ package com.greenkey20.innerorbit.log.application.port.out;
 import com.greenkey20.innerorbit.log.domain.model.LogEntry;
 import com.greenkey20.innerorbit.log.domain.model.LogType;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,6 +23,8 @@ public interface LogRepository {
     List<LogEntry> findAllByUserIdOrderByCreatedAtDesc(Long userId);
 
     List<LogEntry> findTop5ByLogTypeAndUserId(LogType logType, Long userId);
+
+    List<LogEntry> findByUserIdAndCreatedAtBetween(Long userId, LocalDateTime from, LocalDateTime to);
 
     void flush();
 }
