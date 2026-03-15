@@ -86,3 +86,23 @@ export async function apiFetch(url, options = {}) {
 
     return response;
 }
+
+export const weeklyReportService = {
+    getMyReports: async () => {
+        const response = await apiFetch('/api/weekly-reports');
+        if (response.ok) return response.json();
+        throw new Error('주간 리포트 목록을 불러오지 못했습니다.');
+    },
+
+    getReport: async (id) => {
+        const response = await apiFetch(`/api/weekly-reports/${id}`);
+        if (response.ok) return response.json();
+        throw new Error('주간 리포트를 불러오지 못했습니다.');
+    },
+
+    generateForCurrentWeek: async () => {
+        const response = await apiFetch('/api/weekly-reports/generate', { method: 'POST' });
+        if (response.ok) return response.json();
+        throw new Error('주간 리포트 생성에 실패했습니다.');
+    },
+};

@@ -5,6 +5,7 @@ import com.greenkey20.innerorbit.log.infrastructure.adapter.out.persistence.enti
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -20,4 +21,6 @@ public interface LogJpaRepository extends JpaRepository<LogEntryJpaEntity, Long>
     List<LogEntryJpaEntity> findAllByUserIdOrderByCreatedAtDesc(Long userId);
 
     List<LogEntryJpaEntity> findTop5ByLogTypeAndUserIdOrderByCreatedAtDesc(LogType logType, Long userId);
+
+    List<LogEntryJpaEntity> findByUserIdAndCreatedAtBetween(Long userId, LocalDateTime from, LocalDateTime to);
 }

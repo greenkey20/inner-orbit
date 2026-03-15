@@ -61,6 +61,11 @@ jwt:
   secret: ${JWT_SECRET:inner-orbit-default-secret-key-must-be-at-least-256-bits-long!!}
   expiration-ms: 604800000  # 7일 (7 * 24 * 60 * 60 * 1000)
 
+# 주간 리포트 스케줄러 설정
+weekly-report:
+  scheduler:
+    cron: ${WEEKLY_REPORT_CRON:0 0 0 * * SUN} # test = 매분 실행 = "0 * * * * *" vs 원래 = ${WEEKLY_REPORT_CRON:0 0 0 * * SUN}
+
 # 로깅 설정
 logging:
   level:

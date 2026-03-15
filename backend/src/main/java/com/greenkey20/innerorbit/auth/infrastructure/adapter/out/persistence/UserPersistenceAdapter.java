@@ -6,6 +6,7 @@ import com.greenkey20.innerorbit.auth.infrastructure.adapter.out.persistence.ent
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -30,6 +31,13 @@ public class UserPersistenceAdapter implements UserRepository {
                 .createdAt(java.time.LocalDateTime.now())
                 .build());
         return toDomainModel(saved);
+    }
+
+    @Override
+    public List<User> findAll() {
+        return userJpaRepository.findAll().stream()
+                .map(this::toDomainModel)
+                .toList();
     }
 
     private User toDomainModel(UserJpaEntity entity) {
