@@ -8,6 +8,42 @@ Inner Orbit은 개발자의 복잡한 내면(Inner World)을 시스템적으로 
 
 우리는 복잡한 분산 시스템을 다루듯, 우리의 마음과 일상에도 정교한 아키텍처가 필요하다고 믿습니다.
 
+## 🧩 Architecture at a Glance
+
+백엔드는 **헥사고날 아키텍처(Ports & Adapters)** 로 도메인별(`auth`, `log`, `ai`, `weeklyreport`)로 나누었습니다. 각 도메인은 `domain`(순수 모델) → `application`(UseCase 포트, 서비스) → `infrastructure/adapter`(web·persistence·ai·redis 어댑터) 순으로 의존하고, 외부 기술(JPA, OpenAI, Redis)은 `port/out` 인터페이스 뒤에 숨깁니다.
+
+```
+React (Nginx) ──HTTP/JSON + JWT──▶ Controller (in/web)
+                                        │
+                                  UseCase (port/in)
+                                        │
+                                  Service (application)  ◀── 도메인 모델
+                                        │
+                       ┌────────────────┼─────────────────┐
+                 port/out:            port/out:         port/out:
+                 Repository           AiAnalysisPort    PromptHistory
+                       │                  │                 │
+                 JPA Adapter          Spring AI Adapter  Redis Adapter
+                       │                  │                 │
+                 PostgreSQL            OpenAI API         Redis
+               (JSONB, Flyway)                          (TTL 30일)
+
+  @Scheduled (매주 일요일) ──▶ WeeklyReportScheduler ──▶ WeeklyReportGenerator
+```
+
+| 설계 결정 | 이유 |
+|---|---|
+| **포트/어댑터 분리** | 서비스가 JPA·OpenAI·Redis를 직접 알지 못해, AI 모델 교체나 저장소 변경이 도메인 로직에 번지지 않고 서비스를 Mockito로 단위 테스트할 수 있습니다. |
+| **크로스 도메인 호출도 포트로** | `log`가 AI 분석을, `weeklyreport`가 로그 조회를 쓸 때 상대 도메인을 직접 import하지 않고 `AiAnalysisPort`, `LogQueryPort` 어댑터를 거쳐 도메인 간 결합을 막았습니다. |
+| **Stateless JWT 인증** | `JwtAuthenticationFilter`가 토큰을 검증해 `UserPrincipal`(userId, username)을 SecurityContext에 넣고, `/api/auth/**` 외 `/api/**`는 모두 인증이 필요합니다. 모든 로그와 리포트가 `user_id` FK로 사용자별 격리됩니다. |
+| **`WeeklyReportGenerator` 분리** | 같은 클래스 안에서 `@Transactional` 메서드를 호출하면 프록시를 타지 않는 self-invocation 문제가 생겨, 사용자별 리포트 생성을 별도 컴포넌트로 뺐습니다. |
+| **주간 리포트 멱등성** | `weekly_reports`에 `(user_id, week_start)` UNIQUE 제약을 두고, 상태(`NA` / `INSUFFICIENT` / `GENERATED`)를 저장해 로그가 부족한 주도 기록합니다. |
+| **JSONB 컬럼** | AI 분석 결과와 리포트 본문처럼 구조가 바뀌기 쉬운 데이터를 PostgreSQL JSONB에 저장하고, 조회·필터링이 잦은 값은 일반 컬럼으로 둡니다. |
+| **Flyway 마이그레이션(V1~V10)** | 스키마 변경을 코드처럼 버전 관리합니다. 적용된 migration은 수정·삭제하지 않고 새 버전으로 고치는 규칙을 둡니다(체크섬 검증 때문). |
+| **Redis 리스트 + TTL** | 항해 질문 이력을 사용자별 리스트로 저장하고 최대 100개, TTL 30일로 관리해 AI 질문 반복을 막습니다. DB에 둘 필요가 없는 휘발성 데이터라 Redis를 썼습니다. |
+| **공통 예외 처리** | `BusinessException` + `ErrorCode` + `GlobalExceptionHandler`로 API 오류 응답 형식을 통일했습니다. |
+| **Docker Compose 4-서비스 구성** | `db`(PostgreSQL 16) · `redis` · `backend` · `frontend`(Nginx)가 한 네트워크에서 돌고, 백엔드 컨테이너 시간대를 `Asia/Seoul`로 고정해 서버 시간과 사용자 기준 날짜가 어긋나지 않게 했습니다. |
+
 ## 🚀 Evolution: From "Logging" to "Engineering"
 
 단순히 하루를 기록하는 일기장을 넘어, Inner Orbit은 개발자의 관점에서 삶을 **디버깅(Debugging)**하고 **리팩토링(Refactoring)**하는 도구로 진화했습니다.
